@@ -11,12 +11,14 @@ const bot = new TelegramBot(TOKEN, { polling: true });
 // UserID
 const qu1z3x = "923690530";
 
-let firstName;
+let firstName,
+	userStatus = "Ученик";
 
 // Что нового? (text)
 const newsText = [
-	"- Я стал в 2 раза быстрее 🏎️, если иначе, то обратите внимание на свой интернет😉\n- У меня появилось множество новых и активных разделов🆕\n\nНо! все еще не 24/7 поддержка 🥺",
-	"- 87687687687687687666 66 8976 877 6876 876\n\n987879879 87987\n9079798798\n98798798 7987",
+	"Новостей нет 😔",
+	"- Поддержка бота теперь ПОСТОЯННАЯ! 😆\n\n- Я стал быстрее 🏎️, во всех смылсах😉\n\n- Появилось множество новых и активных разделов🔥\n\n- Максимальная нагрузка увеличилась до 70 запросов в СЕКУНДУ 🤯",
+	"МБОУ СОШ №27 | Школа с 2023г, разделена на два корпуса, но и в первом, и во втором царит классная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя здесь как одна большая семья, где дружба и знание всегда рядом",
 ];
 
 // Классы
@@ -55,7 +57,8 @@ let messageId_user,
 	computerChoise,
 	playerChoise,
 	// news
-	newsNum;
+	newsNum,
+	editMode = false;
 
 //?  ФУНКЦИИ
 
@@ -63,7 +66,7 @@ async function menuHome(chatId, exit = true) {
 	try {
 		if (exit && admin) {
 			await bot.editMessageText("*Чем я могу быть полезен? 🤓*", {
-				chat_id: qu1z3x,
+				chat_id: chatId,
 				message_id: messageId_menuHome,
 				parse_mode: "MarkdownV2",
 				reply_markup: {
@@ -83,7 +86,7 @@ async function menuHome(chatId, exit = true) {
 							{ text: "Интересное❗", callback_data: "news" },
 						],
 						[
-							{ text: "💠 Реестр 💠", callback_data: "adminMenu" },
+							{ text: "Управление 💠", callback_data: "adminMenu" },
 							{ text: "Настройки ⚙️", callback_data: "options" },
 						],
 					],
@@ -285,7 +288,7 @@ async function Calls(chatId) {
 * \\- 4* урок *11:25 \\- 12:05 \\| 15мин*\n
 * \\- 5* урок *12:20 \\- 13:00 \\| 15мин*\n
 * \\- 6* урок *13:15 \\- 13:55 \\| 15мин / Обед*\n
-* \\- 7* урок *14:10 \\- 14:50 \\| Домой*\n\n*Звонки работают иначе?\nСообщи @qu1z3x*`,
+* \\- 7* урок *14:10 \\- 14:50 \\| Домой*\n\n*По любым вопросам к @qu1z3x*`,
 			{
 				chat_id: chatId,
 				message_id: messageId_menuHome,
@@ -342,13 +345,15 @@ async function Games(chatId) {
 }
 
 async function game1(chatId, startGame = true) {
-	//? загаданное число
 	try {
-		if (startGame) {
+		let res = "";
+		if (startGame)
+			//? загаданное число
 			rndNum = Math.floor(Math.random() * 10);
-		}
+		if (admin) res = rndNum;
+
 		bot.editMessageText(
-			"*_❓Угадайка❓_\n\nЯ загадал число \\(0 \\- 9\\)\n\nОтгадывай 😉*",
+			`*_❓Угадайка❓_\n\nЯ загадал цифру\\! ${res}\n\nОтгадывай 😉*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -478,7 +483,6 @@ async function game2_2(chatId, playerNum) {
 
 async function News(chatId) {
 	try {
-		newsNum = 0;
 		await bot.editMessageText(
 			`<b><i>❗ Интересное ❗</i>\n\n${newsText[newsNum]}\n\nПо любым вопросам к @qu1z3x</b>`,
 			{
@@ -487,13 +491,14 @@ async function News(chatId) {
 				message_id: messageId_menuHome,
 				reply_markup: {
 					inline_keyboard: [
+						[{ text: "Новости 📖", callback_data: "allnews" }],
 						[
 							{ text: "О боте 🤖", callback_data: "botnews" },
 							{ text: "О школе 🏫", callback_data: "schoolnews" },
 						],
 						[
 							{ text: "⬅️В меню", callback_data: "exit" },
-							{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
+							{ text: "Предложить✍️", url: "https://t.me/qu1z3x" },
 						],
 					],
 				},
@@ -503,10 +508,84 @@ async function News(chatId) {
 		console.log("\nПроизошла ошибка(");
 	}
 }
+
+async function AllNewsTextEdit(chatId) {
+	editMode = true;
+	bot.editMessageText(
+		`<b><i>✏️ Редактирование: Новости 📖</i>\n\n📖 Текущий текст:</b>\n\n<i>"${newsText[0]}"</i>\n\n<b>Напиши измененный текст ниже ⬇️</b>`,
+		{
+			parse_mode: "html",
+			chat_id: chatId,
+			message_id: messageId_menuHome,
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{ text: "⬅️Назад", callback_data: "adminMenu" },
+						{
+							text: "Сбросить ❌",
+							callback_data: "allnewstextRESETmenu",
+						},
+					],
+				],
+			},
+		}
+	);
+}
+
+async function AllNewsTextEdit_2(chatId) {
+	editMode = false;
+	bot.editMessageText(
+		`<b><i>✏️ Редактирование: Новости 📖</i>\n\n🆕 Измененный текст:</b>\n\n<i>"${newsText[0]}"</i>\n\n<b>Применить изменения?🧐</b>`,
+		{
+			parse_mode: "html",
+			chat_id: chatId,
+			message_id: messageId_menuHome,
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{
+							text: "Сбросить ❌",
+							callback_data: "allnewstextRESETmenu",
+						},
+						{ text: "Применить✅", callback_data: "adminMenu" },
+					],
+					// [{ text: "⬅️В меню", callback_data: "exit" }],
+				],
+			},
+		}
+	);
+}
+
+async function AllNewsTextReset(chatId) {
+	try {
+		await bot.editMessageText(
+			`*_✏️ Редактирование: Новости 📖_\n\nCбросить раздел _"Новости 📖"_ ⁉️*`,
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: messageId_menuHome,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "Оставить✅", callback_data: "adminMenu" },
+							{
+								text: "Сбросить ❌",
+								callback_data: "allnewstextRESETend",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log("\nПроизошла ошибка(");
+	}
+}
+
 async function Options(chatId, firstName, userName) {
 	try {
 		await bot.editMessageText(
-			`*_🛠️ Настройки ⚙️_*\n\nТвой логин: *${firstName}*\nID профиля: _*${chatId}*_\nКласс: *${className}*`,
+			`*_🛠️ Настройки ⚙️_*\n\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\n\nКласс: *${className}*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -529,14 +608,34 @@ async function Options(chatId, firstName, userName) {
 
 async function adminMenu(chatId) {
 	await bot.editMessageText(
-		"*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nЧто вы желаете _изменить_ во мне\\? 🧑‍💻*",
+		"*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nБыстрый доступ к элементам\\: 🧑‍💻*",
 		{
 			parse_mode: "MarkdownV2",
-			chat_id: qu1z3x,
+			chat_id: chatId,
 			message_id: messageId_menuHome,
 			reply_markup: {
 				inline_keyboard: [
-					[{ text: "Что нового❓", callback_data: "newsEDIT" }],
+					[{ text: "🔥 Расписание 📚", callback_data: "raspisanie" }],
+					[
+						{ text: "На сегодня 🕚", callback_data: "today" },
+						{ text: "Нет моего 😞", callback_data: "netclassa" },
+					],
+					[{ text: "Развлечения 🕹️", callback_data: "games" }],
+					[
+						{ text: "Угадайка❓", callback_data: "game1" },
+						{ text: "Цуе-Фа ✌️", callback_data: "game2" },
+					],
+					[{ text: "Интересное❗", callback_data: "news" }],
+					[{ text: "Новости 📖", callback_data: "allnews" }],
+					[
+						{ text: "О боте 🤖", callback_data: "botnews" },
+						{ text: "О школе 🏫", callback_data: "schoolnews" },
+					],
+					[{ text: "Внести изменения ✏️", callback_data: "allnewsEDIT" }],
+					[
+						{ text: "Новый диалог ♻️", callback_data: "start" },
+						{ text: "Перезапуск 🔄️", callback_data: "restart1" },
+					],
 					[{ text: "⬅️Назад", callback_data: "exit" }],
 				],
 			},
@@ -546,10 +645,8 @@ async function adminMenu(chatId) {
 
 async function start(chatId, userName, quickStart = false) {
 	try {
-		bot.deleteMessage(chatId, messageId_user);
-	} catch (error) {
-		console.log("\nПроизошла ошибка(");
-	}
+		await bot.deleteMessage(chatId, messageId_user);
+	} catch (error) {}
 	await bot
 		.sendSticker(
 			chatId,
@@ -578,15 +675,26 @@ async function start(chatId, userName, quickStart = false) {
 		.then((message) => {
 			messageId_sayHi2Home = message.message_id;
 		});
-
-	await bot.sendMessage(chatId, "ㅤ").then((message) => {
-		messageId_sayHi3Home = message.message_id;
-	});
 	if (quickStart) {
 		menuHome(chatId, false);
-		className = "Не определен";
+		className = "Не выбран";
 	} else if (!quickStart) {
 		ChoosingClass(chatId);
+	}
+}
+
+async function endMessage(chatId) {
+	try {
+		await bot.editMessageText(
+			`*С тобой было _классно_\\!😁\nВстретимся тут ⬇️😉*`,
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: messageId_menuHome,
+			}
+		);
+	} catch (error) {
+		console.log("\nБот не попрощался(");
 	}
 }
 
@@ -598,8 +706,10 @@ async function StartAll() {
 
 		if (chatId == qu1z3x) {
 			admin = true;
+			userStatus = "Администратор 👑";
 		} else {
 			admin = false;
+			userStatus = "Ученик 🧐";
 		}
 
 		messageId_user = message.message_id;
@@ -624,11 +734,19 @@ async function StartAll() {
 
 		//? КОМАНДЫ
 
+		if (editMode) {
+			editMode = false;
+			newsText[0] = text;
+			AllNewsTextEdit_2(chatId);
+		}
+
 		switch (text) {
 			case "/start":
+				endMessage(chatId);
 				start(chatId, message.from.first_name);
 				break;
 			case "st":
+				endMessage(chatId);
 				start(chatId, message.from.first_name, true);
 				break;
 
@@ -654,11 +772,14 @@ async function StartAll() {
 	bot.on("callback_query", (query) => {
 		const chatId = query.message.chat.id;
 		firstName = query.from.first_name;
+		newsNum = 0;
 
-		if (chatId == "923690530") {
+		if (chatId == qu1z3x) {
 			admin = true;
+			userStatus = "Администратор 👑";
 		} else {
 			admin = false;
+			userStatus = "Ученик 🧐";
 		}
 
 		const data = query.data;
@@ -739,7 +860,7 @@ async function StartAll() {
 			});
 			setTimeout(() => {
 				game1(chatId, false);
-			}, 1500);
+			}, 2000);
 		}
 
 		switch (data) {
@@ -799,7 +920,12 @@ async function StartAll() {
 
 			//? ДЕЙСТВИЯ КНОПОК
 
+			case "start":
+				endMessage(chatId);
+				start(chatId, firstName);
+				break;
 			case "exit":
+				editMode = false;
 				try {
 					menuHome(chatId);
 				} catch (error) {
@@ -848,18 +974,40 @@ async function StartAll() {
 			case "news":
 				News(chatId);
 				break;
+			case "allnews":
+				newsNum = 0;
+				News(chatId);
+				break;
 			case "botnews":
-				if (newsNum != 0) {
-					newsNum = 0;
-					News(chatId);
-				}
-
+				newsNum = 1;
+				News(chatId);
 				break;
 			case "schoolnews":
-				if (newsNum != 1) {
-					newsNum = 1;
-					News(chatId);
-				}
+				newsNum = 2;
+				News(chatId);
+				break;
+			case "allnewsEDIT":
+				AllNewsTextEdit(chatId);
+				break;
+			case "allnewstextRESETmenu":
+				AllNewsTextReset(chatId);
+				break;
+			case "allnewstextRESET":
+				AllNewsTextEdit(chatId);
+				break;
+			case "allnewstextRESETend":
+				newsText[0] = "Новостей нет 😔";
+				bot.editMessageText(
+					`*_✏️ Редактирование: Новости 📖_\n\nРаздел _"Новости📖"_ \\- сброшен\\!✅*`,
+					{
+						parse_mode: "MarkdownV2",
+						chat_id: chatId,
+						message_id: messageId_menuHome,
+					}
+				);
+				setTimeout(() => {
+					adminMenu(chatId);
+				}, 2000);
 				break;
 			// OPTIONS
 			case "options":
@@ -869,9 +1017,16 @@ async function StartAll() {
 			case "adminMenu":
 				adminMenu(chatId);
 				break;
+			case "restart1":
+				try {
+					bot.deleteMessage(chatId, messageId_menuHome);
+				} catch (error) {}
+				ChoosingClass(chatId);
+				break;
 			default:
 				break;
 		}
 	});
 }
+
 StartAll();
