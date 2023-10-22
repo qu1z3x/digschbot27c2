@@ -12,25 +12,34 @@ const bot = new TelegramBot(TOKEN, { polling: true });
 const qu1z3x = "923690530";
 
 let firstName,
-	userStatus = "Ученик";
+	userStatus = "Ученик 🧑‍🏫";
 
-// Что нового? (text)
+// Приветственные стикеры
+const stickers = [
+	"CAACAgIAAxkBAAIXI2U1QcFdX12aOkHp0zodw3LWDX5KAAKFAAPBnGAMi4wdH0hTXSIwBA",
+	"CAACAgIAAxkBAAIXJGU1QclHfnHsU6z0isqU3v72p11mAAJ0AAPBnGAMtJfqrsmMmrQwBA",
+	"CAACAgIAAxkBAAIXJWU1QdMJWNfIOh9odZH8Q25K98A-AAJvAAPBnGAMyw59i8DdTVYwBA",
+	"CAACAgIAAxkBAAIXJmU1QdsTofm7uh7hi3mNYNE837HpAAJ6AAPBnGAM0GBdiVRCvP4wBA",
+	"CAACAgIAAxkBAAIXJ2U1QeZV7H_7f07EPsDHI_gSVA0bAAJwAAPBnGAMYrO6xZKF_qUwBA",
+];
+
+// Что нового? text
 const newsText = [
 	"Новостей нет 😔",
-	"- Поддержка бота теперь ПОСТОЯННАЯ! 😆\n\n- Я стал быстрее 🏎️, во всех смылсах😉\n\n- Появилось множество новых и активных разделов🔥\n\n- Максимальная нагрузка увеличилась до 70 запросов в СЕКУНДУ 🤯",
+	"- Поддержка бота теперь ПОСТОЯННАЯ! 😆\n\n- Я стал быстрее 🏎️, во всех смыслах😉\n\n- Появилось множество новых и активных разделов🔥\n\n- Максимальная нагрузка увеличилась до 70 запросов в СЕКУНДУ 🤯",
 	"МБОУ СОШ №27 | Школа с 2023г, разделена на два корпуса, но и в первом, и во втором царит классная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя здесь как одна большая семья, где дружба и знание всегда рядом",
 ];
 
 // Классы
 
 const weekDayNames = [
+	"Воскресенье",
 	"Понедельник",
 	"Вторник",
 	"Среда",
 	"Четверг",
 	"Пятница",
 	"Суббота",
-	"Воскресенье",
 ];
 
 const r11g = [
@@ -58,6 +67,7 @@ let messageId_user,
 	playerChoise,
 	// news
 	newsNum,
+	newsName = "Новости 📖",
 	editMode = false;
 
 //?  ФУНКЦИИ
@@ -73,7 +83,7 @@ async function menuHome(chatId, exit = true) {
 					inline_keyboard: [
 						[
 							{
-								text: "🔥Расписание📚",
+								text: "Расписание📚",
 								callback_data: "raspisanie",
 							},
 							{
@@ -101,7 +111,7 @@ async function menuHome(chatId, exit = true) {
 					inline_keyboard: [
 						[
 							{
-								text: "🔥Расписание📚",
+								text: "Расписание📚",
 								callback_data: "raspisanie",
 							},
 							{
@@ -124,7 +134,7 @@ async function menuHome(chatId, exit = true) {
 					inline_keyboard: [
 						[
 							{
-								text: "🔥Расписание📚",
+								text: "Расписание📚",
 								callback_data: "raspisanie",
 							},
 							{
@@ -148,9 +158,51 @@ async function menuHome(chatId, exit = true) {
 	}
 }
 
-async function ChoosingClass(chatId, exit = false) {
+async function rulesBot(chatId, RulesToStart = true) {
 	try {
-		if (exit) {
+		if (RulesToStart) {
+			await bot.editMessageText(
+				"*_🤖 Правила пользования 📃_\n\n\\-  Пользоваться приложением строго в благоразумных целях🌍\n\n\\-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n\\-  Бот не отвечает \\- команда \\/restart в вашем распоряжении\\!😉\n\n\\-  Нашёл ошибку? Бот по\\-прежнему не отвечает? Все предыдущие пункты соблюдены? Есть замечания по работе проекта? \\- пожалуйста сообщи об этом автору @qu1z3x 👍 *",
+				{
+					chat_id: chatId,
+					message_id: messageId_menuHome,
+					parse_mode: "MarkdownV2",
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{ text: "⬅️Назад", callback_data: "chooseclass2" },
+								{ text: "Принять✅", callback_data: "agreerules" },
+							],
+						],
+					},
+				}
+			);
+		} else if (!RulesToStart) {
+			await bot.editMessageText(
+				"*_🤖 Правила пользования 📃_\n\n\\-  Пользоваться приложением строго в благоразумных целях🌍\n\n\\-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n\\-  Бот не отвечает \\- команда \\/restart в вашем распоряжении\\!😉\n\n\\-  Нашёл ошибку? Бот\\-по прежнему не отвечает? Все предыдущие пункты соблюдены? Есть замечания по работе проекта? \\- пожалуйста сообщи об этом автору @qu1z3x 👍 *",
+				{
+					chat_id: chatId,
+					message_id: messageId_menuHome,
+					parse_mode: "MarkdownV2",
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{ text: "⬅️Назад", callback_data: "options" },
+								{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
+							],
+						],
+					},
+				}
+			);
+		}
+	} catch (error) {
+		console.log("\nПроизошла ошибка(");
+	}
+}
+
+async function ChoosingClass(chatId, start = 1) {
+	try {
+		if (start == 0) {
 			await bot.editMessageText("*Пожалуйста выбери свой класс 🙂🔎*", {
 				chat_id: chatId,
 				message_id: messageId_menuHome,
@@ -165,18 +217,20 @@ async function ChoosingClass(chatId, exit = false) {
 							{ text: "11Д", callback_data: "11d" },
 						],
 						[
-							{ text: "⬅️В меню", callback_data: "exit" },
+							{ text: "⬅️Назад", callback_data: "options" },
 							{ text: "Нет моего😞", callback_data: "netclassa" },
 						],
 					],
 				},
 			});
-		} else if (!exit) {
-			bot.sendMessage(
-				chatId,
-				"*Будем ближе знакомиться\\!😊\n\nПожалуйста выбери свой класс 🙂🔎*",
+		} else if (start == 1) {
+			bot.editMessageText(
+				`*Будем ближе знакомиться\\! 😊\n\n[Правила пользования ресурсом](https://t.me/digsch27_bot/?start=rules)\n\nА теперь выбирай класс* 🙂🔎`,
 				{
+					chat_id: chatId,
+					message_id: messageId_menuHome,
 					parse_mode: "MarkdownV2",
+					disable_web_page_preview: true,
 					reply_markup: {
 						inline_keyboard: [
 							[
@@ -189,9 +243,35 @@ async function ChoosingClass(chatId, exit = false) {
 						],
 					},
 				}
-			).then((message) => {
-				messageId_menuHome = message.message_id;
-			});
+			);
+		} else if (start === 2) {
+			bot.editMessageText(
+				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](https://t.me/digsch27_bot/?start=rules)\n\nИ выбери свой класс* 🙂🔎`,
+				{
+					chat_id: chatId,
+					message_id: messageId_menuHome,
+					parse_mode: "MarkdownV2",
+					disable_web_page_preview: true,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "10Г",
+									url: "https://t.me/digsch27_bot",
+								},
+								{ text: "11A", url: "https://t.me/digsch27_bot" },
+								{ text: "11В", url: "https://t.me/digsch27_bot" },
+								{ text: "11Г", url: "https://t.me/digsch27_bot" },
+								{
+									text: "11Д",
+									url: "https://t.me/digsch27_bot",
+								},
+							],
+							[{ text: "Нет моего😞", callback_data: "netclassa2" }],
+						],
+					},
+				}
+			);
 		}
 	} catch (error) {
 		console.log("\nПроизошла ошибка(");
@@ -256,24 +336,46 @@ async function RaspisanieText(chatId) {
 	);
 }
 
-async function netClassaText(chatId) {
+async function netClassaText(chatId, exitMenu = true) {
 	try {
-		await bot.editMessageText(
-			`*Грустно это осознавать, но видимо именно твой класс не входит в список программы _"Цифровые классы"_ 🫤\n\nНо\\! Ты всегда можешь написать @qu1z3x, и уточнить все свои потребности\\! 😉*`,
-			{
-				parse_mode: "MarkdownV2",
-				chat_id: chatId,
-				message_id: messageId_menuHome,
-				reply_markup: {
-					inline_keyboard: [
-						[
-							{ text: "⬅️Назад", callback_data: "raspisanie" },
-							{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
+		if (exitMenu) {
+			await bot.editMessageText(
+				`*Грустно это осознавать, но видимо именно твой класс не входит в список программы _"Цифровые классы"_ 🫤\n\nНо\\! Ты всегда можешь написать @qu1z3x, и уточнить все свои потребности\\! 😉*`,
+				{
+					parse_mode: "MarkdownV2",
+					chat_id: chatId,
+					message_id: messageId_menuHome,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{ text: "⬅️Назад", callback_data: "chooseclass0" },
+								{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
+							],
 						],
-					],
-				},
-			}
-		);
+					},
+				}
+			);
+		} else if (!exitMenu) {
+			await bot.editMessageText(
+				`*Грустно это осознавать, но видимо именно твой класс не входит в список программы _"Цифровые классы"_ 🫤\n\nНо\\! Ты всегда можешь написать @qu1z3x, и уточнить все свои потребности\\! 😉*`,
+				{
+					parse_mode: "MarkdownV2",
+					chat_id: chatId,
+					message_id: messageId_menuHome,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{ text: "⬅️К выбору", callback_data: "chooseclass2" },
+								{
+									text: "Написать✍️",
+									url: "https://t.me/qu1z3x/?start=rules",
+								},
+							],
+						],
+					},
+				}
+			);
+		}
 	} catch (error) {
 		console.log("\nПроизошла ошибка(");
 	}
@@ -484,7 +586,7 @@ async function game2_2(chatId, playerNum) {
 async function News(chatId) {
 	try {
 		await bot.editMessageText(
-			`<b><i>❗ Интересное ❗</i>\n\n${newsText[newsNum]}\n\nПо любым вопросам к @qu1z3x</b>`,
+			`<b><i>❗ Интересное | ${newsName}</i>\n\n${newsText[newsNum]}\n\nПо любым вопросам к @qu1z3x</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
@@ -582,17 +684,19 @@ async function AllNewsTextReset(chatId) {
 	}
 }
 
-async function Options(chatId, firstName, userName) {
+async function Options(chatId, firstName) {
 	try {
 		await bot.editMessageText(
-			`*_🛠️ Настройки ⚙️_*\n\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\n\nКласс: *${className}*`,
+			`*_🛠️ Настройки ⚙️_*\n\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\n\nКласс: *${className}\n\n[Правила пользования ресурсом](https://t.me/digsch27_bot/?start=rules2)*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
 				message_id: messageId_menuHome,
+				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
-						[{ text: "Сменить класс 🔄", callback_data: "chooseclass" }],
+						[{ text: "Сменить класс 🔄", callback_data: "chooseclass0" }],
+
 						[
 							{ text: "⬅️В меню", callback_data: "exit" },
 							{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
@@ -608,7 +712,27 @@ async function Options(chatId, firstName, userName) {
 
 async function adminMenu(chatId) {
 	await bot.editMessageText(
-		"*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nБыстрый доступ к элементам\\: 🧑‍💻*",
+		"*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nЧем я могу быть полезен\\? 🤖*",
+		{
+			parse_mode: "MarkdownV2",
+			chat_id: chatId,
+			message_id: messageId_menuHome,
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{ text: "Тест 📟", callback_data: "adminMenu1" },
+						{ text: "Изменение ✏️", callback_data: "adminMenu2" },
+					],
+					[{ text: "⬅️Назад", callback_data: "exit" }],
+				],
+			},
+		}
+	);
+}
+
+async function adminMenuTest(chatId) {
+	await bot.editMessageText(
+		"*_♻️ Тестирование 📟_\n\nБыстрый доступ ко всем элементам\\:*",
 		{
 			parse_mode: "MarkdownV2",
 			chat_id: chatId,
@@ -626,12 +750,11 @@ async function adminMenu(chatId) {
 						{ text: "Цуе-Фа ✌️", callback_data: "game2" },
 					],
 					[{ text: "Интересное❗", callback_data: "news" }],
-					[{ text: "Новости 📖", callback_data: "allnews" }],
 					[
 						{ text: "О боте 🤖", callback_data: "botnews" },
 						{ text: "О школе 🏫", callback_data: "schoolnews" },
 					],
-					[{ text: "Внести изменения ✏️", callback_data: "allnewsEDIT" }],
+					[{ text: "Новости 📖", callback_data: "allnews" }],
 					[
 						{ text: "Новый диалог ♻️", callback_data: "start" },
 						{ text: "Перезапуск 🔄️", callback_data: "restart1" },
@@ -643,18 +766,34 @@ async function adminMenu(chatId) {
 	);
 }
 
+async function adminMenuEdit(chatId) {
+	await bot.editMessageText(
+		"*_📖 Изменение ✏️_ \n\nКакие правки вы хотите внести\\?🤖*",
+		{
+			parse_mode: "MarkdownV2",
+			chat_id: chatId,
+			message_id: messageId_menuHome,
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{
+							text: `✏️Измененить "Новости📖"`,
+							callback_data: "allnewsEDIT",
+						},
+					],
+					[{ text: "⬅️Назад", callback_data: "exit" }],
+				],
+			},
+		}
+	);
+}
+
 async function start(chatId, userName, quickStart = false) {
-	try {
-		await bot.deleteMessage(chatId, messageId_user);
-	} catch (error) {}
-	await bot
-		.sendSticker(
-			chatId,
-			"CAACAgIAAxkBAAIPoGURnYZUL89bmAaLJgNI0kU7v-xXAAKAAAPBnGAMNSI9fXm2854wBA"
-		)
-		.then((message) => {
-			messageId_sayHi0Home = message.message_id;
-		});
+	let rndNum = Math.floor(Math.random() * stickers.length);
+
+	await bot.sendSticker(chatId, stickers[rndNum]).then((message) => {
+		messageId_sayHi0Home = message.message_id;
+	});
 
 	await bot
 		.sendMessage(chatId, `*Салют ${userName} ✌️*`, {
@@ -667,7 +806,7 @@ async function start(chatId, userName, quickStart = false) {
 	await bot
 		.sendMessage(
 			chatId,
-			"*Я чат\\-бот 🤖, созданный для поддержки _цифровых_ классов в школе 🏫\\. Я буду помогать ученикам на уроках 📈, предоставлять полезную информацию📖,|| развлекать🤩||, и запрещать вам скучать😁\\. Давайте же начнем наше увлекательное путешествие в мир _цифровых классов_\\!*🚀",
+			"*Я чат\\-бот 🤖, поддерживаю _цифровое_ обучение🏫\\. Я буду твоим верным учебным помошником😉\\!\n • Нужно уточнить распиание?📚\n • Подсказать когда идти на урок?⏰\n • Напомнить о твоих планах?📝\n • Сыграть партейку в Цуе\\-Фа?✌️\n • Рассказать школьные новости?📖\n\\- то я к твоим услугам, поехали\\!🚀*",
 			{
 				parse_mode: "MarkdownV2",
 			}
@@ -675,11 +814,16 @@ async function start(chatId, userName, quickStart = false) {
 		.then((message) => {
 			messageId_sayHi2Home = message.message_id;
 		});
+
+	await bot.sendMessage(chatId, `ㅤ`, {}).then((message) => {
+		messageId_menuHome = message.message_id;
+	});
+
 	if (quickStart) {
-		menuHome(chatId, false);
+		menuHome(chatId);
 		className = "Не выбран";
 	} else if (!quickStart) {
-		ChoosingClass(chatId);
+		ChoosingClass(chatId, 2);
 	}
 }
 
@@ -718,7 +862,7 @@ async function StartAll() {
 
 		// время отправки
 		let date = new Date(message.date * 1000),
-			d = date.getDay() - 1,
+			d = date.getDay(),
 			h = date.getHours(),
 			m = date.getMinutes(),
 			s = date.getSeconds(),
@@ -728,11 +872,11 @@ async function StartAll() {
 			)}:${String(s).padStart(2, "0")}`;
 
 		//* для удобства в терминале
+		// ${JSON.stringify(message)}
 		console.log(
-			`\n${time} ${weekDayNames[d]} | text | ${message.from.first_name} ${message.from.username} <${chatId}>  -  "${text}"`
+			`\n${time} ${weekDayNames[d]} | text | ${message.from.first_name} ${message.from.username} <${chatId}>  -  "${text}" `
 		);
-
-		//? КОМАНДЫ
+		// console.log(`\n${JSON.stringify(message)}`);
 
 		if (editMode) {
 			editMode = false;
@@ -740,22 +884,34 @@ async function StartAll() {
 			AllNewsTextEdit_2(chatId);
 		}
 
+		//? КОМАНДЫ
+
 		switch (text) {
+			case "s":
 			case "/start":
 				endMessage(chatId);
+				bot.deleteMessage(chatId, messageId_user);
 				start(chatId, message.from.first_name);
 				break;
 			case "st":
 				endMessage(chatId);
+				bot.deleteMessage(chatId, messageId_user);
 				start(chatId, message.from.first_name, true);
 				break;
-
 			case "/restart":
 				try {
 					await bot.deleteMessage(chatId, messageId_menuHome);
 				} catch (error) {}
 				bot.deleteMessage(chatId, messageId_user);
 				menuHome(chatId, false);
+				break;
+			case "/start rules":
+				bot.deleteMessage(chatId, messageId_user);
+				rulesBot(chatId);
+				break;
+			case "/start rules2":
+				bot.deleteMessage(chatId, messageId_user);
+				rulesBot(chatId, false);
 				break;
 			default:
 				try {
@@ -788,7 +944,7 @@ async function StartAll() {
 		// время отправки
 		let hintText,
 			date = new Date(),
-			d = date.getDay() - 1,
+			d = date.getDay(),
 			h = date.getHours(),
 			m = date.getMinutes(),
 			s = date.getSeconds(),
@@ -890,23 +1046,23 @@ async function StartAll() {
 			//? ДЕНЬ НЕДЕЛИ
 
 			case "mon":
-				weekday = 0;
-				RaspisanieText(chatId);
-				break;
-			case "tue":
 				weekday = 1;
 				RaspisanieText(chatId);
 				break;
-			case "wen":
+			case "tue":
 				weekday = 2;
 				RaspisanieText(chatId);
 				break;
-			case "thu":
+			case "wen":
 				weekday = 3;
 				RaspisanieText(chatId);
 				break;
-			case "fri":
+			case "thu":
 				weekday = 4;
+				RaspisanieText(chatId);
+				break;
+			case "fri":
+				weekday = 5;
 				RaspisanieText(chatId);
 				break;
 			case "today":
@@ -920,6 +1076,7 @@ async function StartAll() {
 
 			//? ДЕЙСТВИЯ КНОПОК
 
+			// Начальные
 			case "start":
 				endMessage(chatId);
 				start(chatId, firstName);
@@ -932,23 +1089,33 @@ async function StartAll() {
 					menuHome(chatId, false);
 				}
 				break;
-			// RASPISANIE
-			case "chooseclass":
-				ChoosingClass(chatId, true);
+			case "chooseclass1":
+				ChoosingClass(chatId, 1);
 				break;
+			case "chooseclass2":
+				ChoosingClass(chatId, 2);
+				break;
+
+			// RASPISANIE
+
 			case "raspisanie":
 				Raspisanie(chatId);
 				break;
 			case "netclassa":
 				netClassaText(chatId);
 				break;
+			case "netclassa2":
+				netClassaText(chatId, false);
+				break;
 
 			// CALLS
+
 			case "calls":
 				Calls(chatId);
 				break;
 
 			// GAMES
+
 			case "games":
 				Games(chatId);
 				break;
@@ -971,20 +1138,46 @@ async function StartAll() {
 				break;
 
 			// NEWS (What's new)
+
 			case "news":
+				newsName = "Новости 📖";
 				News(chatId);
 				break;
 			case "allnews":
+				newsName = "Новости 📖";
 				newsNum = 0;
 				News(chatId);
 				break;
 			case "botnews":
+				newsName = "О боте 🤖";
 				newsNum = 1;
 				News(chatId);
 				break;
 			case "schoolnews":
+				newsName = "О школе 🏫";
 				newsNum = 2;
 				News(chatId);
+				break;
+
+			// OPTIONS
+
+			case "options":
+				Options(chatId, firstName);
+				break;
+			case "chooseclass0":
+				ChoosingClass(chatId, 0);
+				break;
+
+			// ADMINMENU
+
+			case "adminMenu":
+				adminMenu(chatId);
+				break;
+			case "adminMenu1":
+				adminMenuTest(chatId);
+				break;
+			case "adminMenu2":
+				adminMenuEdit(chatId);
 				break;
 			case "allnewsEDIT":
 				AllNewsTextEdit(chatId);
@@ -1009,20 +1202,18 @@ async function StartAll() {
 					adminMenu(chatId);
 				}, 2000);
 				break;
-			// OPTIONS
-			case "options":
-				Options(chatId, firstName);
-				break;
-			// ADMINMENU
-			case "adminMenu":
-				adminMenu(chatId);
-				break;
 			case "restart1":
-				try {
-					bot.deleteMessage(chatId, messageId_menuHome);
-				} catch (error) {}
-				ChoosingClass(chatId);
+				ChoosingClass(chatId, 2);
 				break;
+			case "agreerules":
+				bot.editMessageText(`*Спасибо тебе ❤️ \\- команда @qu1z3x*`, {
+					parse_mode: "MarkdownV2",
+					chat_id: chatId,
+					message_id: messageId_menuHome,
+				});
+				setTimeout(() => {
+					ChoosingClass(chatId, 1);
+				}, 2000);
 			default:
 				break;
 		}
