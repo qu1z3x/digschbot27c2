@@ -6,7 +6,15 @@ const TOKEN = "6452076729:AAGds4jdMEUT-idcutZdLGVjKu5kyLs3Md4";
 
 const bot = new TelegramBot(TOKEN, { polling: true });
 
+let botNum = 1;
+
 //? БАЗА ДАННЫХ
+
+httpsRequests = ["https://t.me/digsch27_bot", "https://t.me/digschbot"];
+httpsRules = [
+	"https://t.me/digsch27_bot/?start=rules",
+	"https://t.me/digschbot/?start=rules",
+];
 
 // UserID
 const qu1z3x = "923690530";
@@ -20,9 +28,7 @@ const stickers = [
 	"CAACAgIAAxkBAAIXJGU1QclHfnHsU6z0isqU3v72p11mAAJ0AAPBnGAMtJfqrsmMmrQwBA",
 	"CAACAgIAAxkBAAIXJWU1QdMJWNfIOh9odZH8Q25K98A-AAJvAAPBnGAMyw59i8DdTVYwBA",
 	"CAACAgIAAxkBAAIXJmU1QdsTofm7uh7hi3mNYNE837HpAAJ6AAPBnGAM0GBdiVRCvP4wBA",
-	"CAACAgIAAxkBAAIXJ2U1QeZV7H_7f07EPsDHI_gSVA0bAAJwAAPBnGAMYrO6xZKF_qUwBA",
 ];
-
 // Что нового? text
 const newsText = [
 	"Новостей нет 😔",
@@ -225,7 +231,7 @@ async function ChoosingClass(chatId, start = 1) {
 			});
 		} else if (start == 1) {
 			bot.editMessageText(
-				`*Будем ближе знакомиться\\! 😊\n\n[Правила пользования ресурсом](https://t.me/digsch27_bot/?start=rules)\n\nА теперь выбирай класс* 🙂🔎`,
+				`*Будем ближе знакомиться\\! 😊\n\n[Правила пользования ресурсом](${httpsRules[botNum]})\n\nА теперь выбирай класс* 🙂🔎`,
 				{
 					chat_id: chatId,
 					message_id: messageId_menuHome,
@@ -246,7 +252,7 @@ async function ChoosingClass(chatId, start = 1) {
 			);
 		} else if (start === 2) {
 			bot.editMessageText(
-				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](https://t.me/digsch27_bot/?start=rules)\n\nИ выбери свой класс* 🙂🔎`,
+				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](${httpsRules[botNum]})\n\nИ выбери свой класс* 🙂🔎`,
 				{
 					chat_id: chatId,
 					message_id: messageId_menuHome,
@@ -257,14 +263,14 @@ async function ChoosingClass(chatId, start = 1) {
 							[
 								{
 									text: "10Г",
-									url: "https://t.me/digsch27_bot",
+									url: httpsRequests[botNum],
 								},
-								{ text: "11A", url: "https://t.me/digsch27_bot" },
-								{ text: "11В", url: "https://t.me/digsch27_bot" },
-								{ text: "11Г", url: "https://t.me/digsch27_bot" },
+								{ text: "11A", url: httpsRequests[botNum] },
+								{ text: "11В", url: httpsRequests[botNum] },
+								{ text: "11Г", url: httpsRequests[botNum] },
 								{
 									text: "11Д",
-									url: "https://t.me/digsch27_bot",
+									url: httpsRequests[botNum],
 								},
 							],
 							[{ text: "Нет моего😞", callback_data: "netclassa2" }],
@@ -687,7 +693,7 @@ async function AllNewsTextReset(chatId) {
 async function Options(chatId, firstName) {
 	try {
 		await bot.editMessageText(
-			`*_🛠️ Настройки ⚙️_*\n\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\n\nКласс: *${className}\n\n[Правила пользования ресурсом](https://t.me/digsch27_bot/?start=rules2)*`,
+			`*_🛠️ Настройки ⚙️_*\n\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\n\nКласс: *${className}\n\n[Правила пользования ресурсом](${httpsRules[botNum]})*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
