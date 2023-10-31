@@ -182,9 +182,6 @@ async function menuHome(chatId, exit = true) {
 						],
 					],
 				},
-			}).then((message) => {
-				usersData.find((obj) => obj.chatId === chatId).messageId =
-					message.message_id;
 			});
 		}
 	} catch (error) {
@@ -1076,12 +1073,12 @@ async function adminMenuEdit(chatId) {
 	);
 }
 
-async function RegistryUsersData(chatId, firstName) {
+async function RegistryUsersData(chatId) {
 	let text = "";
 	for (let i = 0; i < usersData.length; i++) {
-		text += `[${i + 1}] ${firstName} @${
-			usersData[i].username
-		}\n• ChatId: <code>${usersData[i].chatId}</code>\n• className: "${
+		text += `[${i + 1}]  @${usersData[i].username}\n• ChatId: <code>${
+			usersData[i].chatId
+		}</code>\n• className: "${
 			usersData[i].className
 		}"\n• callsNotifications: ${usersData[i].notificationStatus}\n\n`;
 	}
@@ -1292,7 +1289,7 @@ async function StartAll() {
 					{
 						parse_mode: "html",
 						chat_id: chatId,
-						message_id: usersData.find((obj) => obj.chatId === chatId)
+						message_id: usersData.find((obj) => obj.chatId == chatId)
 							.messageId,
 						reply_markup: {
 							inline_keyboard: [
@@ -1510,7 +1507,7 @@ async function StartAll() {
 			usersData.push({
 				chatId: chatId,
 				username: query.from.username,
-				className: "Не определен",
+				className: "Не определен (10Г)",
 				messageId: query.message.message_id,
 				notificationStatus: false,
 				messageSent: false,
@@ -2010,7 +2007,7 @@ async function StartAll() {
 				query.from.username
 			} <${chatId}>  -  [${data}]`
 		);
-		console.log(usersData.find((obj) => obj.chatId === chatId));
+		console.log(reminder.find((obj) => obj.chatId === chatId));
 	});
 }
 
