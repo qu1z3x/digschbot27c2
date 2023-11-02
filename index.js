@@ -6,7 +6,7 @@ const TOKENs = [
 ];
 const qu1z3xId = "923690530";
 
-const TOKEN = TOKENs[1]; // 1 - оригинал
+const TOKEN = TOKENs[0]; // 1 - оригинал
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 import { sendDataAboutText } from "./tgterminal.js";
@@ -37,6 +37,16 @@ const stickers = [
 	"CAACAgIAAxkBAAIXJWU1QdMJWNfIOh9odZH8Q25K98A-AAJvAAPBnGAMyw59i8DdTVYwBA",
 	"CAACAgIAAxkBAAIXJmU1QdsTofm7uh7hi3mNYNE837HpAAJ6AAPBnGAM0GBdiVRCvP4wBA",
 ];
+bot.setMyCommands([
+	{
+		command: "/restart2",
+		description: "Полный перезапуск 👌",
+	},
+	{
+		command: "/restart",
+		description: "Перезапуск🫡",
+	},
+]);
 // Что нового? text
 const newsText = [
 	"Новостей нет 😔",
@@ -362,46 +372,47 @@ async function ChoosingClass(chatId, start = 1) {
 }
 
 async function Raspisanie(chatId) {
-	// try {
-	await bot.editMessageText(
-		`*_⏰Расписание📚_*\n\nСегодня\\: *${weekDayNames[dayW]}, ${day} ${monthNames[month]}*\nКласс: *${className}* \\- [изменить](https://t.me/digschbot/?start=options) \n\n*На какой день показать расписание❓🤔*`,
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			disable_web_page_preview: true,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{
-							text: "На сегодня 🕚",
-							callback_data: "today",
-						},
-						{
-							text: "На завтра 🕰️",
-							callback_data: "tomorrow",
-						},
+	try {
+		await bot.editMessageText(
+			`*_⏰Расписание📚_*\n\nСегодня\\: *${weekDayNames[dayW]}, ${day} ${monthNames[month]}*\nКласс: *${className}* \\- [изменить](https://t.me/digschbot/?start=options) \n\n*На какой день показать расписание❓🤔*`,
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				disable_web_page_preview: true,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "На сегодня 🕚",
+								callback_data: "today",
+							},
+							{
+								text: "На завтра 🕰️",
+								callback_data: "tomorrow",
+							},
+						],
+						[
+							{ text: "Пн 😩", callback_data: "mon" },
+							{ text: "Вт 😞", callback_data: "tue" },
+							{ text: "Ср 😟", callback_data: "wen" },
+						],
+						[
+							{ text: "⬅️В меню", callback_data: "exit" },
+							{ text: "Чт 🙂", callback_data: "thu" },
+							{ text: "Пт 😆", callback_data: "fri" },
+						],
 					],
-					[
-						{ text: "Пн 😩", callback_data: "mon" },
-						{ text: "Вт 😞", callback_data: "tue" },
-						{ text: "Ср 😟", callback_data: "wen" },
-					],
-					[
-						{ text: "⬅️В меню", callback_data: "exit" },
-						{ text: "Чт 🙂", callback_data: "thu" },
-						{ text: "Пт 😆", callback_data: "fri" },
-					],
-				],
-			},
-		}
-	);
-	// } catch (error) {
-	// 	sendDataAboutError(
-	// 		chatId,
-	// 		"Не обработан момент вызова выбора дня недели для расписания (Raspisanie)"
-	// 	);
-	// }
+				},
+			}
+		);
+	} catch (error) {
+		sendDataAboutError(
+			chatId,
+			"Не обработан момент вызова выбора дня недели для расписания (Raspisanie)"
+		);
+	}
 }
 
 async function RaspisanieText(chatId) {
@@ -531,49 +542,55 @@ async function Calls(chatId) {
 		buttonNum = 1;
 		textCallsNotifStatus = "✅🔔";
 	}
+	try {
+		setInterval(function () {
+			const dateWithout5Minutes = `${String(new Date().getHours()).padStart(
+				2,
+				"0"
+			)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
+			dayW = new Date().getDay();
 
-	setInterval(function () {
-		const dateWithout5Minutes = `${String(new Date().getHours()).padStart(
-			2,
-			"0"
-		)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
-		dayW = new Date().getDay();
-
-		for (let j = 0; j < usersData.length; j++) {
-			usersData[j].messageSent = false;
-		}
-		let j = 0;
-		while (j < usersData.length) {
-			if (usersData[j].notificationStatus && dayW != 6 && dayW != 0) {
-				for (let i = 0; i < timesOnLesson.length; i++) {
-					if (
-						dateWithout5Minutes == timesOnLesson[i] &&
-						!usersData[j].messageSent
-					) {
-						bot.sendMessage(
-							usersData[j].chatId,
-							`🔔 Через 5 минут у тебя урок! 😉`,
-							{
-								reply_markup: {
-									inline_keyboard: [
-										[
-											{
-												text: "Спасибо 👍",
-												callback_data: "deletereminder",
-											},
+			for (let j = 0; j < usersData.length; j++) {
+				usersData[j].messageSent = false;
+			}
+			let j = 0;
+			while (j < usersData.length) {
+				if (usersData[j].notificationStatus && dayW != 6 && dayW != 0) {
+					for (let i = 0; i < timesOnLesson.length; i++) {
+						if (
+							dateWithout5Minutes == timesOnLesson[i] &&
+							!usersData[j].messageSent
+						) {
+							bot.sendMessage(
+								usersData[j].chatId,
+								`🔔 Через 5 минут у тебя урок! 😉`,
+								{
+									reply_markup: {
+										inline_keyboard: [
+											[
+												{
+													text: "Спасибо 👍",
+													callback_data: "deleteexcess",
+												},
+											],
 										],
-									],
-								},
-							}
-						);
-						usersData[j].messageSent = true;
-						j++;
-						break;
+									},
+								}
+							);
+							usersData[j].messageSent = true;
+							j++;
+							break;
+						}
 					}
 				}
 			}
-		}
-	}, 60000);
+		}, 60000);
+	} catch (error) {
+		sendDataAboutError(
+			chatId,
+			"Не обработан момент проверки и отправки уведомления пользователю (Calls)"
+		);
+	}
 
 	try {
 		await bot.editMessageText(
@@ -837,15 +854,6 @@ async function News(chatId) {
 async function AllNewsTextEdit(chatId) {
 	editMode = true;
 
-	// bot.sendMessage(chatId, "kjkjhkjh", {
-	// 	reply_markup: {
-	// 		keyboard: [
-	// 			["..."],
-	// 			["..."],
-	// 		],
-	// 	},
-	// });
-
 	bot.editMessageText(
 		`<b><i>✏️ Редактирование: Новости 📖</i>\n\n📖 Текущий текст:</b>\n\n<code>"${newsText[0]}"</code>\n\n<b>Напиши измененный текст ниже ⬇️</b>`,
 		{
@@ -869,48 +877,54 @@ async function AllNewsTextEdit(chatId) {
 
 async function AllNewsTextEdit_2(chatId) {
 	editMode = false;
-	bot.editMessageText(
-		`<b><i>✏️ Редактирование: Новости 📖</i>\n\n🆕 Измененный текст:</b>\n\n<i>"${newsText[0]}"</i>\n\n<b>Применить изменения?🧐</b>`,
-		{
-			parse_mode: "html",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{
-							text: "Сбросить ❌",
-							callback_data: "allnewstextRESETmenu",
-						},
-						{ text: "Применить✅", callback_data: "adminMenu" },
+	try {
+		bot.editMessageText(
+			`<b><i>✏️ Редактирование: Новости 📖</i>\n\n🆕 Измененный текст:</b>\n\n<i>"${newsText[0]}"</i>\n\n<b>Применить изменения?🧐</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "Сбросить ❌",
+								callback_data: "allnewstextRESETmenu",
+							},
+							{ text: "Применить✅", callback_data: "adminMenu" },
+						],
+						[{ text: "⬅️Назад", callback_data: "allnewsEDIT" }],
 					],
-					[{ text: "⬅️Назад", callback_data: "allnewsEDIT" }],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function AllNewsTextReset(chatId) {
-	await bot.editMessageText(
-		`*_✏️ Редактирование: Новости 📖_\n\nCбросить раздел _"Новости 📖"_ ⁉️*`,
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{ text: "⬅️Назад", callback_data: "adminMenu" },
-						{
-							text: "Сбросить ✅",
-							callback_data: "allnewstextRESETend",
-						},
+	try {
+		await bot.editMessageText(
+			`*_✏️ Редактирование: Новости 📖_\n\nCбросить раздел _"Новости 📖"_ ⁉️*`,
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️Назад", callback_data: "adminMenu" },
+							{
+								text: "Сбросить ✅",
+								callback_data: "allnewstextRESETend",
+							},
+						],
 					],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function Options(chatId, firstName) {
@@ -966,136 +980,151 @@ async function Options(chatId, firstName) {
 }
 
 async function Options_2(chatId) {
-	await bot.editMessageText(
-		`*_🛠️ Прочие настройки ⚙️_\n\n❗Раздел повышенной опасности❗\n*`,
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{ text: "Новый диалог ♻️", callback_data: "start" },
-						{ text: "Перезапуск 🔄️", callback_data: "restart1" },
+	try {
+		await bot.editMessageText(
+			`*_🛠️ Прочие настройки ⚙️_\n\n❗Раздел повышенной опасности❗\n*`,
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "Новый диалог ♻️", callback_data: "start" },
+							{ text: "Перезапуск 🔄️", callback_data: "restart1" },
+						],
+						[
+							{
+								text: "❌ Удалить Аккаунт❗",
+								callback_data: "deleteaccount",
+							},
+						],
+						[
+							{ text: "⬅️Назад", callback_data: "options" },
+							{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
+						],
 					],
-					[
-						{
-							text: "❌ Удалить Аккаунт❗",
-							callback_data: "deleteaccount",
-						},
-					],
-					[
-						{ text: "⬅️Назад", callback_data: "options" },
-						{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
-					],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function adminMenu(chatId) {
-	await bot.editMessageText(
-		`*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nЧем я могу быть полезен\\? 🤖*`,
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[{ text: "💾 Реестр 📁", callback_data: "usersdatalist" }],
-					[
-						{ text: "Тест 📟", callback_data: "adminMenu1" },
-						{ text: "Изменение ✏️", callback_data: "adminMenu2" },
+	try {
+		await bot.editMessageText(
+			`*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nЧем я могу быть полезен\\? 🤖*`,
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[{ text: "💾 Реестр 📁", callback_data: "usersdatalist" }],
+						[
+							{ text: "Тест 📟", callback_data: "adminMenu1" },
+							{ text: "Изменение ✏️", callback_data: "adminMenu2" },
+						],
+						[{ text: "⬅️Назад", callback_data: "exit" }],
 					],
-					[{ text: "⬅️Назад", callback_data: "exit" }],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function adminMenuTest(chatId) {
-	await bot.editMessageText(
-		"*_♻️ Тестирование 📟_\n\nБыстрый доступ ко всем элементам\\:*",
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[{ text: "🔥 Расписание 📚", callback_data: "raspisanie" }],
-					[
-						{ text: "На сегодня 🕚", callback_data: "today" },
-						{ text: "Нет моего 😞", callback_data: "netclassa" },
+	try {
+		await bot.editMessageText(
+			"*_♻️ Тестирование 📟_\n\nБыстрый доступ ко всем элементам\\:*",
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[{ text: "🔥 Расписание 📚", callback_data: "raspisanie" }],
+						[
+							{ text: "На сегодня 🕚", callback_data: "today" },
+							{ text: "Нет моего 😞", callback_data: "netclassa" },
+						],
+						[{ text: "Развлечения 🕹️", callback_data: "games" }],
+						[
+							{ text: "Угадайка❓", callback_data: "game1" },
+							{ text: "Цуе-Фа ✌️", callback_data: "game2" },
+						],
+						[{ text: "Интересное❗", callback_data: "news" }],
+						[
+							{ text: "О боте 🤖", callback_data: "botnews" },
+							{ text: "О школе 🏫", callback_data: "schoolnews" },
+						],
+						[{ text: "Новости 📖", callback_data: "allnews" }],
+						[
+							{ text: "Новый диалог ♻️", callback_data: "start" },
+							{ text: "Перезапуск 🔄️", callback_data: "restart1" },
+						],
+						[{ text: "⬅️Назад", callback_data: "adminMenu" }],
 					],
-					[{ text: "Развлечения 🕹️", callback_data: "games" }],
-					[
-						{ text: "Угадайка❓", callback_data: "game1" },
-						{ text: "Цуе-Фа ✌️", callback_data: "game2" },
-					],
-					[{ text: "Интересное❗", callback_data: "news" }],
-					[
-						{ text: "О боте 🤖", callback_data: "botnews" },
-						{ text: "О школе 🏫", callback_data: "schoolnews" },
-					],
-					[{ text: "Новости 📖", callback_data: "allnews" }],
-					[
-						{ text: "Новый диалог ♻️", callback_data: "start" },
-						{ text: "Перезапуск 🔄️", callback_data: "restart1" },
-					],
-					[{ text: "⬅️Назад", callback_data: "adminMenu" }],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function adminMenuEdit(chatId) {
-	await bot.editMessageText(
-		"*_📖 Изменение ✏️_ \n\nКакие правки вы хотите внести\\?🤖*",
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{
-							text: `✏️Измененить "Новости📖"`,
-							callback_data: "allnewsEDIT",
-						},
+	try {
+		await bot.editMessageText(
+			"*_📖 Изменение ✏️_ \n\nКакие правки вы хотите внести\\?🤖*",
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `✏️Измененить "Новости📖"`,
+								callback_data: "allnewsEDIT",
+							},
+						],
+						[{ text: "⬅️Назад", callback_data: "adminMenu" }],
 					],
-					[{ text: "⬅️Назад", callback_data: "adminMenu" }],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function RegistryUsersData(chatId) {
-	let text = "";
-	for (let i = 0; i < usersData.length; i++) {
-		text += `[${i + 1}]  @${usersData[i].username}\n• ChatId: <code>${
-			usersData[i].chatId
-		}</code>\n• className: "${
-			usersData[i].className
-		}"\n• callsNotifications: ${usersData[i].notificationStatus}\n\n`;
-	}
-
-	bot.editMessageText(
-		`<b><i>💾 Реестр 📁\n\nДанные о пользователях:\n\n${text}</i>Всего: ${usersData.length}</b>`,
-		{
-			parse_mode: "HTML",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[{ text: "⬅️Назад", callback_data: "adminMenu" }],
-				],
-			},
+	try {
+		let text = "";
+		for (let i = 0; i < usersData.length; i++) {
+			text += `[${i + 1}]  @${usersData[i].username}\n• ChatId: <code>${
+				usersData[i].chatId
+			}</code>\n• className: "${
+				usersData[i].className
+			}"\n• callsNotifications: ${usersData[i].notificationStatus}\n\n`;
 		}
-	);
+
+		bot.editMessageText(
+			`<b><i>💾 Реестр 📁\n\nДанные о пользователях:\n\n${text}</i>Всего: ${usersData.length}</b>`,
+			{
+				parse_mode: "HTML",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[{ text: "⬅️Назад", callback_data: "adminMenu" }],
+					],
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function Reminders(chatId) {
@@ -1103,137 +1132,152 @@ async function Reminders(chatId) {
 		(reminderObj) => reminderObj.chatId === chatId
 	).length;
 
-	bot.editMessageText(
-		"*_🔔Напоминания🗓️_\n\nЯ могу тебе напомнить\\:\n• Когда сдать докла\\.\\.\\.\n• Да всё что угодно\\!🤯\n\\- и я не забуду, то что ты мне поручишь напомнить\\!😉\n\nНе засоряй телефон, пиши мне🤗*",
-		{
-			parse_mode: "MarkdownV2",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{
-							text: `Текущие ${countRem} 📃`,
-							callback_data: "reminderslist",
-						},
-						{ text: "Создать📝", callback_data: "remindersadd" },
+	try {
+		bot.editMessageText(
+			"*_🔔Напоминания🗓️_\n\nЯ могу тебе напомнить\\:\n• Когда сдать докла\\.\\.\\.\n• Да всё что угодно\\!🤯\n\\- и я не забуду, то что ты мне поручишь напомнить\\!😉\n\nНе засоряй телефон, пиши мне🤗*",
+			{
+				parse_mode: "MarkdownV2",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `Текущие ${countRem} 📃`,
+								callback_data: "reminderslist",
+							},
+							{ text: "Создать📝", callback_data: "remindersadd" },
+						],
+						[{ text: "⬅️В меню", callback_data: "exit" }],
 					],
-					[{ text: "⬅️Назад", callback_data: "exit" }],
-				],
-			},
-		}
-	);
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function RemindersList(chatId) {
-	let reminderText = "";
-	const userReminders = reminder.filter(
-		(reminderObj) => reminderObj.chatId === chatId
-	);
-	if (userReminders.length > 0) {
-		let i = 1;
-		userReminders.forEach((reminderObj) => {
-			reminderText += `•${i} ${reminderObj.text} - ${reminderObj.time}\n\n`;
-			i++;
-		});
-	} else if (userReminders.length == 0) {
-		reminderText = "У тебя нет активных напоминаний 😔\n\n";
-	}
-
-	let deleteallreminderButtonText;
-	if (userReminders.length == 0) deleteallreminderButtonText = "";
-	else if (userReminders.length > 0)
-		deleteallreminderButtonText = "Удалить всё ❌";
-
-	bot.editMessageText(
-		`<b><i>🔔Текущие напоминания🗓️</i>\n\nТвои напоминания:</b><i>\n\n${reminderText}</i><b>Количество: ${userReminders.length}</b>`,
-		{
-			parse_mode: "html",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[
-						{
-							text: `${deleteallreminderButtonText}`,
-							callback_data: "deleteallreminder",
-						},
-					],
-					[
-						{ text: "⬅️Назад", callback_data: "reminders" },
-						{ text: "Создать📝", callback_data: "remindersadd" },
-					],
-				],
-			},
+	try {
+		let reminderText = "";
+		const userReminders = reminder.filter(
+			(reminderObj) => reminderObj.chatId === chatId
+		);
+		if (userReminders.length > 0) {
+			let i = 1;
+			userReminders.forEach((reminderObj) => {
+				reminderText += `•${i} ${reminderObj.text} - ${reminderObj.time}\n\n`;
+				i++;
+			});
+		} else if (userReminders.length == 0) {
+			reminderText = "У тебя нет активных напоминаний 😔\n\n";
 		}
-	);
+
+		let deleteallreminderButtonText;
+		if (userReminders.length == 0) deleteallreminderButtonText = "";
+		else if (userReminders.length > 0)
+			deleteallreminderButtonText = "Удалить все ❌";
+
+		bot.editMessageText(
+			`<b><i>🔔Текущие напоминания🗓️</i>\n\nТвои напоминания:</b><i>\n\n${reminderText}</i><b>Количество: ${userReminders.length}</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `${deleteallreminderButtonText}`,
+								callback_data: "deleteallreminder",
+							},
+						],
+						[
+							{ text: "⬅️Назад", callback_data: "reminders" },
+							{ text: "Создать📝", callback_data: "remindersadd" },
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function RemindersAdd(chatId) {
-	bot.editMessageText(
-		"<b><i>🔔Создание напоминания📝\n\nПример:</i></b>\n<code>Сесть за уроки в <b>16:35</b></code>\n\n<b>Пиши прямо под сообщением 😉⬇️</b>",
-		{
-			parse_mode: "html",
-			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
-			reply_markup: {
-				inline_keyboard: [
-					[{ text: "⬅️Назад", callback_data: "reminders" }],
-				],
-			},
-		}
-	);
+	const dateNowHNN = `${String(new Date().getHours())}:${String(
+		new Date().getMinutes() + 1
+	).padStart(2, "0")}`;
+	try {
+		bot.editMessageText(
+			`<b><i>🔔Создание напоминания📝\n\nПример:</i></b>\n<code>Сесть за уроки в <b>${dateNowHNN}</b></code>\n\n<b>Пиши прямо под сообщением 😉⬇️</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[{ text: "⬅️Назад", callback_data: "reminders" }],
+					],
+				},
+			}
+		);
+	} catch (error) {}
 }
 
 async function start(chatId, userName, quickStart = false) {
 	let rndNum = Math.floor(Math.random() * stickers.length);
 
-	await bot.sendSticker(chatId, stickers[rndNum]).then((message) => {
-		messageId_sayHi0Home = message.message_id;
-	});
-
-	await bot
-		.sendMessage(chatId, `*Салют ${userName} ✌️*`, {
-			parse_mode: "MarkdownV2",
-		})
-		.then((message) => {
-			messageId_sayHi1Home = message.message_id;
+	try {
+		await bot.sendSticker(chatId, stickers[rndNum]).then((message) => {
+			messageId_sayHi0Home = message.message_id;
 		});
 
-	await bot
-		.sendMessage(
-			chatId,
-			"*Я чат\\-бот 🤖, поддерживаю _цифровое_ обучение🏫\\. Я буду твоим верным учебным помощником😉\\!\n • Нужно уточнить распиание?📚\n • Подсказать когда идти на урок?⏰\n • Напомнить о твоих планах?📝\n • Сыграть партейку в Цуе\\-Фа?✌️\n • Рассказать школьные новости?📖\nТогда я к твоим услугам, поехали\\!🚀*",
-			{
+		await bot
+			.sendMessage(chatId, `*Салют ${userName} ✌️*`, {
 				parse_mode: "MarkdownV2",
+			})
+			.then((message) => {
+				messageId_sayHi1Home = message.message_id;
+			});
+
+		await bot
+			.sendMessage(
+				chatId,
+				"*Я чат\\-бот 🤖, поддерживаю _цифровое_ обучение🏫\\. Я буду твоим верным учебным помощником😉\\!\n • Нужно уточнить распиание?📚\n • Подсказать когда идти на урок?⏰\n • Напомнить о твоих планах?📝\n • Сыграть партейку в Цуе\\-Фа?✌️\n • Рассказать школьные новости?📖\nТогда я к твоим услугам, поехали\\!🚀*",
+				{
+					parse_mode: "MarkdownV2",
+				}
+			)
+			.then((message) => {
+				messageId_sayHi2Home = message.message_id;
+			});
+
+		await bot.sendMessage(chatId, `ㅤ`, {}).then((message) => {
+			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+			if (dataAboutUser) {
+				dataAboutUser.messageId = message.message_id;
+			} else if (!dataAboutUser) {
+				usersData.push({
+					chatId: chatId,
+					username: userName,
+					className: "Не определен (10Г)",
+					messageId: message.message_id,
+					messageIdother: "",
+					notificationStatus: false,
+					messageSent: false,
+				});
 			}
-		)
-		.then((message) => {
-			messageId_sayHi2Home = message.message_id;
 		});
 
-	await bot.sendMessage(chatId, `ㅤ`, {}).then((message) => {
-		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-		if (dataAboutUser) {
-			dataAboutUser.messageId = message.message_id;
-		} else if (!dataAboutUser) {
-			usersData.push({
-				chatId: chatId,
-				username: userName,
-				className: "Не определен",
-				messageId: message.message_id,
-				notificationStatus: false,
-				messageSent: false,
-			});
+		if (quickStart) {
+			menuHome(chatId);
+			className = "Не определен (10Г)";
+		} else if (!quickStart) {
+			ChoosingClass(chatId, 2);
 		}
-	});
-
-	if (quickStart) {
-		menuHome(chatId);
-		className = "Не выбран";
-	} else if (!quickStart) {
-		ChoosingClass(chatId, 2);
-	}
+	} catch (error) {}
 }
 
 async function endMessage(chatId) {
@@ -1256,7 +1300,7 @@ async function endMessage(chatId) {
 }
 
 async function StartAll() {
-	// bot.sendMessage(userId, ""); //?                                                         Принудительная отправка сообщений определенному лицу.
+	// bot.sendMessage(userChatId, ""); //?                                                         Принудительная отправка сообщений определенному лицу.
 
 	if (TOKEN == TOKENs[0]) botNum = 0;
 	else if (TOKEN == TOKENs[1]) botNum = 1;
@@ -1301,9 +1345,7 @@ async function StartAll() {
 				return;
 			}
 
-			let reminderObj = { chatId: chatId, text: textRem, time: timeRem };
-
-			reminder.push(reminderObj);
+			reminder.push({ chatId: chatId, text: textRem, time: timeRem });
 
 			sendDataAboutAction(
 				message.from.first_name,
@@ -1335,7 +1377,7 @@ async function StartAll() {
 									callback_data: "remindersadd",
 								},
 							],
-							[{ text: "⬅️Назад", callback_data: "exit" }],
+							[{ text: "⬅️Назад", callback_data: "reminders" }],
 						],
 					},
 				}
@@ -1365,17 +1407,21 @@ async function StartAll() {
 										[
 											{
 												text: "Удалить ❌",
-												callback_data: "deletereminder",
+												callback_data: "deleteexcess",
 											},
 											{
 												text: "Спасибо 👍",
-												callback_data: "deletereminder",
+												callback_data: "deleteexcess",
 											},
 										],
 									],
 								},
 							}
-						);
+						).then((message) => {
+							usersData.filter(
+								(reminderObj) => reminderObj.chatId === chatId
+							).messageIdother = message.message_id;
+						});
 						sendDataAboutAction(
 							message.from.first_name,
 							message.from.username,
@@ -1396,6 +1442,18 @@ async function StartAll() {
 
 	bot.on("message", async (message) => {
 		const chatId = message.chat.id;
+		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+
+		if (!dataAboutUser) {
+			usersData.push({
+				chatId: chatId,
+				username: message.from.username,
+				className: "Не определен (10Г)",
+				messageId: "",
+				notificationStatus: false,
+				messageSent: false,
+			});
+		}
 
 		if (chatId == "923690530") {
 			admin = true;
@@ -1405,94 +1463,106 @@ async function StartAll() {
 			admin = false;
 			userStatus = "Ученик 🧑‍🏫";
 		}
+		try {
+			messageId_user = message.message_id;
+			const text = message.text;
+			firstName = message.from.first_name;
 
-		messageId_user = message.message_id;
-		const text = message.text;
-		firstName = message.from.first_name;
+			// время отправки
+			let date = new Date(message.date * 1000),
+				d = date.getDay(),
+				h = date.getHours(),
+				m = date.getMinutes(),
+				s = date.getSeconds(),
+				time = `${String(h).padStart(2, "0")}:${String(m).padStart(
+					2,
+					"0"
+				)}:${String(s).padStart(2, "0")}`;
 
-		// время отправки
-		let date = new Date(message.date * 1000),
-			d = date.getDay(),
-			h = date.getHours(),
-			m = date.getMinutes(),
-			s = date.getSeconds(),
-			time = `${String(h).padStart(2, "0")}:${String(m).padStart(
-				2,
-				"0"
-			)}:${String(s).padStart(2, "0")}`;
+			//* для удобства в терминале
 
-		//* для удобства в терминале
+			sendDataAboutText(
+				message.from.first_name,
+				message.from.username,
+				chatId,
+				text
+			);
+			// ${JSON.stringify(message)}
+			console.log(
+				`\n${day} ${weekDayNames[dayW]} | text | ${message.from.first_name} ${message.from.username} <${chatId}>  -  "${text}"`
+			);
+			console.log(usersData.find((obj) => obj.chatId === chatId));
 
-		sendDataAboutText(
-			message.from.first_name,
-			message.from.username,
-			chatId,
-			text
-		);
-		// ${JSON.stringify(message)}
-		console.log(
-			`\n${day} ${weekDayNames[dayW]} | text | ${message.from.first_name} ${message.from.username} <${chatId}>  -  "${text}"`
-		);
-		console.log(usersData.find((obj) => obj.chatId === chatId));
+			if (editMode) {
+				editMode = false;
+				newsText[0] = text;
+				AllNewsTextEdit_2(chatId);
+			}
 
-		if (editMode) {
-			editMode = false;
-			newsText[0] = text;
-			AllNewsTextEdit_2(chatId);
-		}
+			//? КОМАНДЫ
 
-		//? КОМАНДЫ
-
-		switch (text) {
-			case "s":
-			case "/start":
-				endMessage(chatId);
-				bot.deleteMessage(chatId, messageId_user);
-				start(chatId, message.from.first_name);
-				break;
-			case "st":
-				endMessage(chatId);
-				bot.deleteMessage(chatId, messageId_user);
-				start(chatId, message.from.first_name, true);
-				break;
-			case "/restart":
-				try {
-					await bot.deleteMessage(
-						chatId,
-						usersData.find((obj) => obj.chatId === chatId).messageId
-					);
-				} catch (error) {
-					sendDataAboutError(
-						chatId,
-						"Не найден message_id menuHome, создано новое сообщение (/restart)"
-					);
-				}
-				bot.deleteMessage(chatId, messageId_user);
-				menuHome(chatId, false);
-				break;
-			case "/start rules":
-				bot.deleteMessage(chatId, messageId_user);
-				rulesBot(chatId);
-				break;
-			case "/start rules2":
-				bot.deleteMessage(chatId, messageId_user);
-				rulesBot(chatId, false);
-				break;
-			case "/start options":
-				bot.deleteMessage(chatId, messageId_user);
-				Options(chatId, firstName);
-				break;
-			default:
-				try {
-					await bot.deleteMessage(chatId, messageId_user);
-				} catch (error) {
-					sendDataAboutError(
-						chatId,
-						"Не обработан момент удаления лишнего сообщения пользователя (default)"
-					);
-				}
-				break;
-		}
+			switch (text) {
+				case "s":
+				case "/start":
+					endMessage(chatId);
+					bot.deleteMessage(chatId, messageId_user);
+					start(chatId, message.from.first_name);
+					break;
+				case "st":
+					endMessage(chatId);
+					bot.deleteMessage(chatId, messageId_user);
+					start(chatId, message.from.first_name, true);
+					break;
+				case "/restart":
+					try {
+						await bot.deleteMessage(
+							chatId,
+							usersData.find((obj) => obj.chatId === chatId).messageId
+						);
+					} catch (error) {
+						sendDataAboutError(
+							chatId,
+							"Не найден message_id menuHome, создано новое сообщение (/restart)"
+						);
+					}
+					bot.deleteMessage(chatId, messageId_user);
+					menuHome(chatId, false);
+					break;
+				case "/restart2":
+					try {
+						ChoosingClass(chatId, 2);
+					} catch (error) {
+						sendDataAboutError(
+							chatId,
+							"Не найден message_id, создано новое сообщение (/restart2)"
+						);
+					}
+					bot.deleteMessage(chatId, messageId_user);
+					break;
+				case "/start rules":
+					bot.deleteMessage(chatId, messageId_user);
+					rulesBot(chatId);
+					break;
+				case "/start rules2":
+					bot.deleteMessage(chatId, messageId_user);
+					rulesBot(chatId, false);
+					break;
+				case "/start options":
+					bot.deleteMessage(chatId, messageId_user);
+					Options(chatId, firstName);
+					break;
+				default:
+					try {
+						await bot.deleteMessage(chatId, messageId_user);
+					} catch (error) {
+						sendDataAboutError(
+							chatId,
+							"Не обработан момент удаления лишнего сообщения пользователя (default)"
+						);
+					}
+					break;
+			}
+		} catch (error) {}
 	});
 
 	//? ОБРАБОТЧИК КЛАВИАТУРЫ ПОД СООБЩЕНИЯМИ
@@ -1513,234 +1583,40 @@ async function StartAll() {
 				messageSent: false,
 			});
 		}
+		try {
+			firstName = query.from.first_name;
+			newsNum = 0;
 
-		firstName = query.from.first_name;
-		newsNum = 0;
+			day = new Date().getDate();
+			dayW = new Date().getDay();
+			month = new Date().getMonth();
 
-		day = new Date().getDate();
-		dayW = new Date().getDay();
-		month = new Date().getMonth();
+			if (chatId == "923690530") {
+				admin = true;
+				userStatus = "Администратор 👑";
+			} else {
+				admin = false;
+				userStatus = "Ученик 🧑‍🏫";
+			}
 
-		if (chatId == "923690530") {
-			admin = true;
-			userStatus = "Администратор 👑";
-		} else {
-			admin = false;
-			userStatus = "Ученик 🧑‍🏫";
-		}
+			const data = query.data;
+			usersData.find((obj) => obj.chatId === chatId).messageId =
+				query.message.message_id;
 
-		const data = query.data;
-		usersData.find((obj) => obj.chatId === chatId).messageId =
-			query.message.message_id;
+			// время отправки
+			let hintText,
+				date = new Date(),
+				h = date.getHours(),
+				m = date.getMinutes(),
+				s = date.getSeconds(),
+				time = `${String(h).padStart(2, "0")}:${String(m).padStart(
+					2,
+					"0"
+				)}:${String(s).padStart(2, "0")}`;
 
-		// время отправки
-		let hintText,
-			date = new Date(),
-			h = date.getHours(),
-			m = date.getMinutes(),
-			s = date.getSeconds(),
-			time = `${String(h).padStart(2, "0")}:${String(m).padStart(
-				2,
-				"0"
-			)}:${String(s).padStart(2, "0")}`;
-
-		if (data == rndNum) {
-			bot.editMessageText(
-				`*_❓Угадайка❓_\n\n✅ Правильно ${rndNum}\\!🥳 \n\nПопробуем снова??*`,
-				{
-					parse_mode: "MarkdownV2",
-					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
-						.messageId,
-					reply_markup: {
-						inline_keyboard: [
-							[
-								{ text: "⬅️Назад", callback_data: "games" },
-								{ text: "Давай👌", callback_data: "game1" },
-							],
-						],
-					},
-				}
-			);
-		} else if (
-			data == "0" ||
-			data == "1" ||
-			data == "2" ||
-			data == "3" ||
-			data == "4" ||
-			data == "5" ||
-			data == "6" ||
-			data == "7" ||
-			data == "8" ||
-			data == "9"
-		) {
-			bot.editMessageText(
-				`*_❓Угадайка❓_\n\n❌ Не правильно 😔\nОтвет: ${rndNum}\\! \n\nПопробуем снова??*`,
-				{
-					parse_mode: "MarkdownV2",
-					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
-						.messageId,
-					reply_markup: {
-						inline_keyboard: [
-							[
-								{ text: "⬅️Назад", callback_data: "games" },
-								{ text: "Давай👌", callback_data: "game1" },
-							],
-						],
-					},
-				}
-			);
-		}
-
-		switch (data) {
-			//? КЛАССЫ/РАСПИСАНИЕ
-
-			case "10g":
-				className = "10Г";
-				dataAboutUser.className = className;
-				menuHome(chatId);
-				break;
-			case "11d":
-				className = "11Д";
-				dataAboutUser.className = className;
-				menuHome(chatId);
-				break;
-			case "11g":
-				className = "11Г";
-				dataAboutUser.className = className;
-				menuHome(chatId);
-				break;
-			case "11a":
-				className = "11А";
-				dataAboutUser.className = className;
-				menuHome(chatId);
-				break;
-			case "11v":
-				className = "11В";
-				dataAboutUser.className = className;
-				menuHome(chatId);
-				break;
-
-			//? ДЕНЬ НЕДЕЛИ
-
-			case "mon":
-				weekday = 1;
-				RaspisanieText(chatId);
-				break;
-			case "tue":
-				weekday = 2;
-				RaspisanieText(chatId);
-				break;
-			case "wen":
-				weekday = 3;
-				RaspisanieText(chatId);
-				break;
-			case "thu":
-				weekday = 4;
-				RaspisanieText(chatId);
-				break;
-			case "fri":
-				weekday = 5;
-				RaspisanieText(chatId);
-				break;
-			case "today":
-				weekday = dayW;
-				RaspisanieText(chatId);
-				break;
-			case "tomorrow":
-				if (dayW == 6) weekday = 0;
-				else if (dayW != 6) weekday = ++dayW;
-				RaspisanieText(chatId);
-				break;
-
-			//? ДЕЙСТВИЯ КНОПОК
-
-			// Начальные
-			case "start":
-				endMessage(chatId);
-				start(chatId, firstName);
-				break;
-			case "exit":
-				editMode = false;
-				try {
-					menuHome(chatId);
-				} catch (error) {
-					sendDataAboutError(
-						"Не обработан момент выхода в меню, создано новое сообщение (exit)"
-					);
-					menuHome(chatId, false);
-				}
-				break;
-			case "chooseclass1":
-				ChoosingClass(chatId, 1);
-				break;
-			case "chooseclass2":
-				ChoosingClass(chatId, 2);
-				break;
-
-			// RASPISANIE
-
-			case "raspisanie":
-				Raspisanie(chatId);
-				break;
-			case "netclassa":
-				netClassaText(chatId);
-				break;
-			case "netclassa2":
-				netClassaText(chatId, false);
-				break;
-
-			// CALLS
-
-			case "calls":
-				Calls(chatId);
-				break;
-			case "callsnotiftoggle":
-				if (dataAboutUser) {
-					usersData.find(
-						(obj) => obj.chatId === chatId
-					).notificationStatus = !usersData.find(
-						(obj) => obj.chatId === chatId
-					).notificationStatus;
-				}
-
-				Calls(chatId);
-				break;
-
-			// GAMES
-
-			case "games":
-				Games(chatId);
-				break;
-			// game1
-			case "game1":
-				game1(chatId);
-				break;
-			case "hint":
-				if (rndNum <= 5) {
-					hintText = `Число _меньше_ или равно 5\\! 📉😉`;
-				} else if (rndNum >= 5) {
-					hintText = `Число _больше_ или равно 5\\! 📈😉`;
-				}
-				bot.editMessageText(`*_❓Угадайка❓_\n\n${hintText}*`, {
-					parse_mode: "MarkdownV2",
-					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
-						.messageId,
-					reply_markup: {
-						inline_keyboard: [
-							[
-								{ text: "⬅️Назад", callback_data: "game1_1" },
-								{ text: "Ответ⁉️", callback_data: "game1res" },
-							],
-						],
-					},
-				});
-				break;
-			case "game1res":
+			if (data == rndNum) {
 				bot.editMessageText(
-					`*_❓Угадайка❓_\n\nНу так не интересно\\! 😒\nОтвет: ${rndNum}\\!\n\nЕще партейку\\? 🤔*`,
+					`*_❓Угадайка❓_\n\n✅ Правильно ${rndNum}\\!🥳 \n\nПопробуем снова??*`,
 					{
 						parse_mode: "MarkdownV2",
 						chat_id: chatId,
@@ -1756,58 +1632,20 @@ async function StartAll() {
 						},
 					}
 				);
-				break;
-			case "game1_1":
-				game1(chatId, false);
-				break;
-			// game2
-			case "game2":
-				game2(chatId);
-				break;
-			case "stone":
-				game2_2(chatId, 1);
-				break;
-			case "scissors":
-				game2_2(chatId, 2);
-				break;
-			case "paper":
-				game2_2(chatId, 3);
-				break;
-
-			// NEWS (What's new)
-
-			case "news":
-				newsName = "Новости 📖";
-				newsNum = 0;
-				News(chatId);
-				break;
-			case "allnews":
-				newsName = "Новости 📖";
-				newsNum = 0;
-				News(chatId);
-				break;
-			case "botnews":
-				newsName = "О боте 🤖";
-				newsNum = 1;
-				News(chatId);
-				break;
-			case "schoolnews":
-				newsName = "О школе 🏫";
-				newsNum = 2;
-				News(chatId);
-				break;
-
-			// OPTIONS
-
-			case "options":
-				Options(chatId, firstName);
-				break;
-			case "optionsother":
-				Options_2(chatId);
-				break;
-			case "deleteaccount":
+			} else if (
+				data == "0" ||
+				data == "1" ||
+				data == "2" ||
+				data == "3" ||
+				data == "4" ||
+				data == "5" ||
+				data == "6" ||
+				data == "7" ||
+				data == "8" ||
+				data == "9"
+			) {
 				bot.editMessageText(
-					"*_🛠️ Настройки ⚙️\n\n❗ВНИМАНИЕ❗_\n\nТы действительно хотите _УДАЛИТЬ_ аккаунт\\?*",
+					`*_❓Угадайка❓_\n\n❌ Не правильно 😔\nОтвет: ${rndNum}\\! \n\nПопробуем снова??*`,
 					{
 						parse_mode: "MarkdownV2",
 						chat_id: chatId,
@@ -1816,198 +1654,467 @@ async function StartAll() {
 						reply_markup: {
 							inline_keyboard: [
 								[
-									{ text: "⬅️Назад", callback_data: "exit" },
-									{
-										text: "Удалить ✅",
-										callback_data: "deleteaccount2",
-									},
+									{ text: "⬅️Назад", callback_data: "games" },
+									{ text: "Давай👌", callback_data: "game1" },
 								],
 							],
 						},
 					}
 				);
-				break;
-			case "deleteaccount2":
-				bot.editMessageText(
-					"*Ты успешно удалил свой профиль\\! ✅\n\nПожалуйста опиши причину \\- @qu1z3x\n\nЕсли соскучишься \\- /start, /restart 😉*",
-					{
-						parse_mode: "MarkdownV2",
-						chat_id: chatId,
-						message_id: usersData.find((obj) => obj.chatId === chatId)
-							.messageId,
+			}
+
+			switch (data) {
+				//? КЛАССЫ/РАСПИСАНИЕ
+
+				case "10g":
+					className = "10Г";
+					dataAboutUser.className = className;
+					menuHome(chatId);
+					break;
+				case "11d":
+					className = "11Д";
+					dataAboutUser.className = className;
+					menuHome(chatId);
+					break;
+				case "11g":
+					className = "11Г";
+					dataAboutUser.className = className;
+					menuHome(chatId);
+					break;
+				case "11a":
+					className = "11А";
+					dataAboutUser.className = className;
+					menuHome(chatId);
+					break;
+				case "11v":
+					className = "11В";
+					dataAboutUser.className = className;
+					menuHome(chatId);
+					break;
+
+				//? ДЕНЬ НЕДЕЛИ
+
+				case "mon":
+					weekday = 1;
+					RaspisanieText(chatId);
+					break;
+				case "tue":
+					weekday = 2;
+					RaspisanieText(chatId);
+					break;
+				case "wen":
+					weekday = 3;
+					RaspisanieText(chatId);
+					break;
+				case "thu":
+					weekday = 4;
+					RaspisanieText(chatId);
+					break;
+				case "fri":
+					weekday = 5;
+					RaspisanieText(chatId);
+					break;
+				case "today":
+					weekday = dayW;
+					RaspisanieText(chatId);
+					break;
+				case "tomorrow":
+					if (dayW == 6) weekday = 0;
+					else if (dayW != 6) weekday = ++dayW;
+					RaspisanieText(chatId);
+					break;
+
+				//? ДЕЙСТВИЯ КНОПОК
+
+				// Начальные
+				case "start":
+					endMessage(chatId);
+					start(chatId, firstName);
+					break;
+				case "exit":
+					editMode = false;
+					try {
+						menuHome(chatId);
+					} catch (error) {
+						sendDataAboutError(
+							"Не обработан момент выхода в меню, создано новое сообщение (exit)"
+						);
+						menuHome(chatId, false);
 					}
-				);
-				break;
-
-			case "chooseclass0":
-				ChoosingClass(chatId, 0);
-				break;
-
-			// ADMINMENU
-
-			case "adminMenu":
-				adminMenu(chatId);
-				break;
-			case "adminMenu1":
-				adminMenuTest(chatId);
-				break;
-			case "adminMenu2":
-				adminMenuEdit(chatId);
-				break;
-			case "allnewsEDIT":
-				AllNewsTextEdit(chatId);
-				break;
-			case "allnewstextRESETmenu":
-				AllNewsTextReset(chatId);
-				break;
-			case "allnewstextRESET":
-				AllNewsTextEdit(chatId);
-				break;
-			case "allnewstextRESETend":
-				newsText[0] = "Новостей нет 😔";
-				bot.editMessageText(
-					`*_✏️ Редактирование: Новости 📖_\n\nРаздел _"Новости📖"_ \\- сброшен\\!✅*`,
-					{
-						parse_mode: "MarkdownV2",
-						chat_id: chatId,
-						message_id: usersData.find((obj) => obj.chatId === chatId)
-							.messageId,
-					}
-				);
-				setTimeout(() => {
-					adminMenu(chatId);
-				}, 2000);
-				break;
-			case "restart1":
-				ChoosingClass(chatId, 2);
-				break;
-			case "agreerules":
-				bot.editMessageText(`*Спасибо тебе ❤️ \\- команда @qu1z3x*`, {
-					parse_mode: "MarkdownV2",
-					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
-						.messageId,
-				});
-				setTimeout(() => {
+					break;
+				case "chooseclass1":
 					ChoosingClass(chatId, 1);
-				}, 1500);
-				break;
-			case "usersdatalist":
-				RegistryUsersData(chatId, firstName);
-				break;
+					break;
+				case "chooseclass2":
+					ChoosingClass(chatId, 2);
+					break;
 
-			// REMINDERS
+				// RASPISANIE
 
-			case "reminders":
-				Reminders(chatId);
-				break;
-			case "reminderslist":
-				RemindersList(chatId);
-				break;
-			case "remindersadd":
-				RemindersAdd(chatId);
-				break;
-			case "deleteallreminder":
-				let warningText = "";
+				case "raspisanie":
+					Raspisanie(chatId);
+					break;
+				case "netclassa":
+					netClassaText(chatId);
+					break;
+				case "netclassa2":
+					netClassaText(chatId, false);
+					break;
 
-				if (
-					reminder.filter((reminderObj) => reminderObj.chatId === chatId)
-						.length > 0
-				) {
-					warningText = `Твой список из _${
-						reminder.filter(
-							(reminderObj) => reminderObj.chatId === chatId
-						).length
-					}_ заметок будет удален\\!`;
-				}
+				// CALLS
 
-				bot.editMessageText(
-					`*_🔔 Удаление напоминаний ❌\n\n❗ВНИМАНИЕ❗_\n\nТвой список из _${
-						reminder.filter(
-							(reminderObj) => reminderObj.chatId === chatId
-						).length
-					}_ заметок будет удален\\!\n\nДействительно _УДАЛИТЬ_ список? 🧐❗*`,
-					{
-						parse_mode: "MarkdownV2",
-						chat_id: chatId,
-						message_id: usersData.find((obj) => obj.chatId === chatId)
-							.messageId,
-						reply_markup: {
-							inline_keyboard: [
-								[
-									{ text: "⬅️Назад", callback_data: "reminderslist" },
-									{
-										text: "Удалить ✅",
-										callback_data: "deleteallreminder2",
-									},
-								],
-							],
-						},
+				case "calls":
+					Calls(chatId);
+					break;
+				case "callsnotiftoggle":
+					if (dataAboutUser) {
+						usersData.find(
+							(obj) => obj.chatId === chatId
+						).notificationStatus = !usersData.find(
+							(obj) => obj.chatId === chatId
+						).notificationStatus;
 					}
-				);
-				break;
-			case "deleteallreminder2":
-				reminder = reminder.filter(
-					(reminderObj) => reminderObj.chatId !== chatId
-				);
-				sendDataAboutAction(
-					query.from.first_name,
-					query.from.username,
-					chatId,
-					`❌ Удалил весь свой список напоминаний`
-				);
-				if (
-					reminder.filter((reminderObj) => reminderObj.chatId === chatId)
-						.length == 0
-				) {
-					bot.editMessageText(
-						"*_🔔 Удаление напоминаний ❌_\n\nВы успешно удалили все напоминания\\!✅*",
-						{
+
+					Calls(chatId);
+					break;
+
+				// GAMES
+
+				case "games":
+					Games(chatId);
+					break;
+				// game1
+				case "game1":
+					game1(chatId);
+					break;
+				case "hint":
+					try {
+						if (rndNum <= 5) {
+							hintText = `Число _меньше_ или равно 5\\! 📉😉`;
+						} else if (rndNum >= 5) {
+							hintText = `Число _больше_ или равно 5\\! 📈😉`;
+						}
+						bot.editMessageText(`*_❓Угадайка❓_\n\n${hintText}*`, {
 							parse_mode: "MarkdownV2",
 							chat_id: chatId,
 							message_id: usersData.find((obj) => obj.chatId === chatId)
 								.messageId,
+							reply_markup: {
+								inline_keyboard: [
+									[
+										{ text: "⬅️Назад", callback_data: "game1_1" },
+										{ text: "Ответ⁉️", callback_data: "game1res" },
+									],
+								],
+							},
+						});
+					} catch (error) {}
+					break;
+				case "game1res":
+					try {
+						bot.editMessageText(
+							`*_❓Угадайка❓_\n\nНу так не интересно\\! 😒\nОтвет: ${rndNum}\\!\n\nЕще партейку\\? 🤔*`,
+							{
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId === chatId
+								).messageId,
+								reply_markup: {
+									inline_keyboard: [
+										[
+											{ text: "⬅️Назад", callback_data: "games" },
+											{ text: "Давай👌", callback_data: "game1" },
+										],
+									],
+								},
+							}
+						);
+					} catch (error) {}
+					break;
+				case "game1_1":
+					game1(chatId, false);
+					break;
+				// game2
+				case "game2":
+					game2(chatId);
+					break;
+				case "stone":
+					game2_2(chatId, 1);
+					break;
+				case "scissors":
+					game2_2(chatId, 2);
+					break;
+				case "paper":
+					game2_2(chatId, 3);
+					break;
+
+				// NEWS (What's new)
+
+				case "news":
+					newsName = "Новости 📖";
+					newsNum = 0;
+					News(chatId);
+					break;
+				case "allnews":
+					newsName = "Новости 📖";
+					newsNum = 0;
+					News(chatId);
+					break;
+				case "botnews":
+					newsName = "О боте 🤖";
+					newsNum = 1;
+					News(chatId);
+					break;
+				case "schoolnews":
+					newsName = "О школе 🏫";
+					newsNum = 2;
+					News(chatId);
+					break;
+
+				// OPTIONS
+
+				case "options":
+					Options(chatId, firstName);
+					break;
+				case "optionsother":
+					Options_2(chatId);
+					break;
+				case "deleteaccount":
+					try {
+						bot.editMessageText(
+							"*_🛠️ Удаление аккаунта ❌\n\n❗ВНИМАНИЕ❗_\n\nДействительно _УДАЛИТЬ_ аккаунт\\?*",
+							{
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId === chatId
+								).messageId,
+								reply_markup: {
+									inline_keyboard: [
+										[
+											{
+												text: "⬅️Назад",
+												callback_data: "optionsother",
+											},
+											{
+												text: "Удалить ✅",
+												callback_data: "deleteaccount2",
+											},
+										],
+									],
+								},
+							}
+						);
+					} catch (error) {}
+					break;
+				case "deleteaccount2":
+					try {
+						bot.editMessageText(
+							"*Твой профиль успешно удален\\! ✅\n\nПожалуйста опиши причину \\- @qu1z3x\n\nЕсли соскучишься \\- /start, /restart2 😉*",
+							{
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId === chatId
+								).messageId,
+							}
+						);
+					} catch (error) {}
+					break;
+
+				case "chooseclass0":
+					ChoosingClass(chatId, 0);
+					break;
+
+				// ADMINMENU
+
+				case "adminMenu":
+					adminMenu(chatId);
+					break;
+				case "adminMenu1":
+					adminMenuTest(chatId);
+					break;
+				case "adminMenu2":
+					adminMenuEdit(chatId);
+					break;
+				case "allnewsEDIT":
+					AllNewsTextEdit(chatId);
+					break;
+				case "allnewstextRESETmenu":
+					AllNewsTextReset(chatId);
+					break;
+				case "allnewstextRESET":
+					AllNewsTextEdit(chatId);
+					break;
+				case "allnewstextRESETend":
+					try {
+						newsText[0] = "Новостей нет 😔";
+						bot.editMessageText(
+							`*_✏️ Редактирование: Новости 📖_\n\nРаздел _"Новости📖"_ \\- сброшен\\!✅*`,
+							{
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId === chatId
+								).messageId,
+							}
+						);
+						setTimeout(() => {
+							adminMenu(chatId);
+						}, 2000);
+					} catch (error) {}
+					break;
+				case "restart1":
+					ChoosingClass(chatId, 2);
+					break;
+				case "agreerules":
+					try {
+						bot.editMessageText(`*Спасибо тебе ❤️ \\- команда @qu1z3x*`, {
+							parse_mode: "MarkdownV2",
+							chat_id: chatId,
+							message_id: usersData.find((obj) => obj.chatId === chatId)
+								.messageId,
+						});
+						setTimeout(() => {
+							ChoosingClass(chatId, 1);
+						}, 1500);
+					} catch (error) {}
+					break;
+				case "usersdatalist":
+					RegistryUsersData(chatId, firstName);
+					break;
+
+				// REMINDERS
+
+				case "reminders":
+					Reminders(chatId);
+					break;
+				case "reminderslist":
+					RemindersList(chatId);
+					break;
+				case "remindersadd":
+					RemindersAdd(chatId);
+					break;
+				case "deleteallreminder":
+					try {
+						let warningText = "";
+						if (
+							reminder.filter(
+								(reminderObj) => reminderObj.chatId === chatId
+							).length == 1
+						) {
+							warningText = `Твой список из _1_ заметки будет удален\\!`;
 						}
-					);
-					setTimeout(() => {
-						RemindersList(chatId);
-					}, 2000);
-				}
-				break;
-			case "deletereminder":
-				textRem = "";
-				try {
-					bot.deleteMessage(
-						chatId,
-						usersData.find((obj) => obj.chatId === chatId).messageId
-					);
-				} catch (error) {
-					sendDataAboutError(
-						chatId,
-						"Не обработан момент удаления сообщения с напоминанием (default)"
-					);
-				}
-			default:
-				break;
-		}
+						if (
+							reminder.filter(
+								(reminderObj) => reminderObj.chatId === chatId
+							).length > 1
+						) {
+							warningText = `Твой список из _${
+								reminder.filter(
+									(reminderObj) => reminderObj.chatId === chatId
+								).length
+							}_ заметок будет удален\\!`;
+						}
 
-		//* для удобства в терминале
+						bot.editMessageText(
+							`*_🔔 Удаление напоминаний ❌\n\n❗ВНИМАНИЕ❗_\n\nТвой список из _${
+								reminder.filter(
+									(reminderObj) => reminderObj.chatId === chatId
+								).length
+							}_ заметок будет удален\\!\n\nДействительно _УДАЛИТЬ_ список? 🧐❗*`,
+							{
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId === chatId
+								).messageId,
+								reply_markup: {
+									inline_keyboard: [
+										[
+											{
+												text: "⬅️Назад",
+												callback_data: "reminderslist",
+											},
+											{
+												text: "Удалить ✅",
+												callback_data: "deleteallreminder2",
+											},
+										],
+									],
+								},
+							}
+						);
+					} catch (error) {}
+					break;
+				case "deleteallreminder2":
+					try {
+						reminder = reminder.filter(
+							(reminderObj) => reminderObj.chatId !== chatId
+						);
+						sendDataAboutAction(
+							query.from.first_name,
+							query.from.username,
+							chatId,
+							`❌ Удалил весь свой список напоминаний`
+						);
+						if (
+							reminder.filter(
+								(reminderObj) => reminderObj.chatId === chatId
+							).length == 0
+						) {
+							bot.editMessageText(
+								"*_🔔 Удаление напоминаний ❌_\n\nВы успешно удалили все напоминания\\!✅*",
+								{
+									parse_mode: "MarkdownV2",
+									chat_id: chatId,
+									message_id: usersData.find(
+										(obj) => obj.chatId === chatId
+									).messageId,
+								}
+							);
+							setTimeout(() => {
+								RemindersList(chatId);
+							}, 2000);
+						}
+					} catch (error) {}
+					break;
+				case "deleteexcess":
+					textRem = "";
+					try {
+						bot.deleteMessage(
+							chatId,
+							usersData.find((obj) => obj.chatId === chatId).messageId
+						);
+					} catch (error) {
+						sendDataAboutError(
+							chatId,
+							"Не обработан момент удаления сообщения с напоминанием (default)"
+						);
+					}
+				default:
+					break;
+			}
 
-		sendDataAboutButton(
-			query.from.first_name,
-			query.from.username,
-			chatId,
-			data
-		);
+			//* для удобства в терминале
 
-		console.log(
-			`\n${time} ${weekDayNames[dayW]} | button ${
-				usersData.find((obj) => obj.chatId === chatId).messageId
-			} | ${query.from.first_name} ${
-				query.from.username
-			} <${chatId}>  -  [${data}]`
-		);
-		console.log(reminder.find((obj) => obj.chatId === chatId));
+			sendDataAboutButton(
+				query.from.first_name,
+				query.from.username,
+				chatId,
+				data
+			);
+
+			console.log(
+				`\n${time} ${weekDayNames[dayW]} | button ${
+					usersData.find((obj) => obj.chatId === chatId).messageId
+				} | ${query.from.first_name} ${
+					query.from.username
+				} <${chatId}>  -  [${data}]`
+			);
+			console.log(reminder.find((obj) => obj.chatId === chatId));
+		} catch (error) {}
 	});
 }
 
