@@ -6,7 +6,7 @@ const TOKENs = [
 ];
 const qu1z3xId = "923690530";
 
-const TOKEN = TOKENs[0]; // 1 - оригинал
+const TOKEN = TOKENs[1]; // 1 - оригинал
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 import { sendDataAboutText } from "./tgterminal.js";
