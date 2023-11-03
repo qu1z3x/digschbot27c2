@@ -543,48 +543,47 @@ async function Calls(chatId) {
 		textCallsNotifStatus = "✅🔔";
 	}
 	try {
-		setInterval(function () {
-			const dateWithout5Minutes = `${String(new Date().getHours()).padStart(
-				2,
-				"0"
-			)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
-			dayW = new Date().getDay();
-
-			for (let j = 0; j < usersData.length; j++) {
-				usersData[j].messageSent = false;
-			}
-			let j = 0;
-			while (j < usersData.length) {
-				if (usersData[j].notificationStatus && dayW != 6 && dayW != 0) {
-					for (let i = 0; i < timesOnLesson.length; i++) {
-						if (
-							dateWithout5Minutes == timesOnLesson[i] &&
-							!usersData[j].messageSent
-						) {
-							bot.sendMessage(
-								usersData[j].chatId,
-								`🔔 Через 5 минут у тебя урок! 😉`,
-								{
-									reply_markup: {
-										inline_keyboard: [
-											[
-												{
-													text: "Спасибо 👍",
-													callback_data: "deleteexcess",
-												},
-											],
-										],
-									},
-								}
-							);
-							usersData[j].messageSent = true;
-							j++;
-							break;
-						}
-					}
-				}
-			}
-		}, 60000);
+		// setInterval(function () {
+		// 	const dateWithout5Minutes = `${String(new Date().getHours()).padStart(
+		// 		2,
+		// 		"0"
+		// 	)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
+		// 	dayW = new Date().getDay();
+		// 	for (let j = 0; j < usersData.length; j++) {
+		// 		usersData[j].messageSent = false;
+		// 	}
+		// 	let j = 0;
+		// 	while (j < usersData.length) {
+		// 		if (usersData[j].notificationStatus && dayW != 6 && dayW != 0) {
+		// 			for (let i = 0; i < timesOnLesson.length; i++) {
+		// 				if (
+		// 					dateWithout5Minutes == timesOnLesson[i] &&
+		// 					!usersData[j].messageSent
+		// 				) {
+		// 					bot.sendMessage(
+		// 						usersData[j].chatId,
+		// 						`🔔 Через 5 минут у тебя урок! 😉`,
+		// 						{
+		// 							reply_markup: {
+		// 								inline_keyboard: [
+		// 									[
+		// 										{
+		// 											text: "Спасибо 👍",
+		// 											callback_data: "deleteexcess",
+		// 										},
+		// 									],
+		// 								],
+		// 							},
+		// 						}
+		// 					);
+		// 					usersData[j].messageSent = true;
+		// 					j++;
+		// 					break;
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }, 60000);
 	} catch (error) {
 		sendDataAboutError(
 			chatId,
@@ -600,7 +599,7 @@ async function Calls(chatId) {
 * \\- 4* урок *11:25 \\- 12:05 \\| 15мин*\n
 * \\- 5* урок *12:20 \\- 13:00 \\| 15мин*\n
 * \\- 6* урок *13:15 \\- 13:55 \\| 15мин / Обед*\n
-* \\- 7* урок *14:10 \\- 14:50 \\| Домой*\n\n*• Бета версия уведомлений ⬇️* `,
+* \\- 7* урок *14:10 \\- 14:50 \\| Домой*\n\n*• Бета версия уведомлений ⬇️\n\n🚫 Функция не дорступна 😔* `, //! .........................................................................................
 
 			{
 				chat_id: chatId,
@@ -1355,7 +1354,7 @@ async function StartAll() {
 			);
 
 			await bot.editMessageText(
-				`<b>Поставил напоминание на ${timeRem}</b>😉\n\n<i>"${textRem}"</i>`,
+				`<b>Поставил напоминание на ${timeRem}</b>😉\n\n<i>"${textRem}"</i>\n\n🚫 Функция не дорступна 😔`, //! ........................................................................................
 				{
 					parse_mode: "html",
 					chat_id: message.chat.id,
@@ -1383,55 +1382,56 @@ async function StartAll() {
 				}
 			);
 
-			setInterval(function () {
-				const dateNowHNN = `${String(new Date().getHours())}:${String(
-					new Date().getMinutes()
-				).padStart(2, "0")}`;
-				const dateNowHHNN = `${String(new Date().getHours()).padStart(
-					2,
-					"0"
-				)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
-
-				for (let i = 0; i < reminder.length; i++) {
-					if (
-						reminder[i].time == dateNowHNN ||
-						reminder[i].time == dateNowHHNN
-					) {
-						bot.sendMessage(
-							reminder[i].chatId,
-							`<b>🔔 Напоминание на <i>${reminder[i].time}:\n\n "${reminder[i].text}"</i></b>`,
-							{
-								parse_mode: "html",
-								reply_markup: {
-									inline_keyboard: [
-										[
-											{
-												text: "Удалить ❌",
-												callback_data: "deleteexcess",
-											},
-											{
-												text: "Спасибо 👍",
-												callback_data: "deleteexcess",
-											},
-										],
-									],
-								},
-							}
-						).then((message) => {
-							usersData.filter(
-								(reminderObj) => reminderObj.chatId === chatId
-							).messageIdother = message.message_id;
-						});
-						sendDataAboutAction(
-							message.from.first_name,
-							message.from.username,
-							chatId,
-							`✅ Получил напоминание <i>${textRem}</i> на ${timeRem}`
-						);
-						reminder.splice(i, 1); // удаление напоминания которое уже объявилось
-					}
-				}
-			}, 60000);
+			// setInterval(function () {
+			// 	const dateNowHNN = `${String(new Date().getHours())}:${String(
+			// 		new Date().getMinutes()
+			// 	).padStart(2, "0")}`;
+			// 	const dateNowHHNN = `${String(new Date().getHours()).padStart(
+			// 		2,
+			// 		"0"
+			// 	)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+			// 	if (reminder.length > 0) {
+			// 		for (let i = 0; i < reminder.length; i++) {
+			// 			if (
+			// 				reminder[i].time == dateNowHNN ||
+			// 				reminder[i].time == dateNowHHNN
+			// 			) {
+			// 				bot.sendMessage(
+			// 					reminder[i].chatId,
+			// 					`<b>🔔 Напоминание на <i>${reminder[i].time}:\n\n "${reminder[i].text}"</i></b>`,
+			// 					{
+			// 						parse_mode: "html",
+			// 						reply_markup: {
+			// 							inline_keyboard: [
+			// 								[
+			// 									{
+			// 										text: "Удалить ❌",
+			// 										callback_data: "deleteexcess",
+			// 									},
+			// 									{
+			// 										text: "Спасибо 👍",
+			// 										callback_data: "deleteexcess",
+			// 									},
+			// 								],
+			// 							],
+			// 						},
+			// 					}
+			// 				).then((message) => {
+			// 					usersData.filter(
+			// 						(reminderObj) => reminderObj.chatId === chatId
+			// 					).messageIdother = message.message_id;
+			// 				});
+			// 				sendDataAboutAction(
+			// 					message.from.first_name,
+			// 					message.from.username,
+			// 					chatId,
+			// 					`✅ Получил напоминание <i>${textRem}</i> на ${timeRem}`
+			// 				);
+			// 				reminder.splice(i, 1); // удаление напоминания которое уже объявилось
+			// 			}
+			// 		}
+			// 	}
+			// }, 60000);
 		} catch (error) {
 			sendDataAboutError(
 				chatId,
@@ -1531,13 +1531,13 @@ async function StartAll() {
 				case "/restart2":
 					try {
 						ChoosingClass(chatId, 2);
+						bot.deleteMessage(chatId, messageId_user);
 					} catch (error) {
 						sendDataAboutError(
 							chatId,
 							"Не найден message_id, создано новое сообщение (/restart2)"
 						);
 					}
-					bot.deleteMessage(chatId, messageId_user);
 					break;
 				case "/start rules":
 					bot.deleteMessage(chatId, messageId_user);
