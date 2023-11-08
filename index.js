@@ -16,19 +16,18 @@ import { sendDataAboutAction } from "./tgterminal.js";
 
 //? БАЗА ДАННЫХ
 
-let reminder = [];
-let usersData = [];
+let reminder = []; // существующие заметки
+let usersData = []; // информация о пользователях
 
-const httpsRequests = ["https://t.me/digsch27_bot", "https://t.me/digschbot"],
-	httpsRules = [
-		"https://t.me/digsch27_bot/?start=rules",
-		"https://t.me/digschbot/?start=rules",
-	];
+const httpsRequests = ["https://t.me/digsch27_bot", "https://t.me/digschbot"];
+const httpsRules = [
+	"https://t.me/digsch27_bot/?start=rules",
+	"https://t.me/digschbot/?start=rules",
+];
 
 // UserID
 
-let firstName,
-	userStatus = "Ученик 🧑‍🏫";
+let userStatus = "Ученик 🧑‍🏫";
 
 // Приветственные стикеры
 const stickers = [
@@ -39,19 +38,17 @@ const stickers = [
 ];
 bot.setMyCommands([
 	{
-		command: "/restart2",
-		description: "Полный перезапуск 👌",
-	},
-	{
 		command: "/restart",
-		description: "Перезапуск🫡",
+		description: "Перезапуск 👾",
 	},
 ]);
+
 // Что нового? text
 const newsText = [
+	"",
 	"Новостей нет 😔",
-	"- Поддержка бота теперь ПОСТОЯННАЯ! 😆\n\n- Я стал быстрее 🏎️, во всех смыслах😉\n\n- Появилось множество новых и активных разделов🔥\n\n- Максимальная нагрузка увеличилась до 70 запросов в СЕКУНДУ 🤯",
-	"МБОУ СОШ №27 | Школа с 2023г, разделена на два корпуса, но и в первом, и во втором царит классная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя здесь как одна большая семья, где дружба и знание всегда рядом",
+	"- Полностью обновлен раздел с настройками ✅\n\n- Отслеживай статистику сыгранных игр 👌\n\n- Объем всего функционала бота, упирается в +2500 строк кода 🫡\n\n- Я стал быстрее 🏎️, во всех смыслах😉\n\n- Максимальная нагрузка увеличилась до 50 запросов в СЕКУНДУ 🤯",
+	'МБОУ СОШ №27 | Школа с 2023г, разделена на два корпуса, но и в первом, и во втором царит классная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя здесь как одна большая семья, где дружба и знание всегда рядом. Также существует множество спортивных секций в обеих корпусах! \n\nСовсем недавно наша школа заняла 3-е место, в турнире "Кубок памяти А. З. Бакурова", сыграв со всеми школами в округе!',
 ];
 
 // Классы
@@ -89,16 +86,8 @@ const classes10 = [
 ];
 let messageId_user,
 	botNum = 1,
-	messageId_All,
-	admin = false,
-	adminMenuButtonText = "",
-	// home
-	messageId_sayHi0Home,
-	messageId_sayHi1Home,
-	messageId_sayHi2Home,
-	messageId_sayHi3Home,
 	// Raspisanie
-	className = "10Г",
+	className = "Не определен",
 	weekday,
 	month,
 	day,
@@ -113,21 +102,36 @@ let messageId_user,
 	newsName = "Новости 📖",
 	editMode = false,
 	// notification
-	callsNotifStatusON = false,
 	textCallsNotifStatus = "❌🔕",
 	// reminders
 	textRem = "",
-	timeRem;
+	timeRem,
+	// adminMenu
+	textMessageForAllUsers;
 
 //?  ФУНКЦИИ
 
 async function menuHome(chatId, exit = true) {
+	const greetingsText = [
+		"Чем я могу тебе пригодиться? 😉",
+		"Чем я могу быть полезен? 🤓",
+		"Чем я могу быть полезным? 🥸",
+		"Чем я могу тебя облегчить? 🐵",
+		"С чем я могу тебе помочь? 🤔",
+		"Чем я могу помочь сегодня? 🤖",
+		"Как я могу тебя удовлетворить? 🐤",
+		"В чем я могу быть полезен? 👾",
+	];
+	rndNum = Math.floor(Math.random() * greetingsText.length);
+
 	try {
 		let adminMenuButtonText = "";
-		if (admin) adminMenuButtonText = "💠 Управление 💠";
+		if (chatId == qu1z3xId || chatId == "6815420098") {
+			adminMenuButtonText = "💠 Управление 💠";
+		}
 
 		if (exit) {
-			await bot.editMessageText("*Чем я могу быть полезен? 🤓*", {
+			await bot.editMessageText(`*${greetingsText[rndNum]}*`, {
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
@@ -195,6 +199,7 @@ async function menuHome(chatId, exit = true) {
 			});
 		}
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова главного меню (menuHome)"
@@ -204,7 +209,7 @@ async function menuHome(chatId, exit = true) {
 
 async function rulesBot(chatId, RulesToStart = true) {
 	let rulesText =
-		"*_🤖 Правила пользования 📃_\n\n\\-  Пользоваться приложением строго в благоразумных целях🌍\n\n\\-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n\\-  Бот не отвечает \\- команда \\/restart в вашем распоряжении\\!😉\n\n\\-  Нашёл ошибку? Бот\\-по прежнему не отвечает? Все предыдущие пункты соблюдены? Есть замечания по работе проекта? \\- пожалуйста сообщи об этом автору @qu1z3x 👍 *";
+		"*_🤖 Правила пользования 📃_\n\n\\-  Пользоваться приложением строго в благих целях🌍\n\n\\-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n\\-  Бот не отвечает \\- команда \\/restart в вашем распоряжении\\!😉\n\n\\-  Нашёл ошибку? Бот по\\-прежнему не отвечает? Есть замечания по работе проекта? \\- пожалуйста сообщи об этом автору @qu1z3x 👍 *";
 
 	if (RulesToStart) {
 		try {
@@ -223,6 +228,7 @@ async function rulesBot(chatId, RulesToStart = true) {
 				},
 			});
 		} catch (error) {
+			console.log(error);
 			bot.sendMessage(
 				chatId,
 				`*Сообщение сверху ты не видел, просто удали 🙈⬆️*\n\n${rulesText}`,
@@ -260,6 +266,7 @@ async function rulesBot(chatId, RulesToStart = true) {
 				},
 			});
 		} catch (error) {
+			console.log(error);
 			bot.sendMessage(
 				chatId,
 				`*Сообщение сверху ты не видел, просто удали 🙈⬆️*\n\n${rulesText}`,
@@ -335,7 +342,7 @@ async function ChoosingClass(chatId, start = 1) {
 			);
 		} else if (start === 2) {
 			bot.editMessageText(
-				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](${httpsRules[botNum]})\n\nИ выбери свой класс* 🙂🔎`,
+				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](${httpsRules[botNum]})❗\n\nИ выбери свой класс* 🙂🔎`,
 				{
 					chat_id: chatId,
 					message_id: usersData.find((obj) => obj.chatId === chatId)
@@ -364,6 +371,7 @@ async function ChoosingClass(chatId, start = 1) {
 			);
 		}
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова выбора класса (ChoosingClass)"
@@ -374,7 +382,11 @@ async function ChoosingClass(chatId, start = 1) {
 async function Raspisanie(chatId) {
 	try {
 		await bot.editMessageText(
-			`*_⏰Расписание📚_*\n\nСегодня\\: *${weekDayNames[dayW]}, ${day} ${monthNames[month]}*\nКласс: *${className}* \\- [изменить](https://t.me/digschbot/?start=options) \n\n*На какой день показать расписание❓🤔*`,
+			`*_⏰Расписание📚_*\n\nСегодня\\: *${weekDayNames[dayW]}, ${day} ${
+				monthNames[month]
+			}*\nКласс: *${
+				usersData.find((obj) => obj.chatId === chatId).className
+			}* \\- [изменить](https://t.me/digschbot/?start=options) \n\n*На какой день показать расписание❓🤔*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -394,20 +406,21 @@ async function Raspisanie(chatId) {
 							},
 						],
 						[
-							{ text: "Пн 😩", callback_data: "mon" },
-							{ text: "Вт 😞", callback_data: "tue" },
-							{ text: "Ср 😟", callback_data: "wen" },
+							{ text: "Пн 🐥", callback_data: "mon" },
+							{ text: "Вт 🙈", callback_data: "tue" },
+							{ text: "Ср 🎯", callback_data: "wen" },
 						],
 						[
 							{ text: "⬅️В меню", callback_data: "exit" },
-							{ text: "Чт 🙂", callback_data: "thu" },
-							{ text: "Пт 😆", callback_data: "fri" },
+							{ text: "Чт ☀️", callback_data: "thu" },
+							{ text: "Пт 🥇", callback_data: "fri" },
 						],
 					],
 				},
 			}
 		);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова выбора дня недели для расписания (Raspisanie)"
@@ -416,35 +429,59 @@ async function Raspisanie(chatId) {
 }
 
 async function RaspisanieText(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 	let raspisText = classes11[0];
+	if (weekday == 0 || weekday == 6) {
+		raspisText = "В этот день уроков нет, отдыхай! 😆";
+	}
+
 	try {
-		if (weekday == 0 || weekday == 6) {
-			raspisText = "В этот день уроков нет, отдыхай! 😆";
+		if (dataAboutUser.className == "Не определен") {
+			await bot.editMessageText(
+				`*_⏰Расписание📚_\n\nУ тебя не выбран класс❗\n\nЕго можно изменить в настройках ⬇️😉*`,
+				{
+					parse_mode: "MarkdownV2",
+					chat_id: chatId,
+					disable_web_page_preview: true,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{ text: "⬅️Назад", callback_data: "raspisanie" },
+								{ text: "Настройки⚙️", callback_data: "options" },
+							],
+						],
+					},
+				}
+			);
+		} else {
+			await bot.editMessageText(
+				`<b><i>⏰Расписание📚\n\n</i></b>Класс: <b><i>${dataAboutUser.className} • ${weekDayNames[weekday]}</i>\n\n${raspisText}\n\nРасписание всё еще не точное 😔</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "Создать напоминание 🗓️",
+									callback_data: "remindersadd",
+								},
+							],
+							[
+								{ text: "⬅️В меню", callback_data: "exit" },
+								{ text: "Сменить день🔁", callback_data: "raspisanie" },
+							],
+						],
+					},
+				}
+			);
 		}
-		await bot.editMessageText(
-			`<b><i>⏰Расписание📚\n\n</i></b>Класс: <b><i>${className} • ${weekDayNames[weekday]}</i>\n\n${raspisText}\n\nРасписание всё еще не точное 😔</b>`,
-			{
-				parse_mode: "html",
-				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
-				reply_markup: {
-					inline_keyboard: [
-						[
-							{
-								text: "Создать напоминание 🗓️",
-								callback_data: "remindersadd",
-							},
-						],
-						[
-							{ text: "⬅️В меню", callback_data: "exit" },
-							{ text: "Сменить день🔁", callback_data: "raspisanie" },
-						],
-					],
-				},
-			}
-		);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова расписания класса (RaspisanieText)"
@@ -495,6 +532,7 @@ async function netClassaText(chatId, exitMenu = true) {
 			);
 		}
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова объяснения отсутсвия класса (netClassaText)"
@@ -518,15 +556,15 @@ async function Calls(chatId) {
 	let buttonNum = 0,
 		notifStatusButton = [
 			{
-				text: "✅ Включить уведомления 🔔",
+				text: "✅ Включить оповещения 🔔",
 				callback_data: "callsnotiftoggle",
 			},
 			{
-				text: "❌ Выключить уведомления 🔕",
+				text: "❌ Выключить оповещения 🔕",
 				callback_data: "callsnotiftoggle",
 			},
 			{
-				text: "❌ Уведомления отключены 🔕",
+				text: "❌ Оповещения отключены 🔕",
 				callback_data: "-",
 			},
 		];
@@ -549,16 +587,12 @@ async function Calls(chatId) {
 		// 		"0"
 		// 	)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
 		// 	dayW = new Date().getDay();
-		// 	for (let j = 0; j < usersData.length; j++) {
-		// 		usersData[j].messageSent = false;
-		// 	}
 		// 	let j = 0;
 		// 	while (j < usersData.length) {
 		// 		if (usersData[j].notificationStatus && dayW != 6 && dayW != 0) {
 		// 			for (let i = 0; i < timesOnLesson.length; i++) {
 		// 				if (
-		// 					dateWithout5Minutes == timesOnLesson[i] &&
-		// 					!usersData[j].messageSent
+		// 					dateWithout5Minutes == timesOnLesson[i]
 		// 				) {
 		// 					bot.sendMessage(
 		// 						usersData[j].chatId,
@@ -576,8 +610,6 @@ async function Calls(chatId) {
 		// 							},
 		// 						}
 		// 					);
-		// 					usersData[j].messageSent = true;
-		// 					j++;
 		// 					break;
 		// 				}
 		// 			}
@@ -585,6 +617,7 @@ async function Calls(chatId) {
 		// 	}
 		// }, 60000);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент проверки и отправки уведомления пользователю (Calls)"
@@ -599,7 +632,7 @@ async function Calls(chatId) {
 * \\- 4* урок *11:25 \\- 12:05 \\| 15мин*\n
 * \\- 5* урок *12:20 \\- 13:00 \\| 15мин*\n
 * \\- 6* урок *13:15 \\- 13:55 \\| 15мин / Обед*\n
-* \\- 7* урок *14:10 \\- 14:50 \\| Домой*\n\n*• Бета версия уведомлений ⬇️\n\n🚫 Функция не дорступна 😔* `, //! .........................................................................................
+* \\- 7* урок *14:10 \\- 14:50 \\| Домой*\n\n*🚫 Функция не дорступна 😔* `, //! .................................... • Бета версия уведомлений ⬇️
 
 			{
 				chat_id: chatId,
@@ -618,6 +651,7 @@ async function Calls(chatId) {
 			}
 		);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова расписания звонков (Calls)"
@@ -642,6 +676,7 @@ async function Games(chatId) {
 			},
 		});
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова списка развлечений (Games)"
@@ -655,7 +690,7 @@ async function game1(chatId, startGame = true) {
 		if (startGame)
 			//? загаданное число
 			rndNum = Math.floor(Math.random() * 10);
-		if (admin) res = rndNum;
+		if (chatId == qu1z3xId) res = rndNum;
 
 		bot.editMessageText(
 			`*_❓Угадайка❓_\n\nЯ загадал цифру\\! ${res}\n\nОтгадывай 😉*`,
@@ -691,6 +726,7 @@ async function game1(chatId, startGame = true) {
 			}
 		);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова игры Угадайка (game1)"
@@ -720,6 +756,7 @@ async function game2(chatId) {
 			}
 		);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова игры Цуе-Фа (game2)"
@@ -728,6 +765,8 @@ async function game2(chatId) {
 }
 
 async function game2_2(chatId, playerNum) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+
 	const options = ["✊", "✌️", "🖐️"];
 	rndNum = Math.floor(Math.random() * options.length);
 	playerChoise = options[playerNum - 1];
@@ -752,6 +791,7 @@ async function game2_2(chatId, playerNum) {
 					},
 				}
 			);
+			dataAboutUser.game2DrawResults += 1;
 		} else if (
 			(playerChoise === "✊" && computerChoise === "✌️") ||
 			(playerChoise === "✌️" && computerChoise === "🖐️") ||
@@ -774,6 +814,7 @@ async function game2_2(chatId, playerNum) {
 					},
 				}
 			);
+			dataAboutUser.game2NiceResults += 1;
 		} else {
 			bot.editMessageText(
 				`*_🪨 Камень\\-Ножницы\\-Бумага ✂️_\n\n❌ Ты проиграл\\! 😔\n\nРезультат:\n 👤${playerChoise}  vs  ${computerChoise}🤖\n\nЕще партейку\\? 🤔*`,
@@ -792,8 +833,10 @@ async function game2_2(chatId, playerNum) {
 					},
 				}
 			);
+			dataAboutUser.game2BadResults += 1;
 		}
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
 			"Не обработан момент вызова результата игры Цуе-Фа (game2_2)"
@@ -813,15 +856,15 @@ async function News(chatId) {
 		{ text: "• О школе 🏫 •", callback_data: "-" },
 	];
 
-	if (newsNum == 0) {
+	if (newsNum == 1) {
 		news1Button = 1;
 		news2Button = 2;
 		news3Button = 4;
-	} else if (newsNum == 1) {
+	} else if (newsNum == 2) {
 		news1Button = 0;
 		news2Button = 3;
 		news3Button = 4;
-	} else if (newsNum == 2) {
+	} else if (newsNum == 3) {
 		news1Button = 0;
 		news2Button = 2;
 		news3Button = 5;
@@ -847,14 +890,16 @@ async function News(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function AllNewsTextEdit(chatId) {
 	editMode = true;
 
 	bot.editMessageText(
-		`<b><i>✏️ Редактирование: Новости 📖</i>\n\n📖 Текущий текст:</b>\n\n<code>"${newsText[0]}"</code>\n\n<b>Напиши измененный текст ниже ⬇️</b>`,
+		`<b><i>✏️ Редактирование: Новости 📖</i>\n\n📖 Текущий текст:</b>\n\n<code>${newsText[1]}</code>\n\n<b>Напиши измененный текст ниже ⬇️</b>`,
 		{
 			parse_mode: "html",
 			chat_id: chatId,
@@ -891,14 +936,16 @@ async function AllNewsTextEdit_2(chatId) {
 								text: "Сбросить ❌",
 								callback_data: "allnewstextRESETmenu",
 							},
-							{ text: "Применить✅", callback_data: "adminMenu" },
+							{ text: "Применить✅", callback_data: "allnewsadd" },
 						],
 						[{ text: "⬅️Назад", callback_data: "allnewsEDIT" }],
 					],
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function AllNewsTextReset(chatId) {
@@ -923,10 +970,18 @@ async function AllNewsTextReset(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function Options(chatId, firstName) {
+	if (chatId == qu1z3xId || chatId == "231345534") {
+		userStatus = "Администратор 👑";
+	} else {
+		userStatus = "Ученик 🧑‍🏫";
+	}
+
 	textCallsNotifStatus = "❌🔕";
 	const countRem = reminder.filter(
 		(reminderObj) => reminderObj.chatId === chatId
@@ -943,7 +998,17 @@ async function Options(chatId, firstName) {
 		await bot.editMessageText(
 			`*_🛠️ Настройки ⚙️_\n\nДанные:*\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\nКласс: *${
 				dataAboutUser.className
-			}\n\nУведомления:*\nЗвонки на уроки: *${textCallsNotifStatus}*\nНапоминания: *${"✅🔔"}*\nСоздано: *${countRem}*\n\n*[Правила пользования ресурсом](https://t.me/digschbot/?start=rules2)*`,
+			}\n\nУведомления:*\nЗвонки на уроки: *${textCallsNotifStatus}*\nНапоминания: *${"✅🔔"}*\nСоздано: *${countRem}* \\- [список](https://t.me/digschbot/?start=remindersList)*\n\nСтатистика в играх:*\nУгадайка: *${
+				dataAboutUser.game1NiceResults
+			}✅\\, ${dataAboutUser.game1BadResults}❌ из ${
+				dataAboutUser.game1NiceResults + dataAboutUser.game1BadResults
+			} игр*\nЦуе\\-фа: *${dataAboutUser.game2NiceResults}✅\\, ${
+				dataAboutUser.game2BadResults
+			}❌\\, ${dataAboutUser.game2DrawResults}🤷‍♂️ из ${
+				dataAboutUser.game2NiceResults +
+				dataAboutUser.game2BadResults +
+				dataAboutUser.game2DrawResults
+			} игр*\n\n*[Правила пользования ресурсом](https://t.me/digschbot/?start=rules2)*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -1007,13 +1072,26 @@ async function Options_2(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
-async function adminMenu(chatId) {
+async function adminMenu(chatId, firstName) {
+	let textDay = "";
+	const dateNowHHNN = `${String(new Date().getHours()).padStart(
+		2,
+		"0"
+	)}:${String(new Date().getMinutes() + 1).padStart(2, "0")}`;
+	if (dateNowHHNN < "12:00" && dateNowHHNN >= "06:00") textDay = "Доброе утро";
+	else if (dateNowHHNN < "17:00" && dateNowHHNN >= "12:00")
+		textDay = "Добрый день";
+	else if (dateNowHHNN < "22:00" && dateNowHHNN >= "17:00")
+		textDay = "Добрый вечер";
+	else if (dateNowHHNN >= "22:00") textDay = "Доброй ночи";
 	try {
 		await bot.editMessageText(
-			`*_💠Центр управления💠_\n\nДобрый день\\, Давид\\!\n\nЧем я могу быть полезен\\? 🤖*`,
+			`*_💠Центр управления💠_\n\n${textDay}\\, ${firstName}\\!\n\nЧем я могу быть полезен\\? 🤖*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -1023,54 +1101,97 @@ async function adminMenu(chatId) {
 					inline_keyboard: [
 						[{ text: "💾 Реестр 📁", callback_data: "usersdatalist" }],
 						[
-							{ text: "Тест 📟", callback_data: "adminMenu1" },
-							{ text: "Изменение ✏️", callback_data: "adminMenu2" },
+							{
+								text: "Объявление 📢",
+								callback_data: "adminMenuSendMessage",
+							},
+							{
+								text: "Изменение ✏️",
+								callback_data: "adminMenuEdit",
+							},
 						],
 						[{ text: "⬅️Назад", callback_data: "exit" }],
 					],
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
-async function adminMenuTest(chatId) {
+async function adminMenuSendMessage(chatId) {
 	try {
 		await bot.editMessageText(
-			"*_♻️ Тестирование 📟_\n\nБыстрый доступ ко всем элементам\\:*",
+			"<b><i>📋 Объявление 📢 \n\n❗ВНИМАНИЕ❗</i>\n\nВсе пользователи получат уведомление!\n\n<i>Пример:</i>\n</b><code>=В школе родительское собрание❗😉</code><b>\n\nНапиши объявление ниже c `=` ⬇️</b>",
 			{
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
 				reply_markup: {
 					inline_keyboard: [
-						[{ text: "🔥 Расписание 📚", callback_data: "raspisanie" }],
-						[
-							{ text: "На сегодня 🕚", callback_data: "today" },
-							{ text: "Нет моего 😞", callback_data: "netclassa" },
-						],
-						[{ text: "Развлечения 🕹️", callback_data: "games" }],
-						[
-							{ text: "Угадайка❓", callback_data: "game1" },
-							{ text: "Цуе-Фа ✌️", callback_data: "game2" },
-						],
-						[{ text: "Интересное❗", callback_data: "news" }],
-						[
-							{ text: "О боте 🤖", callback_data: "botnews" },
-							{ text: "О школе 🏫", callback_data: "schoolnews" },
-						],
-						[{ text: "Новости 📖", callback_data: "allnews" }],
-						[
-							{ text: "Новый диалог ♻️", callback_data: "start" },
-							{ text: "Перезапуск 🔄️", callback_data: "restart1" },
-						],
 						[{ text: "⬅️Назад", callback_data: "adminMenu" }],
 					],
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function adminMenuSendMessage_2(chatId, firstName) {
+	try {
+		await bot.editMessageText(
+			`<b><i>📋 Создание объявления 📢</i>\n\nОбъявление опубликовано! 😉✅</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+			}
+		);
+		for (let i = 0; i < usersData.length; i++) {
+			if (usersData[i].chatId != qu1z3xId) {
+				bot.sendMessage(
+					usersData[i].chatId,
+					`<b><i>❗Уведомление❗</i>\n\n${textMessageForAllUsers}</b>`,
+					{
+						parse_mode: "html",
+						reply_markup: {
+							inline_keyboard: [
+								[
+									{
+										text: "Удалить ❌",
+										callback_data: "deleteexcess",
+									},
+									{
+										text: "Спасибо 👍",
+										callback_data: "deleteexcess",
+									},
+								],
+							],
+						},
+					}
+				).then((message) => {
+					bot.pinChatMessage(usersData[i].chatId, message.message_id);
+					bot.s;
+				});
+			}
+			setTimeout(() => {
+				adminMenu(chatId, firstName);
+			}, 2000);
+			sendDataAboutAction(
+				"Администратор",
+				"",
+				chatId,
+				`❗Опубликовано объявление:\n\n${textMessageForAllUsers}`
+			);
+		}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function adminMenuEdit(chatId) {
@@ -1095,7 +1216,9 @@ async function adminMenuEdit(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function RegistryUsersData(chatId) {
@@ -1106,7 +1229,15 @@ async function RegistryUsersData(chatId) {
 				usersData[i].chatId
 			}</code>\n• className: "${
 				usersData[i].className
-			}"\n• callsNotifications: ${usersData[i].notificationStatus}\n\n`;
+			}"\n• callsNotifications: ${
+				usersData[i].notificationStatus
+			}\n• allGamesPlayed: ${
+				usersData[i].game1BadResults +
+				usersData[i].game1NiceResults +
+				usersData[i].game2BadResults +
+				usersData[i].game2NiceResults +
+				usersData[i].game2DrawResults
+			}\n\n`;
 		}
 
 		bot.editMessageText(
@@ -1123,7 +1254,9 @@ async function RegistryUsersData(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function Reminders(chatId) {
@@ -1153,7 +1286,9 @@ async function Reminders(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function RemindersList(chatId) {
@@ -1200,7 +1335,9 @@ async function RemindersList(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function RemindersAdd(chatId) {
@@ -1222,15 +1359,19 @@ async function RemindersAdd(chatId) {
 				},
 			}
 		);
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function start(chatId, userName, quickStart = false) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+
 	let rndNum = Math.floor(Math.random() * stickers.length);
 
 	try {
 		await bot.sendSticker(chatId, stickers[rndNum]).then((message) => {
-			messageId_sayHi0Home = message.message_id;
+			dataAboutUser.messageIdSayHi0 = message.message_id;
 		});
 
 		await bot
@@ -1238,7 +1379,7 @@ async function start(chatId, userName, quickStart = false) {
 				parse_mode: "MarkdownV2",
 			})
 			.then((message) => {
-				messageId_sayHi1Home = message.message_id;
+				dataAboutUser.messageIdSayHi1 = message.message_id;
 			});
 
 		await bot
@@ -1250,24 +1391,11 @@ async function start(chatId, userName, quickStart = false) {
 				}
 			)
 			.then((message) => {
-				messageId_sayHi2Home = message.message_id;
+				dataAboutUser.messageIdSayHi2 = message.message_id;
 			});
 
 		await bot.sendMessage(chatId, `ㅤ`, {}).then((message) => {
-			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-			if (dataAboutUser) {
-				dataAboutUser.messageId = message.message_id;
-			} else if (!dataAboutUser) {
-				usersData.push({
-					chatId: chatId,
-					username: userName,
-					className: "Не определен (10Г)",
-					messageId: message.message_id,
-					messageIdother: "",
-					notificationStatus: false,
-					messageSent: false,
-				});
-			}
+			dataAboutUser.messageId = message.message_id;
 		});
 
 		if (quickStart) {
@@ -1276,24 +1404,23 @@ async function start(chatId, userName, quickStart = false) {
 		} else if (!quickStart) {
 			ChoosingClass(chatId, 2);
 		}
-	} catch (error) {}
+	} catch (error) {
+		console.log(error);
+	}
 }
 
-async function endMessage(chatId) {
+async function deleteAllMessages(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 	try {
-		await bot.editMessageText(
-			`*С тобой было _классно_\\!😁\nВстретимся тут ⬇️😉*`,
-			{
-				parse_mode: "MarkdownV2",
-				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
-			}
-		);
+		bot.deleteMessage(chatId, dataAboutUser.messageIdSayHi0);
+		bot.deleteMessage(chatId, dataAboutUser.messageIdSayHi1);
+		bot.deleteMessage(chatId, dataAboutUser.messageIdSayHi2);
+		bot.deleteMessage(chatId, dataAboutUser.messageId);
 	} catch (error) {
+		console.log(error);
 		sendDataAboutError(
 			chatId,
-			"Не обработан момент прощания, завершения перед новым диалогом (endMessage)"
+			"Не обработан момент прощания, завершения перед новым диалогом (deleteAllMessages)"
 		);
 	}
 }
@@ -1306,6 +1433,40 @@ async function StartAll() {
 
 	const timeFormat = /^\d{1,2}:\d{2}$/;
 
+	bot.onText(/=(.+)/, async (message, match) => {
+		let chatId = message.chat.id;
+		if (chatId == qu1z3xId || chatId == "6815420098") {
+			textMessageForAllUsers = match[1];
+			try {
+				await bot.editMessageText(
+					`<b><i>📋 Создание объявления 📢\n\n</i>Объявление:\n</b>${textMessageForAllUsers}\n\n<b>Опубликовать объявление? 🧐❗</b>`,
+					{
+						parse_mode: "html",
+						chat_id: chatId,
+						message_id: usersData.find((obj) => obj.chatId === chatId)
+							.messageId,
+						reply_markup: {
+							inline_keyboard: [
+								[
+									{
+										text: "⬅️Назад",
+										callback_data: "adminMenuSendMessage",
+									},
+									{
+										text: "Создать ✅",
+										callback_data: "adminMenuSendMessage2",
+									},
+								],
+							],
+						},
+					}
+				);
+			} catch (error) {
+				console.log(error);
+				console.log(error);
+			}
+		}
+	});
 	bot.onText(/^(.+?) в (.+)/, async (message, match) => {
 		let formatIsNice = true,
 			hours,
@@ -1317,6 +1478,7 @@ async function StartAll() {
 			[hours, minutes] = timeRem.split(":").map(Number);
 			formatIsNice = true;
 		} catch (error) {
+			console.log(error);
 			formatIsNice = false;
 		}
 
@@ -1433,9 +1595,10 @@ async function StartAll() {
 			// 	}
 			// }, 60000);
 		} catch (error) {
+			console.log(error);
 			sendDataAboutError(
 				chatId,
-				"Не обработан момент редактирования сообщения о созданном напоминании из за потери 'messageId' (endMessage)"
+				"Не обработан момент редактирования сообщения о созданном напоминании из за потери 'messageId' (deleteAllMessages)"
 			);
 		}
 	});
@@ -1448,25 +1611,23 @@ async function StartAll() {
 			usersData.push({
 				chatId: chatId,
 				username: message.from.username,
-				className: "Не определен (10Г)",
+				className: "Не определен",
 				messageId: "",
+				messageIdSayHi0: "",
+				messageIdSayHi1: "",
+				messageIdSayHi2: "",
 				notificationStatus: false,
-				messageSent: false,
+				game1NiceResults: 0,
+				game1BadResults: 0,
+				game2NiceResults: 0,
+				game2BadResults: 0,
+				game2DrawResults: 0,
 			});
-		}
-
-		if (chatId == "923690530") {
-			admin = true;
-
-			userStatus = "Администратор 👑";
-		} else {
-			admin = false;
-			userStatus = "Ученик 🧑‍🏫";
 		}
 		try {
 			messageId_user = message.message_id;
 			const text = message.text;
-			firstName = message.from.first_name;
+			let firstName = message.from.first_name;
 
 			// время отправки
 			let date = new Date(message.date * 1000),
@@ -1502,14 +1663,15 @@ async function StartAll() {
 			//? КОМАНДЫ
 
 			switch (text) {
+				case "S":
 				case "s":
 				case "/start":
-					endMessage(chatId);
+					deleteAllMessages(chatId);
 					bot.deleteMessage(chatId, messageId_user);
 					start(chatId, message.from.first_name);
 					break;
 				case "st":
-					endMessage(chatId);
+					deleteAllMessages(chatId);
 					bot.deleteMessage(chatId, messageId_user);
 					start(chatId, message.from.first_name, true);
 					break;
@@ -1520,6 +1682,7 @@ async function StartAll() {
 							usersData.find((obj) => obj.chatId === chatId).messageId
 						);
 					} catch (error) {
+						console.log(error);
 						sendDataAboutError(
 							chatId,
 							"Не найден message_id menuHome, создано новое сообщение (/restart)"
@@ -1533,6 +1696,7 @@ async function StartAll() {
 						ChoosingClass(chatId, 2);
 						bot.deleteMessage(chatId, messageId_user);
 					} catch (error) {
+						console.log(error);
 						sendDataAboutError(
 							chatId,
 							"Не найден message_id, создано новое сообщение (/restart2)"
@@ -1551,10 +1715,15 @@ async function StartAll() {
 					bot.deleteMessage(chatId, messageId_user);
 					Options(chatId, firstName);
 					break;
+				case "/start remindersList":
+					bot.deleteMessage(chatId, messageId_user);
+					RemindersList(chatId);
+					break;
 				default:
 					try {
-						await bot.deleteMessage(chatId, messageId_user);
+						bot.deleteMessage(chatId, messageId_user);
 					} catch (error) {
+						console.log(error);
 						sendDataAboutError(
 							chatId,
 							"Не обработан момент удаления лишнего сообщения пользователя (default)"
@@ -1562,42 +1731,42 @@ async function StartAll() {
 					}
 					break;
 			}
-		} catch (error) {}
+		} catch (error) {
+			console.log(error);
+		}
 	});
 
 	//? ОБРАБОТЧИК КЛАВИАТУРЫ ПОД СООБЩЕНИЯМИ
 
 	bot.on("callback_query", (query) => {
 		const chatId = query.message.chat.id;
-
 		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-		if (dataAboutUser) {
-			dataAboutUser.messageId = query.message.message_id;
-		} else if (!dataAboutUser) {
-			usersData.push({
-				chatId: chatId,
-				username: query.from.username,
-				className: "Не определен (10Г)",
-				messageId: query.message.message_id,
-				notificationStatus: false,
-				messageSent: false,
-			});
-		}
+
 		try {
-			firstName = query.from.first_name;
+			if (dataAboutUser) {
+				dataAboutUser.messageId = query.message.message_id;
+			} else if (!dataAboutUser) {
+				usersData.push({
+					chatId: chatId,
+					username: query.from.username,
+					className: "Не определен",
+					messageId: query.message.message_id,
+					messageIdother: "",
+					notificationStatus: false,
+					game1NiceResults: 0,
+					game1BadResults: 0,
+					game2NiceResults: 0,
+					game2BadResults: 0,
+					game2DrawResults: 0,
+				});
+			}
+
+			let firstName = query.from.first_name;
 			newsNum = 0;
 
 			day = new Date().getDate();
 			dayW = new Date().getDay();
 			month = new Date().getMonth();
-
-			if (chatId == "923690530") {
-				admin = true;
-				userStatus = "Администратор 👑";
-			} else {
-				admin = false;
-				userStatus = "Ученик 🧑‍🏫";
-			}
 
 			const data = query.data;
 			usersData.find((obj) => obj.chatId === chatId).messageId =
@@ -1632,6 +1801,7 @@ async function StartAll() {
 						},
 					}
 				);
+				dataAboutUser.game1NiceResults += 1;
 			} else if (
 				data == "0" ||
 				data == "1" ||
@@ -1661,6 +1831,7 @@ async function StartAll() {
 						},
 					}
 				);
+				dataAboutUser.game1BadResults += 1;
 			}
 
 			switch (data) {
@@ -1726,9 +1897,9 @@ async function StartAll() {
 
 				//? ДЕЙСТВИЯ КНОПОК
 
-				// Начальные
+				// НАЧАЛЬНЫЕ
 				case "start":
-					endMessage(chatId);
+					deleteAllMessages(chatId);
 					start(chatId, firstName);
 					break;
 				case "exit":
@@ -1736,6 +1907,7 @@ async function StartAll() {
 					try {
 						menuHome(chatId);
 					} catch (error) {
+						console.log(error);
 						sendDataAboutError(
 							"Не обработан момент выхода в меню, создано новое сообщение (exit)"
 						);
@@ -1808,7 +1980,9 @@ async function StartAll() {
 								],
 							},
 						});
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "game1res":
 					try {
@@ -1830,7 +2004,9 @@ async function StartAll() {
 								},
 							}
 						);
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "game1_1":
 					game1(chatId, false);
@@ -1853,22 +2029,22 @@ async function StartAll() {
 
 				case "news":
 					newsName = "Новости 📖";
-					newsNum = 0;
+					newsNum = 1;
 					News(chatId);
 					break;
 				case "allnews":
 					newsName = "Новости 📖";
-					newsNum = 0;
+					newsNum = 1;
 					News(chatId);
 					break;
 				case "botnews":
 					newsName = "О боте 🤖";
-					newsNum = 1;
+					newsNum = 2;
 					News(chatId);
 					break;
 				case "schoolnews":
 					newsName = "О школе 🏫";
-					newsNum = 2;
+					newsNum = 3;
 					News(chatId);
 					break;
 
@@ -1906,7 +2082,9 @@ async function StartAll() {
 								},
 							}
 						);
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "deleteaccount2":
 					try {
@@ -1920,7 +2098,9 @@ async function StartAll() {
 								).messageId,
 							}
 						);
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 
 				case "chooseclass0":
@@ -1930,16 +2110,34 @@ async function StartAll() {
 				// ADMINMENU
 
 				case "adminMenu":
-					adminMenu(chatId);
+					adminMenu(chatId, firstName);
 					break;
-				case "adminMenu1":
-					adminMenuTest(chatId);
+				case "adminMenuSendMessage":
+					adminMenuSendMessage(chatId);
 					break;
-				case "adminMenu2":
+				case "adminMenuSendMessage2":
+					adminMenuSendMessage_2(chatId, firstName);
+					break;
+				case "adminMenuEdit":
 					adminMenuEdit(chatId);
 					break;
 				case "allnewsEDIT":
 					AllNewsTextEdit(chatId);
+					break;
+				case "allnewsadd":
+					bot.editMessageText(
+						"*_✏️ Редактирование: Новости 📖_\n\nВы успешно обновили Новости\\! 📖✅*",
+						{
+							parse_mode: "MarkdownV2",
+							chat_id: chatId,
+							message_id: usersData.find((obj) => obj.chatId === chatId)
+								.messageId,
+						}
+					);
+					newsText[1] = newsText[0];
+					setTimeout(() => {
+						adminMenu(chatId, firstName);
+					}, 2000);
 					break;
 				case "allnewstextRESETmenu":
 					AllNewsTextReset(chatId);
@@ -1949,7 +2147,7 @@ async function StartAll() {
 					break;
 				case "allnewstextRESETend":
 					try {
-						newsText[0] = "Новостей нет 😔";
+						newsText[1] = "Новостей нет 😔";
 						bot.editMessageText(
 							`*_✏️ Редактирование: Новости 📖_\n\nРаздел _"Новости📖"_ \\- сброшен\\!✅*`,
 							{
@@ -1961,9 +2159,11 @@ async function StartAll() {
 							}
 						);
 						setTimeout(() => {
-							adminMenu(chatId);
+							adminMenu(chatId, firstName);
 						}, 2000);
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "restart1":
 					ChoosingClass(chatId, 2);
@@ -1979,7 +2179,9 @@ async function StartAll() {
 						setTimeout(() => {
 							ChoosingClass(chatId, 1);
 						}, 1500);
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "usersdatalist":
 					RegistryUsersData(chatId, firstName);
@@ -2046,7 +2248,9 @@ async function StartAll() {
 								},
 							}
 						);
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "deleteallreminder2":
 					try {
@@ -2078,7 +2282,9 @@ async function StartAll() {
 								RemindersList(chatId);
 							}, 2000);
 						}
-					} catch (error) {}
+					} catch (error) {
+						console.log(error);
+					}
 					break;
 				case "deleteexcess":
 					textRem = "";
@@ -2088,6 +2294,7 @@ async function StartAll() {
 							usersData.find((obj) => obj.chatId === chatId).messageId
 						);
 					} catch (error) {
+						console.log(error);
 						sendDataAboutError(
 							chatId,
 							"Не обработан момент удаления сообщения с напоминанием (default)"
@@ -2113,8 +2320,9 @@ async function StartAll() {
 					query.from.username
 				} <${chatId}>  -  [${data}]`
 			);
-			console.log(reminder.find((obj) => obj.chatId === chatId));
-		} catch (error) {}
+		} catch (error) {
+			console.log(error);
+		}
 	});
 }
 
