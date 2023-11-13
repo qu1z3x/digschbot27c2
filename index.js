@@ -738,7 +738,7 @@ async function NotificationsMenuCalls(
 
 	try {
 		await bot.editMessageText(
-			`*_🔕 Центр уведомлений 🔔_\n\nНапоминания:*\nНа урок: *${
+			`*_🔕 Центр уведомлений 🔔\n\nНапоминания:_\n*На урок: *${
 				dataAboutUser.callOnLessonIn5minutes ? "за 5" : ""
 			}${
 				dataAboutUser.callOnLessonIn5minutes &&
@@ -762,11 +762,11 @@ async function NotificationsMenuCalls(
 				!dataAboutUser.callOnBreakIn10minutes
 					? "не выбрано"
 					: " минут"
-			}\n\n_${
+			}\n\n${
 				dayW == 6 || dayW == 0
-					? "❗Звонки не активны \\- выходной❗\n\n"
+					? "_❗Звонки не активны \\- выходной❗_\n\n"
 					: ""
-			}_За сколько до звонка оповещать\\? 🤔*`,
+			}За сколько до звонка оповещать\\?* 🤔`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -3454,7 +3454,7 @@ async function StartAll() {
 					try {
 						bot.deleteMessage(
 							chatId,
-							usersData.find((obj) => obj.chatId === chatId).messageIdcas
+							usersData.find((obj) => obj.chatId === chatId).messageId
 						);
 					} catch (error) {
 						console.log(error);
