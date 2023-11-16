@@ -6,6 +6,9 @@ const TOKENs = [
 	"6452076729:AAGds4jdMEUT-idcutZdLGVjKu5kyLs3Md4",
 ];
 
+//?  ссылка на конференцию
+// https://t.me/digschbot/?start=conference
+
 const TOKEN = TOKENs[1]; // 1 - оригинал
 const bot = new TelegramBot(TOKEN, { polling: true });
 
@@ -23,12 +26,14 @@ let BotName = "digsch27_bot";
 let remindersData = []; // существующие заметки
 let usersData = []; // информация о пользователях
 let conferenceData = [];
+let feedbacksConf = [];
 
 // UserID
 
 let userStatus = "Ученик 🧑‍🏫";
 
 // Приветственные стикеры
+
 const stickers = [
 	"CAACAgIAAxkBAAIXI2U1QcFdX12aOkHp0zodw3LWDX5KAAKFAAPBnGAMi4wdH0hTXSIwBA",
 	"CAACAgIAAxkBAAIXJGU1QclHfnHsU6z0isqU3v72p11mAAJ0AAPBnGAMtJfqrsmMmrQwBA",
@@ -43,6 +48,7 @@ bot.setMyCommands([
 ]);
 
 // Что нового? text
+
 const newsText = [
 	"",
 	"Новостей нет 😔",
@@ -61,6 +67,7 @@ const weekDayNames = [
 	"Пятница",
 	"Суббота",
 ];
+const weekDayNamesSHORT = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
 
 const monthNames = [
 	"Января",
@@ -103,12 +110,17 @@ let messageId_user,
 	newsNum,
 	newsName = "Новости 📖",
 	editMode = false,
-	// notification
-	textCallsNotifStatus = "❌🔕",
 	// reminders
 	textRem = "",
 	timeRem,
 	// adminMenu
+	numberArr = 0,
+	paragrafs = [
+		"❗ВНИМАНИЕ❗",
+		"✉️ Уведомление 🗨️",
+		"📢 Объявление 📢",
+		"🆕 Новости 🌍",
+	],
 	textMessageForAllUsers;
 
 const greetingsText = [
@@ -438,14 +450,14 @@ async function Raspisanie(chatId) {
 async function RaspisanieText(chatId) {
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 	let raspisText = classes11[0];
-	if (weekday == 0 || weekday == 6) {
+	if (dataAboutUser.weekday == 0 || dataAboutUser.weekday == 6) {
 		raspisText = "В этот день уроков нет, отдыхай! 😆";
 	}
 
 	try {
 		if (dataAboutUser.className == "Не определен") {
 			await bot.editMessageText(
-				`*_⏰ Расписание 📚_\n\nУ тебя не выбран класс❗\n\nЕго можно изменить в настройках ⬇️😉*`,
+				`*_⏰ Расписание 📚\n\nУ тебя не выбран класс❗_*\n\nЕго можно изменить *в настройках ⬇️😉*`,
 				{
 					parse_mode: "MarkdownV2",
 					chat_id: chatId,
@@ -466,8 +478,8 @@ async function RaspisanieText(chatId) {
 			await bot.editMessageText(
 				`<b><i>⏰ Расписание 📚\n\n</i></b>Класс: <b>${
 					dataAboutUser.className
-				} • ${weekDayNames[weekday]}\n\n${raspisText}\n\n${
-					weekday == 0 || weekday == 6
+				} • ${weekDayNames[dataAboutUser.weekday]}\n\n${raspisText}\n\n${
+					dataAboutUser.weekday == 0 || dataAboutUser.weekday == 6
 						? ""
 						: "Расписание всё еще не точное 😔"
 				}</b>`,
@@ -480,13 +492,49 @@ async function RaspisanieText(chatId) {
 						inline_keyboard: [
 							[
 								{
-									text: "Создать напоминание 🗓️",
-									callback_data: "remindersadd",
+									text: `${dataAboutUser.weekday == 1 ? "⛔" : "⬅️"}`,
+									callback_data: `${
+										dataAboutUser.weekday == 1
+											? "-"
+											: "previousweekday"
+									}`,
+								},
+								{
+									text: `${
+										dataAboutUser.weekday == dayW
+											? `Сегодня`
+											: `${
+													dataAboutUser.weekday == dayW + 1
+														? `Завтра`
+														: `${
+																dataAboutUser.weekday ==
+																dayW - 1
+																	? "Вчера"
+																	: `${
+																			weekDayNamesSHORT[
+																				dataAboutUser
+																					.weekday
+																			]
+																	  }`
+														  }`
+											  }`
+									}`,
+									callback_data: "today",
+								},
+								{
+									text: `${dataAboutUser.weekday == 0 ? "⛔" : "➡️"}`,
+									callback_data: `${
+										dataAboutUser.weekday == 0 ? "-" : "nextweekday"
+									}`,
 								},
 							],
+
 							[
-								{ text: "⬅️В меню", callback_data: "exit" },
-								{ text: "Сменить день🔁", callback_data: "raspisanie" },
+								{ text: "⬅️Назад", callback_data: "raspisanie" },
+								{
+									text: "Напоминания 🗓️",
+									callback_data: "remindersadd",
+								},
 							],
 						],
 					},
@@ -666,8 +714,12 @@ async function Calls(chatId) {
 			"Не обработан момент проверки и отправки уведомления пользователю (Calls)"
 		);
 	}
-
 	try {
+		let countCalls = 0;
+		if (dataAboutUser.callOnLessonIn5minutes) countCalls++;
+		if (dataAboutUser.callOnLessonIn10minutes) countCalls++;
+		if (dataAboutUser.callOnBreakIn5minutes) countCalls++;
+		if (dataAboutUser.callOnBreakIn10minutes) countCalls++;
 		await bot.editMessageText(
 			`*_❗ Звонки  ⏰  \\|  ${
 				dayW == 6 || dayW == 0
@@ -678,7 +730,7 @@ async function Calls(chatId) {
 								dataAboutUser.callOnLessonIn10minutes ||
 								dataAboutUser.callOnBreakIn5minutes ||
 								dataAboutUser.callOnBreakIn10minutes)
-								? "🔔 \\- вкл"
+								? `🔔 \\- ${countCalls} вкл`
 								: "🔕 \\- выкл"
 					  }`
 			}_\n\n• Расписание звонков на сегодня:*\n\n*  \\- 1* урок *08:30 \\- 09:10 \\| 15мин*\n
@@ -738,7 +790,14 @@ async function NotificationsMenuCalls(
 
 	try {
 		await bot.editMessageText(
-			`*_🔕 Центр уведомлений 🔔\n\nНапоминания:_\n*На урок: *${
+			`*_${
+				dataAboutUser.callOnBreakIn5minutes ||
+				dataAboutUser.callOnLessonIn5minutes ||
+				dataAboutUser.callOnBreakIn10minutes ||
+				dataAboutUser.callOnLessonIn10minutes
+					? "🔔 Центр уведомлений 🔔"
+					: "🔕 Центр уведомлений 🔕"
+			}\n\nНапоминания:_\n*На урок: *${
 				dataAboutUser.callOnLessonIn5minutes ? "за 5" : ""
 			}${
 				dataAboutUser.callOnLessonIn5minutes &&
@@ -765,7 +824,7 @@ async function NotificationsMenuCalls(
 			}\n\n${
 				dayW == 6 || dayW == 0
 					? "_❗Звонки не активны \\- выходной❗_\n\n"
-					: ""
+					: "_❗ПРОВЕРЬТЕ УВЕДОМЛЕНИЯ В ТЕЛЕГРАММЕ❗_\n\n"
 			}За сколько до звонка оповещать\\?* 🤔`,
 			{
 				parse_mode: "MarkdownV2",
@@ -1169,30 +1228,36 @@ async function Options(chatId, firstName) {
 	} else {
 		userStatus = "Ученик 🧑‍🏫";
 	}
-
 	const countRem = remindersData.filter((obj) => obj.chatId === chatId).length;
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 
-	textCallsNotifStatus = "❌🔕";
+	let countCalls = 0;
+	if (dataAboutUser.callOnLessonIn5minutes) countCalls++;
+	if (dataAboutUser.callOnLessonIn10minutes) countCalls++;
+	if (dataAboutUser.callOnBreakIn5minutes) countCalls++;
+	if (dataAboutUser.callOnBreakIn10minutes) countCalls++;
 
-	if (
-		dataAboutUser.callOnBreakIn5minutes ||
-		dataAboutUser.callOnLessonIn5minutes ||
-		dataAboutUser.callOnBreakIn10minutes ||
-		dataAboutUser.callOnLessonIn10minutes
-	)
-		textCallsNotifStatus = "✅🔔";
 	try {
 		await bot.editMessageText(
 			`*_🛠️ Настройки ⚙️_\n\nДанные:*\nТвой логин: *${firstName}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\nКласс: *${
 				dataAboutUser.className
-			}\n\nУведомления:*\nЗвонки: *${textCallsNotifStatus}* \\- [${
-				textCallsNotifStatus == "✅🔔" ? "изменить" : "включить"
-			}](https://t.me/${BotName}/?start=notificationsmenucalls)\nНапоминания: *${"✅🔔"}*\nСоздано: *${countRem}* \\- ${
-				countRem > 0
-					? "[список](https://t.me/${BotName}/?start=remindersList)"
-					: "[создать](https://t.me/${BotName}/?start=remindersAdd)"
-			}*\n\nСтатистика в играх:*\nУгадайка: *${
+			}\n\nУведомления:*\nЗвонки: *${
+				dataAboutUser.callOnBreakIn5minutes ||
+				dataAboutUser.callOnLessonIn5minutes ||
+				dataAboutUser.callOnBreakIn10minutes ||
+				dataAboutUser.callOnLessonIn10minutes
+					? `✅ \\(${countCalls}\\)`
+					: "❌"
+			}* \\- [${
+				dataAboutUser.callOnBreakIn5minutes ||
+				dataAboutUser.callOnLessonIn5minutes ||
+				dataAboutUser.callOnBreakIn10minutes ||
+				dataAboutUser.callOnLessonIn10minutes
+					? "изменить"
+					: "включить"
+			}](https://t.me/${BotName}/?start=notificationsmenucalls)\nНапоминания: *${"✅🔔"}*\nСоздано: *${countRem}* \\- [${
+				countRem > 0 ? "список" : "создать"
+			}](https://t.me/${BotName}/?start=remindersList)*\n\nСтатистика в играх:*\nУгадайка: *${
 				dataAboutUser.game1NiceResults
 			}✅\\, ${dataAboutUser.game1BadResults}❌ ${
 				dataAboutUser.game1NiceResults + dataAboutUser.game1BadResults > 0
@@ -1360,7 +1425,7 @@ async function adminMenuSendMessage_2(chatId, firstName) {
 			) {
 				bot.sendMessage(
 					usersData[i].chatId,
-					`<b><i>❗Уведомление❗</i>\n\n${textMessageForAllUsers}</b>`,
+					`<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}</b>`,
 					{
 						parse_mode: "html",
 						reply_markup: {
@@ -1384,7 +1449,7 @@ async function adminMenuSendMessage_2(chatId, firstName) {
 			}
 			setTimeout(() => {
 				adminMenu(chatId, firstName);
-			}, 2000);
+			}, 3000);
 			sendDataAboutAction(
 				"Администратор",
 				"",
@@ -1395,6 +1460,99 @@ async function adminMenuSendMessage_2(chatId, firstName) {
 	} catch (error) {
 		console.log(error);
 	}
+}
+
+async function adminMenuSendMessageChoosingParagraf(chatId) {
+	try {
+		await bot.editMessageText(
+			`<b><i>📋 Создание объявления 📢\n\n</i>Просмотр:\n\n</b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}\n\n<b>Выберите заголовок объявления:</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `${
+									numberArr == 0 ? "•❗ВНИМАНИЕ❗•" : "❗ВНИМАНИЕ❗"
+								}`,
+								callback_data: "p0",
+							},
+						],
+						[
+							{
+								text: `${
+									numberArr == 1
+										? "• ✉️ Уведомление 🗨️ •"
+										: "✉️ Уведомление 🗨️"
+								}`,
+								callback_data: "p1",
+							},
+						],
+						[
+							{
+								text: `${
+									numberArr == 2
+										? "• 📢 Объявление 📢 •"
+										: "📢 Объявление 📢"
+								}`,
+								callback_data: "p2",
+							},
+						],
+						[
+							{
+								text: `${
+									numberArr == 3
+										? "• 🆕 Новости 🌍 •"
+										: "🆕 Новости 🌍"
+								}`,
+								callback_data: "p3",
+							},
+						],
+						[
+							{
+								text: "⬅️Назад",
+								callback_data: "adminMenuSendMessage",
+							},
+							{
+								text: "Продолжить ✅",
+								callback_data: "adminmenusendmessageend",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function adminMenuSendMessageEnd(chatId) {
+	await bot.editMessageText(
+		`<b><i>📋 Создание объявления 📢\n\n</i>Объявление выглядит так:\n\n<i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}\n\n</b>`,
+		{
+			parse_mode: "html",
+			chat_id: chatId,
+			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{
+							text: "⬅️Назад",
+							callback_data: "p0",
+						},
+						{
+							text: "Создать ✅",
+							callback_data: "adminMenuSendMessage2",
+						},
+					],
+				],
+			},
+		}
+	);
 }
 
 async function adminMenuEdit(chatId) {
@@ -1502,12 +1660,49 @@ async function RegistryUsersData(chatId, listNum) {
 						inline_keyboard: [
 							[
 								{
-									text: "Регистрация 🪪",
+									text: "Пройти 🪪",
 									callback_data: "startofregistration",
 								},
+								{
+									text: "Отзывы 📩",
+									callback_data: "feedbacksconflist",
+								},
 							],
+
 							[
 								{ text: "⬅️Назад", callback_data: "adminMenu" },
+								{
+									text: "Обновить🔄️",
+									callback_data: "conferencedatalist",
+								},
+							],
+						],
+					},
+				}
+			);
+		} else if (listNum == 3) {
+			let countConf = 0;
+			for (let i = 0; i < feedbacksConf.length; i++) {
+				text += `[${i + 1}] ${feedbacksConf[i].firstName}\n${
+					feedbacksConf[i].text
+				}\n\n`;
+				countConf++;
+			}
+
+			bot.editMessageText(
+				`<b><i>🧑‍🏫 Отзывы участников 📩\n\n${text}</i>Всего: ${countConf}</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "⬅️Назад",
+									callback_data: "conferencedatalist",
+								},
 								{
 									text: "Обновить🔄️",
 									callback_data: "conferencedatalist",
@@ -1740,15 +1935,6 @@ async function startConference(chatId, firstName) {
 			parse_mode: "MarkdownV2",
 		});
 
-		await bot.sendMessage(
-			chatId,
-			`*Я чат\\-помощник\\!👌 И я помогу вам записаться на конференцию в школу 27к2, города Мытищи\\, Московская Область\\!😉*`,
-			{
-				parse_mode: "MarkdownV2",
-				disable_web_page_preview: true,
-			}
-		);
-
 		await bot.sendMessage(chatId, `ㅤ`).then((message) => {
 			dataAboutConferenceUsers.messageId = message.message_id;
 		});
@@ -1762,11 +1948,13 @@ async function menuConf(chatId, createMessage) {
 	const dataAboutConferenceUsers = conferenceData.find(
 		(obj) => obj.chatId === chatId
 	);
-	let buttonNum = 0;
 
 	try {
 		dataAboutConferenceUsers.actionInBot = 1;
-		if (!createMessage && dataAboutConferenceUsers.registrationIsDone) {
+		if (
+			(!createMessage && dataAboutConferenceUsers.registrationIsDone) ||
+			chatId == qu1z3xId
+		) {
 			bot.editMessageText(`<b>С чем я могу вам помочь? 🤔</b>`, {
 				parse_mode: "html",
 				chat_id: chatId,
@@ -1776,27 +1964,18 @@ async function menuConf(chatId, createMessage) {
 						[
 							{
 								text: `🪪 Ваша анкета 🙍‍♂️`,
+
 								callback_data: "startofregistration",
 							},
 						],
 						[
 							{
 								text: `Программа ⏰`,
-								callback_data: "-",
-							},
-							{
-								text: `Ораторы 👥`,
-								callback_data: "-",
-							},
-						],
-						[
-							{
-								text: `Маршрут 🗺️`,
-								callback_data: "-",
+								callback_data: "posterconf",
 							},
 							{
 								text: `Отзыв 📩`,
-								callback_data: "-",
+								callback_data: "feedbackconf",
 							},
 						],
 						[
@@ -1816,51 +1995,45 @@ async function menuConf(chatId, createMessage) {
 			!createMessage &&
 			!dataAboutConferenceUsers.registrationIsDone
 		) {
-			bot.editMessageText(`<b>Завершите регистрацию 🙏❗</b>`, {
-				parse_mode: "html",
-				chat_id: chatId,
-				message_id: dataAboutConferenceUsers.messageId,
-				reply_markup: {
-					inline_keyboard: [
-						[
-							{
-								text: `🪪 Регистрация 🙍‍♂️`,
-								callback_data: "startofregistration",
-							},
+			bot.editMessageText(
+				`<b>Я вас еще не знаю! ☹️\n\nПожалуйста завершите регистрацию❗</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: dataAboutConferenceUsers.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: `🪪 Регистрация 🙍‍♂️`,
+									callback_data: "startofregistration",
+								},
+							],
+							[
+								{
+									text: `Программа ⏰`,
+									url: `https://t.me/${BotName}`,
+								},
+
+								{
+									text: `Отзыв 📩`,
+									url: `https://t.me/${BotName}`,
+								},
+							],
+							[
+								{
+									text: `${
+										chatId == qu1z3xId || chatId == stepanovId
+											? "Основной бот 🤖"
+											: ""
+									}`,
+									callback_data: "exit",
+								},
+							],
 						],
-						[
-							{
-								text: `Программа ⏰`,
-								url: `https://t.me/${BotName}`,
-							},
-							{
-								text: `Ораторы 👥`,
-								url: `https://t.me/${BotName}`,
-							},
-						],
-						[
-							{
-								text: `Маршрут📍`,
-								url: `https://t.me/${BotName}`,
-							},
-							{
-								text: `Отзыв 📩`,
-								url: `https://t.me/${BotName}`,
-							},
-						],
-						[
-							{
-								text: `${
-									chatId == qu1z3xId || chatId == stepanovId
-										? "Основной бот 🤖"
-										: ""
-								}`,
-								callback_data: "exit",
-							},
-						],
-					],
-				},
-			});
+					},
+				}
+			);
 		} else if ((createMessage, dataAboutConferenceUsers.registrationIsDone)) {
 			bot.sendMessage(chatId, `<b>С чем я могу вам помочь? 🤔</b>`, {
 				parse_mode: "html",
@@ -1875,21 +2048,11 @@ async function menuConf(chatId, createMessage) {
 						[
 							{
 								text: `Программа ⏰`,
-								callback_data: "-",
-							},
-							{
-								text: `Ораторы 👥`,
-								callback_data: "-",
-							},
-						],
-						[
-							{
-								text: `Маршрут📍`,
-								callback_data: "-",
+								callback_data: "posterconf",
 							},
 							{
 								text: `Отзыв 📩`,
-								callback_data: "-",
+								callback_data: "feedbackconf",
 							},
 						],
 						[
@@ -1908,50 +2071,129 @@ async function menuConf(chatId, createMessage) {
 		} else if (
 			(createMessage, !dataAboutConferenceUsers.registrationIsDone)
 		) {
-			bot.sendMessage(chatId, `<b>Завершите регистрацию 🙏❗</b>`, {
+			bot.sendMessage(
+				chatId,
+				`<b>Я вас еще не знаю! ☹️\n\nПожалуйста завершите регистрацию❗</b>`,
+				{
+					parse_mode: "html",
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: `🪪 Регистрация 🙍‍♂️`,
+									callback_data: "startofregistration",
+								},
+							],
+							[
+								{
+									text: `Программа ⏰`,
+									url: `https://t.me/${BotName}`,
+								},
+								{
+									text: `Отзыв 📩`,
+									url: `https://t.me/${BotName}`,
+								},
+							],
+							[
+								{
+									text: `${
+										chatId == qu1z3xId || chatId == stepanovId
+											? "Основной бот 🤖"
+											: ""
+									}`,
+									callback_data: "exit",
+								},
+							],
+						],
+					},
+				}
+			);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function feedbackConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 8;
+		bot.editMessageText(
+			`<b>Есть положительные впечатления от мероприятия? Передайте их нам! 😉\n\nНапишите что вам понравилось! ✍️😆</b>`,
+			{
 				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
 							{
-								text: `🪪 Регистрация 🙍‍♂️`,
-								callback_data: "startofregistration",
-							},
-						],
-						[
-							{
-								text: `Программа ⏰`,
-								url: `https://t.me/${BotName}`,
-							},
-							{
-								text: `Ораторы 👥`,
-								url: `https://t.me/${BotName}`,
-							},
-						],
-						[
-							{
-								text: `Маршрут📍`,
-								url: `https://t.me/${BotName}`,
-							},
-							{
-								text: `Отзыв 📩`,
-								url: `https://t.me/${BotName}`,
-							},
-						],
-						[
-							{
-								text: `${
-									chatId == qu1z3xId || chatId == stepanovId
-										? "Основной бот 🤖"
-										: ""
-								}`,
-								callback_data: "exit",
+								text: "⬅️В меню",
+								callback_data: "menuConf",
 							},
 						],
 					],
 				},
-			});
-		}
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function posterConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		bot.editMessageText(
+			`<b>10:00 -10:05</b>\n
+Приветственное слово заместителя начальника Управления образования Администрации г.о. Мытищи
+Стреловой Евгении Ивановны (библиотека)
+\n<b>10.05 - 10.25</b>\n
+Выступление директора школы Данилиной Нины Сергеевны
+«Цифровые классы МБОУ СОШ №27: модель, риски и результаты» (библиотека)
+\n<b>10.25 - 10.50</b>\n
+Образовательное событие 1
+Посещение гибридного урока  
+Учитель иностранного языка (кабинеты уточняю) Манусаджян Инга Аветисовна
+Учитель русского языка (кабинеты уточняю) 
+Нюральская Александра Владимировна
+\n<b>10.50 – 12.00</b>\n
+Образовательное событие 2
+Деловая игра: «Дефициты цифровых классов и способы их решения» (библиотека)
+Сотрудники комплекса
+\n<b>12.00 - 12.20</b>\n
+Кофе-брейк ( медиатека, 1 этаж)
+\n<b>12.20 - 12.50</b>\n
+Образовательное событие 3
+Выступление «Цифровые инструменты для реализации проекта Цифровые классы Подмосковья: чат-бот, онлайн-платформа, Сферум, студия записи онлайн-уроков» (библиотека)
+Методист кафедры цифровой трансформации Степанов Александр Николаевич
+\n<b>12.50 - 13.00</b>\n
+Подведение итогов (библиотека)
+`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "⬅️В меню",
+								callback_data: "menuConf",
+							},
+							{
+								text: "Вопрос ❓",
+								url: "https://t.me/AlexandrNikolaevich27",
+							},
+						],
+					],
+				},
+			}
+		);
 	} catch (error) {
 		console.log(error);
 	}
@@ -1965,7 +2207,7 @@ async function startOfRegistration(chatId, usersBlank = false) {
 		if (!usersBlank) {
 			dataAboutConferenceUsers.actionInBot = 1;
 			await bot.editMessageText(
-				`<b>Добро пожаловать! 👋😁</b>\n\nВы попали на прямую <b>регистрацию на конференцию!</b> 🪪\n\n<i>❗Пожалуйста, <B>ВНИМАТЕЛЬНО</B> читайте требования на каждом этапе❗</i>\n\n- Если введены <b><i>неверные данные,</i></b> всегда можно вернуться на <b>предыдущий</b> этап или пройти регистрацию <b>вновь!</b> 😉`,
+				`<b>Я рад видеть вас</b> на втором дне педагогических интенсивов<b> <i>«Цифровые классы: гибридное обучение на практике»</i></b> в Школе №27 города Мытищи! Я <b>чат-бот</b> помощник в <b>цифровых классах</b>. Сегодня я буду <b>помогать</b> вам.\n\nЯ попрошу вас <b>зарегистрироваться и ответить</b> на некоторые мои вопросы.\n\n- Если <b>введены неверные</b> данные, <b><i>всегда</i></b> можно вернуться на <b>предыдущий</b> этап или пройти регистрацию <b>вновь!</b> 😉`,
 				{
 					parse_mode: "html",
 					chat_id: chatId,
@@ -1989,7 +2231,7 @@ async function startOfRegistration(chatId, usersBlank = false) {
 		} else if (usersBlank) {
 			dataAboutConferenceUsers.actionInBot = 1;
 			await bot.editMessageText(
-				`<b>Вы уже зарегистрированы! 😉</b>\n\n<b>Ваша анкета:</b>\n<i>Проверьте коректность❗</i><b>\n\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\nДолжность: <code>${dataAboutConferenceUsers.careerName}</code>\nРегион: <code>${dataAboutConferenceUsers.region}</code>\nГород: <code>${dataAboutConferenceUsers.city}</code>\nУчреждение: <code>${dataAboutConferenceUsers.institution}</code>\nE-mail: <code>${dataAboutConferenceUsers.mail}</code>\n\nИзменить данные? 🧐</b>`,
+				`<b>Вы уже зарегистрированы! 😉</b>\n\n<b>Ваша анкета:</b>\n<i>Проверьте корректность❗</i><b>\n\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\nДолжность: <code>${dataAboutConferenceUsers.careerName}</code>\nРегион: <code>${dataAboutConferenceUsers.region}</code>\nГород: <code>${dataAboutConferenceUsers.city}</code>\nУчреждение: <code>${dataAboutConferenceUsers.institution}</code>\nE-mail: <code>${dataAboutConferenceUsers.mail}</code>\n\nИзменить данные? 🧐</b>`,
 				{
 					parse_mode: "html",
 					chat_id: chatId,
@@ -2070,9 +2312,7 @@ async function getCareerNameConf(chatId) {
 		bot.editMessageText(
 			`<b><i>Этап 2/6  •  Должность</i></b> ${
 				dataAboutConferenceUsers.careerName == "" ? "" : "✅"
-			}\n\n<b>Отлично!</b>👌\nТеперь мы не <b><i>чужие люди</i></b> 😁\n\n<b>Таблица постепенно заполняется:</b>\n<code>${
-				dataAboutConferenceUsers.firstName
-			} ${dataAboutConferenceUsers.middleName}</code>\n\n${
+			}\n\n<b>Отлично!</b>👌\nТеперь мы не <b><i>чужие люди</i></b> 😁\n\n${
 				dataAboutConferenceUsers.careerName == ""
 					? "Сейчас укажите вашу <b>должность</b> 🤔"
 					: `<b>Выбранная должность:</b>\n<code>${dataAboutConferenceUsers.careerName}</code>\n\nВпишите <b>измененную</b> должность 🧐`
@@ -2113,13 +2353,9 @@ async function getRegionConf(chatId) {
 		bot.editMessageText(
 			`<b><i>Этап 3/6  •  Регион</i></b> ${
 				dataAboutConferenceUsers.region == "" ? "" : "✅"
-			}\n\n<b><code>${dataAboutConferenceUsers.firstName} ${
-				dataAboutConferenceUsers.middleName
-			}</code>\nДолжность: <code>${
-				dataAboutConferenceUsers.careerName
-			}</code></b>\n\nСупер, <b>продолжаем!</b>👍\n${
+			}\n\nСупер, <b>продолжаем!</b>👍\n${
 				dataAboutConferenceUsers.region == ""
-					? "А теперь ваш <b>регион</b> 😁"
+					? "\nА теперь ваш <b>регион</b> 😁"
 					: `\n<b>Текущий регион:</b>\n<code>${dataAboutConferenceUsers.region}</code>\n\nИзмените и напишите <b>регион</b> 😊`
 			}✍️`,
 			{
@@ -2158,15 +2394,9 @@ async function getCityConf(chatId) {
 		bot.editMessageText(
 			` <b><i>Этап 4/6  •  Город</i></b> ${
 				dataAboutConferenceUsers.city == "" ? "" : "✅"
-			}\n\n<b><code>${dataAboutConferenceUsers.firstName} ${
-				dataAboutConferenceUsers.middleName
-			}</code>\nДолжность: <code>${
-				dataAboutConferenceUsers.careerName
-			}</code>\nРегион: <code>${
-				dataAboutConferenceUsers.region
-			}</code></b>\n\n<b>Прекрасно</b>, просто <b>замечательно!</b> 🤩\n\n${
+			}\n\n<b>Прекрасно</b>, просто <b>замечательно!</b> 🤩\n\n${
 				dataAboutConferenceUsers.city == ""
-					? "Какой регион без <b>города?</b> 😅\nПожалуйста, напишите <b>его</b> 🙏"
+					? "Но какой регион без <b>города?</b> 😅\nПожалуйста, напишите <b>его</b> 🙏"
 					: `<b>Выбранный город:</b>\n<code>${dataAboutConferenceUsers.city}</code>\n\nНапишите свой <b>город снова</b> 👌`
 			}✍️`,
 			{
@@ -2205,15 +2435,7 @@ async function getInstitutionConf(chatId) {
 		bot.editMessageText(
 			`<b><i>Этап 5/6  •  Учреждение</i></b> ${
 				dataAboutConferenceUsers.institution == "" ? "" : "✅"
-			}\n\n<b><code>${dataAboutConferenceUsers.firstName} ${
-				dataAboutConferenceUsers.middleName
-			}</code>\nДолжность: <code>${
-				dataAboutConferenceUsers.careerName
-			}</code>\nРегион: <code>${
-				dataAboutConferenceUsers.region
-			}</code>\nГород: <code>${
-				dataAboutConferenceUsers.city
-			}</code></b>\n\nОсталось совсем <b>немного!</b> 🤏\n\n${
+			}\n\nОсталось совсем <b>немного!</b> 🤏\n\n${
 				dataAboutConferenceUsers.institution == ""
 					? "А как же <b>учебное заведение?</b> 🤔"
 					: `<b>Текущее учреждение:</b>\n<code>${dataAboutConferenceUsers.institution}</code>\n\nВпишите <b>изменое</b> учебное заведение 😉`
@@ -2254,17 +2476,7 @@ async function getEMailConf(chatId) {
 		bot.editMessageText(
 			`<b><i>Этап 6/6  •  E-mail</i></b> ${
 				dataAboutConferenceUsers.mail == "" ? "" : "✅"
-			}\n\n<b><code>${dataAboutConferenceUsers.firstName} ${
-				dataAboutConferenceUsers.middleName
-			}</code>\nДолжность: <code>${
-				dataAboutConferenceUsers.careerName
-			}</code>\nРегион: <code>${
-				dataAboutConferenceUsers.region
-			}</code>\nГород: <code>${
-				dataAboutConferenceUsers.city
-			}</code>\nУчреждение: <code>${
-				dataAboutConferenceUsers.institution
-			}</code></b>\n\nИии.. <b>Главный</b> вопрос!🧐 \n\n${
+			}\n\nИии.. <b>Финальный</b> вопрос!🧐 \n\n${
 				dataAboutConferenceUsers.mail == ""
 					? "<b>Пример:</b>\n<code>originalno@yandex.ru</code>\n\nПотребуется ваш <b>E-mail</b> 🙏"
 					: `<b>Указанный E-mail:</b>\n<code>${dataAboutConferenceUsers.mail}</code>\n\nНапишите <b>новую</b> Эл. почту 😀`
@@ -2311,7 +2523,7 @@ async function endOfRegistrationConf(chatId) {
 				: false
 		}`;
 		bot.editMessageText(
-			`<b>❗Проверьте ВСЕ пункты❗\n\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\nДолжность: <code>${dataAboutConferenceUsers.careerName}</code>\nРегион: <code>${dataAboutConferenceUsers.region}</code>\nГород: <code>${dataAboutConferenceUsers.city}</code>\nУчреждение: <code>${dataAboutConferenceUsers.institution}</code>\nE-mail: <code>${dataAboutConferenceUsers.mail}</code></b>\n\n<b>Поздравляю вас!</b> 🥳👏\n\nРегистрация на проект - <b>пройдена!</b> ✅😉\n\n<b>- Есть ошибки? ❌\nВернитесь</b> и <b>измените</b> данные!👌
+			`<b>Ваша анкета:\n\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\nДолжность: <code>${dataAboutConferenceUsers.careerName}</code>\nРегион: <code>${dataAboutConferenceUsers.region}</code>\nГород: <code>${dataAboutConferenceUsers.city}</code>\nУчреждение: <code>${dataAboutConferenceUsers.institution}</code>\nE-mail: <code>${dataAboutConferenceUsers.mail}</code>\n\n❗Проверьте ВСЕ пункты❗\n\nЕсть ошибки? ❌\nВернитесь</b> и <b>измените</b> данные!👌
 			`,
 			{
 				parse_mode: "html",
@@ -2344,37 +2556,10 @@ async function StartAll() {
 	const timeFormat = /^\d{1,2}:\d{2}$/;
 
 	bot.onText(/=(.+)/, async (message, match) => {
-		let chatId = message.chat.id;
+		const chatId = message.chat.id;
 		if (chatId == qu1z3xId || chatId == stepanovId) {
 			textMessageForAllUsers = match[1];
-			try {
-				await bot.editMessageText(
-					`<b><i>📋 Создание объявления 📢\n\n</i>Объявление:\n</b>${textMessageForAllUsers}\n\n<b>Опубликовать объявление? 🧐❗</b>`,
-					{
-						parse_mode: "html",
-						chat_id: chatId,
-						message_id: usersData.find((obj) => obj.chatId === chatId)
-							.messageId,
-						reply_markup: {
-							inline_keyboard: [
-								[
-									{
-										text: "⬅️Назад",
-										callback_data: "adminMenuSendMessage",
-									},
-									{
-										text: "Создать ✅",
-										callback_data: "adminMenuSendMessage2",
-									},
-								],
-							],
-						},
-					}
-				);
-			} catch (error) {
-				console.log(error);
-				console.log(error);
-			}
+			adminMenuSendMessageChoosingParagraf(chatId);
 		}
 	});
 
@@ -2583,6 +2768,7 @@ async function StartAll() {
 				messageIdSayHi0: "",
 				messageIdSayHi1: "",
 				messageIdSayHi2: "",
+				weekday: "",
 				callOnLessonIn5minutes: false,
 				callOnLessonIn10minutes: false,
 				callOnBreakIn5minutes: false,
@@ -2618,7 +2804,6 @@ async function StartAll() {
 			console.log(
 				`\n${day} ${weekDayNames[dayW]} | text | ${message.from.first_name} ${message.from.username} <${chatId}>  -  "${text}"`
 			);
-			console.log(usersData.find((obj) => obj.chatId === chatId));
 
 			if (editMode) {
 				editMode = false;
@@ -2658,6 +2843,28 @@ async function StartAll() {
 			) {
 				dataAboutConferenceUsers.mail = text;
 				endOfRegistrationConf(chatId);
+			} else if (
+				dataAboutConferenceUsers &&
+				dataAboutConferenceUsers.actionInBot == 8
+			) {
+				feedbacksConf.push({
+					firstName: firstName,
+					text: text,
+				});
+				bot.editMessageText(
+					"<b>Мы учтем ваше сообщение! 😀\nСпасибо за обратную связь! 😉❤️</b>",
+					{
+						parse_mode: "html",
+						chat_id: chatId,
+						message_id: conferenceData.find(
+							(obj) => obj.chatId === chatId
+						).messageId,
+					}
+				);
+
+				setTimeout(() => {
+					menuConf(chatId);
+				}, 4000);
 			}
 
 			//? КОМАНДЫ
@@ -2759,7 +2966,6 @@ async function StartAll() {
 
 				//?  приветствие и запись на конференцию
 
-				case "Cc":
 				case "/start conference":
 					bot.deleteMessage(chatId, messageId_user);
 					startConference(chatId, firstName);
@@ -2819,6 +3025,7 @@ async function StartAll() {
 					className: "Не определен",
 					messageId: query.message.message_id,
 					messageIdother: "",
+					weekday: "",
 					callOnLessonIn5minutes: false,
 					callOnLessonIn10minutes: false,
 					callOnBreakIn5minutes: false,
@@ -2983,32 +3190,45 @@ async function StartAll() {
 				//? ДЕНЬ НЕДЕЛИ
 
 				case "mon":
-					weekday = 1;
+					dataAboutUser.weekday = 1;
 					RaspisanieText(chatId);
 					break;
 				case "tue":
-					weekday = 2;
+					dataAboutUser.weekday = 2;
 					RaspisanieText(chatId);
 					break;
 				case "wen":
-					weekday = 3;
+					dataAboutUser.weekday = 3;
 					RaspisanieText(chatId);
 					break;
 				case "thu":
-					weekday = 4;
+					dataAboutUser.weekday = 4;
 					RaspisanieText(chatId);
 					break;
 				case "fri":
-					weekday = 5;
+					dataAboutUser.weekday = 5;
 					RaspisanieText(chatId);
 					break;
 				case "today":
-					weekday = dayW;
+					dataAboutUser.weekday = dayW;
 					RaspisanieText(chatId);
 					break;
 				case "tomorrow":
-					if (dayW == 6) weekday = 0;
-					else if (dayW != 6) weekday = ++dayW;
+					if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
+					else if (dataAboutUser.weekday != 6)
+						dataAboutUser.weekday = dayW + 1;
+					RaspisanieText(chatId);
+					break;
+				case "nextweekday":
+					if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
+					else if (dataAboutUser.weekday < 6)
+						dataAboutUser.weekday = ++dataAboutUser.weekday;
+					RaspisanieText(chatId);
+					break;
+				case "previousweekday":
+					if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
+					else if (dataAboutUser.weekday > 0)
+						dataAboutUser.weekday = --dataAboutUser.weekday;
 					RaspisanieText(chatId);
 					break;
 
@@ -3021,9 +3241,10 @@ async function StartAll() {
 					break;
 				case "exit":
 					editMode = false;
-					if (dataAboutConferenceUsers) {
+					if (dataAboutUser) dataAboutUser.weekday = dayW;
+					if (dataAboutConferenceUsers)
 						dataAboutConferenceUsers.actionInBot = 7;
-					}
+
 					try {
 						menuHome(chatId);
 					} catch (error) {
@@ -3355,6 +3576,28 @@ async function StartAll() {
 				case "conferencedatalist":
 					RegistryUsersData(chatId, 2);
 					break;
+				case "feedbacksconflist":
+					RegistryUsersData(chatId, 3);
+					break;
+				case "p0":
+					numberArr = 0;
+					adminMenuSendMessageChoosingParagraf(chatId);
+					break;
+				case "p1":
+					numberArr = 1;
+					adminMenuSendMessageChoosingParagraf(chatId);
+					break;
+				case "p2":
+					numberArr = 2;
+					adminMenuSendMessageChoosingParagraf(chatId);
+					break;
+				case "p3":
+					numberArr = 3;
+					adminMenuSendMessageChoosingParagraf(chatId);
+					break;
+				case "adminmenusendmessageend":
+					adminMenuSendMessageEnd(chatId);
+					break;
 
 				// REMINDERS
 
@@ -3369,27 +3612,16 @@ async function StartAll() {
 					break;
 				case "deleteallreminder":
 					try {
-						let warningText = "";
-						if (
-							remindersData.filter((obj) => obj.chatId === chatId)
-								.length == 1
-						) {
-							warningText = `Твой список из _1_ заметки будет удален\\!`;
-						} else if (
-							remindersData.filter((obj) => obj.chatId === chatId)
-								.length > 1
-						) {
-							warningText = `Твой список из _${
-								remindersData.filter((obj) => obj.chatId === chatId)
-									.length
-							}_ заметок будет удален\\!`;
-						}
-
 						bot.editMessageText(
-							`*_🔔 Удаление напоминаний ❌\n\n❗ВНИМАНИЕ❗_\n\nТвой список из _${
+							`*_🔔 Удаление напоминаний ❌\n\n❗ВНИМАНИЕ❗_*\n\nТвой список из *_${
 								remindersData.filter((obj) => obj.chatId === chatId)
 									.length
-							}_ заметок будет удален\\!\n\nДействительно _УДАЛИТЬ_ список? 🧐❗*`,
+							} ${
+								remindersData.filter((obj) => obj.chatId === chatId)
+									.length == 1
+									? "заметки"
+									: "заметок"
+							}_* будет *удален*\\!\n\nДействительно *_УДАЛИТЬ_* список? 🧐❗`,
 							{
 								parse_mode: "MarkdownV2",
 								chat_id: chatId,
@@ -3498,7 +3730,7 @@ async function StartAll() {
 				case "senduserblank":
 					try {
 						bot.editMessageText(
-							`Ваша анкета <b>успешно</b> отпралена! ✅\n\nCпасибо вам за <b>уделённое</b> время!🙏\n<b>Встретимся на конференции!</b>😄 `,
+							`<b>Поздравляю вас!</b> 🥳👏\nВаша анкета <b>успешно</b> отпралена! ✅\n\nCпасибо вам за <b>уделённое</b> время!🙏\n<b>Встретимся на конференции!</b>😄 `,
 							{
 								parse_mode: "html",
 								chat_id: chatId,
@@ -3516,6 +3748,12 @@ async function StartAll() {
 					break;
 				case "menuConf":
 					menuConf(chatId);
+					break;
+				case "posterconf":
+					posterConf(chatId);
+					break;
+				case "feedbackconf":
+					feedbackConf(chatId);
 					break;
 				default:
 					break;
