@@ -4,13 +4,6 @@ const TOKEN = "6989513059:AAG5bGQJln05r9KEFkgu6frNB-IpDddrHlg";
 const bot = new TelegramBot(TOKEN, { polling: false });
 const qu1z3xId = "923690530";
 
-async function sendDataAboutText(firstName, userName, chatId, text) {
-	await bot.sendMessage(
-		qu1z3xId,
-		`<b> text | Текст\n\n${firstName} @${userName}</b><i>\nId: <code>${chatId}</code>\n\n"${text}"</i>`,
-		{ parse_mode: "html", disable_notification: true }
-	);
-}
 async function sendDataAboutButton(firstName, userName, chatId, data) {
 	await bot.sendMessage(
 		qu1z3xId,
@@ -35,7 +28,6 @@ async function sendDataAboutError(chatId, textAboutError) {
 
 //? ЭКСПОРТ ФУНКЦИЙ В index.js
 
-export { sendDataAboutText };
 export { sendDataAboutButton };
 export { sendDataAboutError };
 export { sendDataAboutAction };
