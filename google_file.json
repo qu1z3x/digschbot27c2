@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "digschraspisanie",
+  "private_key_id": "051704ddd14536a0a7a91e3cf252f6dc21d0f143",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQDu/aPOMQyeyUTV\nWv9aT2h7vt90Ren2kkoehvH0PH0xU5XN68NgsyLkCfaWpdlZVdk34/0kupPjsvIP\nZOeHOGoJtEtGNmCcwcFLAbmlB5X0+k8hLG0ysXWw8a8N63rXAp6/K9CEl7h9fvR/\nGPHJkAKBpkBLsZn8xEatH60WDfkS/KKgxhhwNPSTxJ6XPwRa9FOuNcPgI2b7wvOD\nUhc5dHHJ56Nb7E5TaLDC+fj0F/JY+MuIWFjOYvv2bGfaXyPVSqVEhtayvTNR3qq/\n0sAHQksr29ROQktr0e1GVgmBJd9rZDDh6/NYV5QoMYcuNiRb5CwlT++DGUEIp+ss\naiZDQbDDAgMBAAECgf9RmFBm0hliAiQxykcBpOCFF2t7HsZomjRISdxawSPHPsJk\nbGH3eYKCCA02HpIWfdqnTFglxkpm7I2dZ4mk1vxGpMDziLOybphefL8JLVfzdGMA\nGOeSMUxFLzpWQvAQgZEhvOFHaEaiSko9CI8Pu3mLYvirpNfps6k8SfcfNrOLZIGw\nFtf5w1Iqfup4vWYaM47uUAFjGmmpGt1NHPGDBDHm/XF9NiOslVJi0K61yvhBg4l+\nRpiFkQZL8vysSeGejwVhxEw1UlgSjsFC7EALmFV4D7wCLQ4/vK5qVHCEt+zV7nUD\ngx4dmwcaN2UdBegXI/oQg33itWTNZqJPXrMYRvECgYEA977IriWjtZZKf4ZwMCvx\nIg2p1QZkzfLDlWuFCPXqrQeJs4kfRivjGUgseSlLMkkdI9kV/i2b1RoM0UYd4spz\nwOrWjgQxdA+8h/I9zAiF/9jIan0VIklF0+fFYcUXZxC/XOD4CjCNk8uYA+6O6FtE\nr1oFmM2xYNUMwOJal4J+go0CgYEA9vQuoHdyumtccBeskyFIHmGeXHX/G18XulI9\nfSwfIVYSKMsgv0QH3UyQ69uZEdOoQnygvoxdfzuQWAUPVB5puXa52uTK+ixGQFBt\nRo+u9D6zMK14JiSlBPxV76fPgkrtz5dK4WhECCdrqMUpBpbjh6cDzV5+BtY5b/3l\njELi1I8CgYB1jdB5WaDRlAurcSYgpWkYqHUSgKMqWevWJZuNgeqlybLcPs9ZI4/x\nuh5oK2Dj7m9mSCa4YfnUZzT3xBaAO2IrgwLlhjXVBXaG5znNa6nxmXKXnNx/VVdN\n0mcFGlkdbYPv1Uu8wgcbvvpVu0eSF2SC8+s98zQcZ1tS1tT3mVLgLQKBgB6jjwFj\nsH1GgrJ5jXS3pV33mJE6Jot70dLRD0XvanFVX21mPkrcoukm7bgFh8k5bF/LXJon\nihYWCsOQ5ST3nQBgpZBt4G0HfzPNhrFBdGBjQxIgA48f7sVelT7loA43Q6gEykqL\nCB3G3kmTJJLnt5UF+KfLOHGatIebhZZQWhorAoGBAOgBvJ1V87Weyj/DBD9AmmJW\nfnKwDmZPHqckeTPfyt1/nwxNL+9/OQyf14mDOwJxjsSw1OuxbA/FqJhFVq7AenQx\nQcsK3YRXku3QhwtSAUj/4SDVw/ktKjxu4U2gWW/ggRpTqBMGHrVzOYoS+D5dSqUG\ngnJj6sCjVNVr7zNE0TOJ\n-----END PRIVATE KEY-----\n",
+  "client_email": "digschraspisanie@digschraspisanie.iam.gserviceaccount.com",
+  "client_id": "110972796505545404589",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/digschraspisanie%40digschraspisanie.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

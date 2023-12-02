@@ -1,0 +1,987 @@
+
+		
+let conferenceData = [];
+let feedbacksConf = [];
+
+		{
+								text: "Делегаты 🎓",
+								callback_data: "conferencedatalist",
+							},
+			
+			
+
+
+			//! ФУНКЦИОНАЛ ДЛЯ ЗАПИСИ НА КОНФЕРЕНЦИЮ ФУНКЦИИ
+			
+			async function RegistryUsersData(chatId, listNum) {
+	try {
+		let text = "";
+
+		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+		
+		if (listNum == 2) {
+			let countConf = 0;
+			for (let i = 0; i < conferenceData.length; i++) {
+				if (conferenceData[i].registrationIsDone) {
+					text += `[${i + 1}] <code>${conferenceData[i].lastName} ${
+						conferenceData[i].firstName
+					} ${conferenceData[i].middleName}</code>\n• Должность:  <code>${
+						conferenceData[i].careerName
+					}</code>\n• Регион:  <code>${
+						conferenceData[i].region
+					}</code>\n• Город:  <code>${
+						conferenceData[i].city
+					}</code>\n• Учреждение:  <code>${
+						conferenceData[i].institution
+					}</code>\n• Почта:  <code>${conferenceData[i].mail}</code>\n\n`;
+					countConf++;
+				}
+			}
+
+			bot.editMessageText(
+				`<b><i>🎓 Участники конференции 🤠</i>\n\n${
+					countConf > 0
+						? `Кликом копируется инфа❗\n\n<i>Данные об участниках:\n\n${text}</i>Всего: ${countConf}`
+						: "Пока что пусто 🏝️"
+				}</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "Пройти 🪪",
+									callback_data: "startofregistration",
+								},
+								{
+									text: "Отзывы 📩",
+									callback_data: "feedbacksconflist",
+								},
+							],
+
+							[
+								{ text: "⬅️Назад", callback_data: "adminMenu" },
+								{
+									text: "Обновить🔄️",
+									callback_data: "conferencedatalist",
+								},
+							],
+						],
+					},
+				}
+			);
+		} else if (listNum == 3) {
+			let countConf = 0;
+			for (let i = 0; i < feedbacksConf.length; i++) {
+				text += `[${i + 1}] ${feedbacksConf[i].firstName}\n${
+					feedbacksConf[i].text
+				}\n\n`;
+				countConf++;
+			}
+
+			bot.editMessageText(
+				`<b><i>🧑‍🏫 Отзывы участников 📩\n\n${text}</i>Всего: ${countConf}</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "⬅️Назад",
+									callback_data: "conferencedatalist",
+								},
+								{
+									text: "Обновить🔄️",
+									callback_data: "conferencedatalist",
+								},
+							],
+						],
+					},
+				}
+			);
+		}
+		}}
+
+async function startConference(chatId, firstName) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+
+	let rndNum = Math.floor(Math.random() * stickers.length);
+	const dateNowHHNN = `${String(new Date().getHours()).padStart(
+		2,
+		"0"
+	)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+	if (dateNowHHNN < "12:00" && dateNowHHNN >= "06:00")
+		textToSayHello = "Доброе утро";
+	else if (dateNowHHNN < "17:00" && dateNowHHNN >= "12:00")
+		textToSayHello = "Добрый день";
+	else if (dateNowHHNN < "22:00" && dateNowHHNN >= "17:00")
+		textToSayHello = "Добрый вечер";
+	else if (dateNowHHNN >= "22:00" || dateNowHHNN < "6:00")
+		textToSayHello = "Доброй ночи";
+
+	try {
+		await bot.sendSticker(chatId, stickers[rndNum]);
+
+		await bot.sendMessage(
+			chatId,
+			`*${textToSayHello}, ${firstName}\\! [✌️](https://t.me/${BotName}/?start=minidetail1)*`,
+			{
+				parse_mode: "MarkdownV2",
+				disable_web_page_preview: true,
+			}
+		);
+
+		await bot.sendMessage(chatId, `ㅤ`).then((message) => {
+			dataAboutConferenceUsers.messageId = message.message_id;
+		});
+		startOfRegistration(chatId);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function menuConf(chatId, createMessage) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+
+	try {
+		dataAboutConferenceUsers.actionInBot = 1;
+		if (
+			(!createMessage && dataAboutConferenceUsers.registrationIsDone) ||
+			chatId == qu1z3xId
+		) {
+			bot.editMessageText(`<b>С чем я могу вам помочь? 🤔</b>`, {
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `🪪 Ваша анкета 🙍‍♂️`,
+
+								callback_data: "startofregistration",
+							},
+						],
+						[
+							{
+								text: `Программа ⏰`,
+								callback_data: "posterconf",
+							},
+							{
+								text: `Отзыв 📩`,
+								callback_data: "feedbackconf",
+							},
+						],
+						[
+							{
+								text: `${
+									chatId == qu1z3xId || chatId == stepanovId
+										? "Основной бот 🤖"
+										: ""
+								}`,
+								callback_data: "exit",
+							},
+						],
+					],
+				},
+			});
+		} else if (
+			!createMessage &&
+			!dataAboutConferenceUsers.registrationIsDone
+		) {
+			bot.editMessageText(
+				`<b>Я вас еще не знаю! ☹️\n\nПожалуйста завершите регистрацию❗</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: dataAboutConferenceUsers.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: `🪪 Регистрация 🙍‍♂️`,
+									callback_data: "startofregistration",
+								},
+							],
+							[
+								{
+									text: `Программа ⏰`,
+									url: `https://t.me/${BotName}`,
+								},
+
+								{
+									text: `Отзыв 📩`,
+									url: `https://t.me/${BotName}`,
+								},
+							],
+							[
+								{
+									text: `${
+										chatId == qu1z3xId || chatId == stepanovId
+											? "Основной бот 🤖"
+											: ""
+									}`,
+									callback_data: "exit",
+								},
+							],
+						],
+					},
+				}
+			);
+		} else if ((createMessage, dataAboutConferenceUsers.registrationIsDone)) {
+			bot.sendMessage(chatId, `<b>С чем я могу вам помочь? 🤔</b>`, {
+				parse_mode: "html",
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `🪪 Ваша анкета 🙍‍♂️`,
+								callback_data: "startofregistration",
+							},
+						],
+						[
+							{
+								text: `Программа ⏰`,
+								callback_data: "posterconf",
+							},
+							{
+								text: `Отзыв 📩`,
+								callback_data: "feedbackconf",
+							},
+						],
+						[
+							{
+								text: `${
+									chatId == qu1z3xId || chatId == stepanovId
+										? "Основной бот 🤖"
+										: ""
+								}`,
+								callback_data: "exit",
+							},
+						],
+					],
+				},
+			});
+		} else if (
+			(createMessage, !dataAboutConferenceUsers.registrationIsDone)
+		) {
+			bot.sendMessage(
+				chatId,
+				`<b>Я вас еще не знаю! ☹️\n\nПожалуйста завершите регистрацию❗</b>`,
+				{
+					parse_mode: "html",
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: `🪪 Регистрация 🙍‍♂️`,
+									callback_data: "startofregistration",
+								},
+							],
+							[
+								{
+									text: `Программа ⏰`,
+									url: `https://t.me/${BotName}`,
+								},
+								{
+									text: `Отзыв 📩`,
+									url: `https://t.me/${BotName}`,
+								},
+							],
+							[
+								{
+									text: `${
+										chatId == qu1z3xId || chatId == stepanovId
+											? "Основной бот 🤖"
+											: ""
+									}`,
+									callback_data: "exit",
+								},
+							],
+						],
+					},
+				}
+			);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function feedbackConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 8;
+		bot.editMessageText(
+			`<b>Есть положительные впечатления от мероприятия? Передайте их нам! 😉\n\nНапишите что вам понравилось! ✍️😆</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "⬅️В меню",
+								callback_data: "menuConf",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function posterConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		bot.editMessageText(
+			`<b>10:00 -10:05</b>\n
+Приветственное слово заместителя начальника Управления образования Администрации г.о. Мытищи
+Стреловой Евгении Ивановны (библиотека)
+\n<b>10.05 - 10.25</b>\n
+Выступление директора школы Данилиной Нины Сергеевны
+«Цифровые классы МБОУ СОШ №27: модель, риски и результаты» (библиотека)
+\n<b>10.25 - 10.50</b>\n
+Образовательное событие 1
+Посещение гибридного урока  
+Учитель иностранного языка (кабинеты уточняю) Манусаджян Инга Аветисовна
+Учитель русского языка (кабинеты уточняю) 
+Нюральская Александра Владимировна
+\n<b>10.50 – 12.00</b>\n
+Образовательное событие 2
+Деловая игра: «Дефициты цифровых классов и способы их решения» (библиотека)
+Сотрудники комплекса
+\n<b>12.00 - 12.20</b>\n
+Кофе-брейк ( медиатека, 1 этаж)
+\n<b>12.20 - 12.50</b>\n
+Образовательное событие 3
+Выступление «Цифровые инструменты для реализации проекта Цифровые классы Подмосковья: чат-бот, онлайн-платформа, Сферум, студия записи онлайн-уроков» (библиотека)
+Методист кафедры цифровой трансформации Степанов Александр Николаевич
+\n<b>12.50 - 13.00</b>\n
+Подведение итогов (библиотека)
+`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "⬅️В меню",
+								callback_data: "menuConf",
+							},
+							{
+								text: "Вопрос ❓",
+								url: "https://t.me/AlexandrNikolaevich27",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function startOfRegistration(chatId, usersBlank = false) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		if (!usersBlank) {
+			dataAboutConferenceUsers.actionInBot = 1;
+			await bot.editMessageText(
+				`<b>Я рад видеть вас</b> на втором дне педагогических интенсивов<b> <i>«Цифровые классы: гибридное обучение на практике»</i></b> в Школе №27 города Мытищи! Я <b>чат-бот</b> помощник в <b>цифровых классах</b>. Сегодня я буду <b>помогать</b> вам.\n\nЯ попрошу вас <b>зарегистрироваться и ответить</b> на некоторые мои вопросы.\n\n- Если <b>введены неверные</b> данные, <b><i>всегда</i></b> можно вернуться на <b>предыдущий</b> этап или пройти регистрацию <b>вновь!</b> 😉`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: dataAboutConferenceUsers.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "⬅️В меню",
+									callback_data: "menuConf",
+								},
+								{
+									text: "Продолжить ✅",
+									callback_data: "initials",
+								},
+							],
+						],
+					},
+				}
+			);
+		} else if (usersBlank) {
+			dataAboutConferenceUsers.actionInBot = 1;
+			await bot.editMessageText(
+				`<b>Вы уже зарегистрированы! 😉</b>\n\n<b>Ваша анкета:</b>\n<i>Проверьте корректность❗</i><b>\n\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\nДолжность: <code>${dataAboutConferenceUsers.careerName}</code>\nРегион: <code>${dataAboutConferenceUsers.region}</code>\nГород: <code>${dataAboutConferenceUsers.city}</code>\nУчреждение: <code>${dataAboutConferenceUsers.institution}</code>\nE-mail: <code>${dataAboutConferenceUsers.mail}</code>\n\nИзменить данные? 🧐</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: dataAboutConferenceUsers.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "⬅️ В меню",
+									callback_data: "menuConf",
+								},
+								{
+									text: "Изменить 🔄️",
+									callback_data: "initials",
+								},
+							],
+						],
+					},
+				}
+			);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getInitialsConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+
+	try {
+		dataAboutConferenceUsers.actionInBot = 1;
+		bot.editMessageText(
+			`<b><i>Этап 1/6  •  Инициалы</i></b> ${
+				dataAboutConferenceUsers.middleName == "" ? "" : "✅"
+			}\n\nИтак, приступим к <b>знакомству!</b> 👋😉\n\n${
+				dataAboutConferenceUsers.middleName == ""
+					? "<b>Пример (ФИО)</b>:\n<code>Петров Пётр Петрович</code>\n\nНапишите ниже <b>свои инициалы</b> 😀"
+					: `<b>Указаное ФИО:</b>\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\n\nНапишите <b>изменённые</b> данные 🤔`
+			}✍️`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "⬅️ Назад",
+								callback_data: "startofregistration",
+							},
+							{
+								text: `${
+									dataAboutConferenceUsers.middleName != ""
+										? "Вперед ➡️ "
+										: ""
+								}`,
+								callback_data: "careername",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getCareerNameConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 2;
+
+		bot.editMessageText(
+			`<b><i>Этап 2/6  •  Должность</i></b> ${
+				dataAboutConferenceUsers.careerName == "" ? "" : "✅"
+			}\n\n<b>Отлично!</b>👌\nТеперь мы не <b><i>чужие люди</i></b> 😁\n\n${
+				dataAboutConferenceUsers.careerName == ""
+					? "Сейчас укажите вашу <b>должность</b> 🤔"
+					: `<b>Выбранная должность:</b>\n<code>${dataAboutConferenceUsers.careerName}</code>\n\nВпишите <b>измененную</b> должность 🧐`
+			}✍️`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️ Назад", callback_data: "initials" },
+							{
+								text: `${
+									dataAboutConferenceUsers.careerName != ""
+										? "Вперед ➡️ "
+										: ""
+								}`,
+								callback_data: "region",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getRegionConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 3;
+
+		bot.editMessageText(
+			`<b><i>Этап 3/6  •  Регион</i></b> ${
+				dataAboutConferenceUsers.region == "" ? "" : "✅"
+			}\n\nСупер, <b>продолжаем!</b>👍\n${
+				dataAboutConferenceUsers.region == ""
+					? "\nА теперь ваш <b>регион</b> 😁"
+					: `\n<b>Текущий регион:</b>\n<code>${dataAboutConferenceUsers.region}</code>\n\nИзмените и напишите <b>регион</b> 😊`
+			}✍️`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️ Назад", callback_data: "careername" },
+							{
+								text: `${
+									dataAboutConferenceUsers.region != ""
+										? "Вперед ➡️"
+										: ""
+								}`,
+								callback_data: "city",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getCityConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 4;
+
+		bot.editMessageText(
+			` <b><i>Этап 4/6  •  Город</i></b> ${
+				dataAboutConferenceUsers.city == "" ? "" : "✅"
+			}\n\n<b>Прекрасно</b>, просто <b>замечательно!</b> 🤩\n\n${
+				dataAboutConferenceUsers.city == ""
+					? "Но какой регион без <b>города?</b> 😅\nПожалуйста, напишите <b>его</b> 🙏"
+					: `<b>Выбранный город:</b>\n<code>${dataAboutConferenceUsers.city}</code>\n\nНапишите свой <b>город снова</b> 👌`
+			}✍️`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️ Назад", callback_data: "region" },
+							{
+								text: `${
+									dataAboutConferenceUsers.city != ""
+										? "Вперед ➡️"
+										: ""
+								}`,
+								callback_data: "institution",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getInstitutionConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 5;
+
+		bot.editMessageText(
+			`<b><i>Этап 5/6  •  Учреждение</i></b> ${
+				dataAboutConferenceUsers.institution == "" ? "" : "✅"
+			}\n\nОсталось совсем <b>немного!</b> 🤏\n\n${
+				dataAboutConferenceUsers.institution == ""
+					? "А как же <b>учебное заведение?</b> 🤔"
+					: `<b>Текущее учреждение:</b>\n<code>${dataAboutConferenceUsers.institution}</code>\n\nВпишите <b>изменое</b> учебное заведение 😉`
+			}✍️`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️ Назад", callback_data: "city" },
+							{
+								text: `${
+									dataAboutConferenceUsers.institution != ""
+										? "Вперед ➡️"
+										: ""
+								}`,
+								callback_data: "mail",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function getEMailConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 6;
+
+		bot.editMessageText(
+			`<b><i>Этап 6/6  •  E-mail</i></b> ${
+				dataAboutConferenceUsers.mail == "" ? "" : "✅"
+			}\n\nИии.. <b>Финальный</b> вопрос!🧐 \n\n${
+				dataAboutConferenceUsers.mail == ""
+					? "<b>Пример:</b>\n<code>originalno@yandex.ru</code>\n\nПотребуется ваш <b>E-mail</b> 🙏"
+					: `<b>Указанный E-mail:</b>\n<code>${dataAboutConferenceUsers.mail}</code>\n\nНапишите <b>новую</b> Эл. почту 😀`
+			}✍️`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️ Назад", callback_data: "institution" },
+							{
+								text: `${
+									dataAboutConferenceUsers.mail != "" ? "Итог ➡️" : ""
+								}`,
+								callback_data: "endоfкegistration",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function endOfRegistrationConf(chatId) {
+	const dataAboutConferenceUsers = conferenceData.find(
+		(obj) => obj.chatId === chatId
+	);
+	try {
+		dataAboutConferenceUsers.actionInBot = 7;
+
+		dataAboutConferenceUsers.registrationIsDone = `${
+			dataAboutConferenceUsers.middleName != "" &&
+			dataAboutConferenceUsers.careerName != "" &&
+			dataAboutConferenceUsers.region != "" &&
+			dataAboutConferenceUsers.city != "" &&
+			dataAboutConferenceUsers.institution != "" &&
+			dataAboutConferenceUsers.mail != ""
+				? true
+				: false
+		}`;
+		bot.editMessageText(
+			`<b>Ваша анкета:\n\n<code>${dataAboutConferenceUsers.lastName} ${dataAboutConferenceUsers.firstName} ${dataAboutConferenceUsers.middleName}</code>\nДолжность: <code>${dataAboutConferenceUsers.careerName}</code>\nРегион: <code>${dataAboutConferenceUsers.region}</code>\nГород: <code>${dataAboutConferenceUsers.city}</code>\nУчреждение: <code>${dataAboutConferenceUsers.institution}</code>\nE-mail: <code>${dataAboutConferenceUsers.mail}</code>\n\n❗Проверьте ВСЕ пункты❗\n\nЕсть ошибки? ❌\nВернитесь</b> и <b>измените</b> данные!👌
+			`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: dataAboutConferenceUsers.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️ Изменить", callback_data: "mail" },
+							{
+								text: `Отправить ✅`,
+								callback_data: "senduserblank",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+
+startAll(){
+//? конференция
+		bot.onText(/(.+) (.+) (.+)/, async (message, match) => {
+			const chatId = message.chat.id;
+			const dataAboutConferenceUsers = conferenceData.find(
+				(obj) => obj.chatId === chatId
+			);
+
+			if (
+				dataAboutConferenceUsers &&
+				dataAboutConferenceUsers.actionInBot == 1
+			) {
+				try {
+					dataAboutConferenceUsers.lastName = match[1];
+					dataAboutConferenceUsers.firstName = match[2];
+					dataAboutConferenceUsers.middleName = match[3];
+
+					getCareerNameConf(chatId);
+				} catch (error) {
+					console.log(error);
+				}
+			}
+		});
+		
+		
+		
+		bot.on("message", async (message) => {
+			const chatId = message.chat.id;
+			const text = message.text;
+
+			let firstName = message.from.first_name;
+
+			const dataAboutConferenceUsers = conferenceData.find(
+				(obj) => obj.chatId === chatId
+			);
+			
+			if (
+				((text == "/start conference" || text == "Cc") &&
+					!dataAboutUser &&
+					!dataAboutConferenceUsers) ||
+				((chatId == qu1z3xId || chatId == stepanovId) &&
+					!dataAboutUser &&
+					(text == "/start conference" || text == "Cc") &&
+					!dataAboutConferenceUsers)
+			) {
+				conferenceData.push({
+					chatId: chatId,
+					actionInBot: "",
+					messageId: "",
+					lastName: "", // фамилия
+					firstName: "", // имя
+					middleName: "", // отчество
+					careerName: "",
+					region: "",
+					city: "",
+					institution: "",
+					mail: "",
+					registrationIsDone: false,
+				});
+			}
+			
+			// КОНФЕРЕНЦИЯ
+
+				if (
+					dataAboutConferenceUsers &&
+					dataAboutConferenceUsers.actionInBot == 2
+				) {
+					dataAboutConferenceUsers.careerName = text;
+					getRegionConf(chatId);
+				} else if (
+					dataAboutConferenceUsers &&
+					dataAboutConferenceUsers.actionInBot == 3
+				) {
+					dataAboutConferenceUsers.region = text;
+					getCityConf(chatId);
+				} else if (
+					dataAboutConferenceUsers &&
+					dataAboutConferenceUsers.actionInBot == 4
+				) {
+					dataAboutConferenceUsers.city = text;
+					getInstitutionConf(chatId);
+				} else if (
+					dataAboutConferenceUsers &&
+					dataAboutConferenceUsers.actionInBot == 5
+				) {
+					dataAboutConferenceUsers.institution = text;
+					getEMailConf(chatId);
+				} else if (
+					dataAboutConferenceUsers &&
+					dataAboutConferenceUsers.actionInBot == 6
+				) {
+					dataAboutConferenceUsers.mail = text;
+					endOfRegistrationConf(chatId);
+				} else if (
+					dataAboutConferenceUsers &&
+					dataAboutConferenceUsers.actionInBot == 8
+				) {
+					feedbacksConf.push({
+						firstName: firstName,
+						text: text,
+					});
+					bot.editMessageText(
+						"<b>Мы учтем ваше сообщение! 😀\nСпасибо за обратную связь! 😉❤️</b>",
+						{
+							parse_mode: "html",
+							chat_id: chatId,
+							message_id: conferenceData.find(
+								(obj) => obj.chatId === chatId
+							).messageId,
+						}
+					);
+
+					setTimeout(() => {
+						menuConf(chatId);
+					}, 4000);
+				}
+
+
+				switch (text) {
+
+				//?  приветствие и запись на конференцию
+
+					case "Cc":
+					case "/start conference":
+						startConference(chatId, firstName);
+						break;
+
+					default:
+						setTimeout(() => {
+							if (
+								dataAboutConferenceUsers &&
+								dataAboutConferenceUsers.actionInBot == 1 &&
+								dataAboutConferenceUsers.middleName == ""
+							) {
+								bot.editMessageText(
+									"*❗Неверный формат\\! 🚫\n\n_Пример \\(ФИО\\):\n`Иванов Иван Иванович`_\n\nПожалуйста, перепишите, следуя примеру ✍️*",
+									{
+										parse_mode: "MarkdownV2",
+										chat_id: chatId,
+										message_id: dataAboutConferenceUsers.messageId,
+									}
+								);
+								dataAboutConferenceUsers.actionInBot = 1;
+							}
+						}, 1000);
+						break;}
+			
+			
+			
+			})
+			
+			bot.on("callback_query", (query) => {
+			const chatId = query.message.chat.id;
+			const data = query.data;
+			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+
+			const dataAboutConferenceUsers = conferenceData.find(
+				(obj) => obj.chatId === chatId
+			);
+			
+			
+			switch(data){
+			
+					// КОНФЕРЕНЦИЯ
+
+					case "startofregistration":
+						if (dataAboutConferenceUsers.registrationIsDone) {
+							startOfRegistration(chatId, true);
+						} else if (!dataAboutConferenceUsers.registrationIsDone) {
+							startOfRegistration(chatId);
+						}
+						break;
+					case "initials":
+						getInitialsConf(chatId);
+						break;
+					case "careername":
+						getCareerNameConf(chatId);
+						break;
+					case "region":
+						getRegionConf(chatId);
+						break;
+					case "city":
+						getCityConf(chatId);
+						break;
+					case "institution":
+						getInstitutionConf(chatId);
+						break;
+					case "mail":
+						getEMailConf(chatId);
+						break;
+					case "endоfкegistration":
+						endOfRegistrationConf(chatId);
+						break;
+					case "senduserblank":
+						try {
+							bot.editMessageText(
+								`<b>Поздравляю вас!</b> 🥳👏\nВаша анкета <b>успешно</b> отпралена! ✅\n\nCпасибо вам за <b>уделённое</b> время!🙏\n<b>Встретимся на конференции!</b>😄 `,
+								{
+									parse_mode: "html",
+									chat_id: chatId,
+									message_id: conferenceData.find(
+										(obj) => obj.chatId === chatId
+									).messageId,
+								}
+							);
+							setTimeout(() => {
+								menuConf(chatId, false);
+							}, 5000);
+						} catch (error) {
+							console.log(error);
+						}
+						break;
+					case "menuConf":
+						menuConf(chatId);
+						break;
+					case "posterconf":
+						posterConf(chatId);
+						break;
+					case "feedbackconf":
+						feedbackConf(chatId);
+						break;
+						case "conferencedatalist":
+						RegistryUsersData(chatId, 2);
+						break;
+					case "feedbacksconflist":
+						RegistryUsersData(chatId, 3);
+						break;
+					default:
+						break;
+				}
+			})
+
+}

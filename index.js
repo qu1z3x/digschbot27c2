@@ -1,6 +1,22 @@
 import TelegramBot from "node-telegram-bot-api";
 import cron from "node-cron";
-import fs from "fs";
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, get } from "firebase/database";
+
+const firebaseConfig = {
+	apiKey: "AIzaSyBy6yyzbKDNXslvbMo51uJMiCpcuL4CnJE",
+	authDomain: "digschraspisanie.firebaseapp.com",
+	databaseURL: "https://digschraspisanie-default-rtdb.firebaseio.com",
+	projectId: "digschraspisanie",
+	storageBucket: "digschraspisanie.appspot.com",
+	messagingSenderId: "831815158500",
+	appId: "1:831815158500:web:3059c65379b4317ff33af1",
+	measurementId: "G-9Z5EGQ2GBM",
+};
+const app = initializeApp(firebaseConfig);
+// Получение ссылки на базу данных Firebase Realtime Database
+const db = getDatabase(app);
+const dataRef = ref(db);
 
 const TOKENs = [
 	"6654105779:AAEnCdIzKS_cgJUg4rMY8yNM3LPP5iZ-d_A",
@@ -13,6 +29,7 @@ const bot = new TelegramBot(TOKEN, { polling: true });
 import { sendDataAboutButton } from "./tgterminal.js";
 import { sendDataAboutError } from "./tgterminal.js";
 import { sendDataAboutAction } from "./tgterminal.js";
+import { class10g, class11a, class11v, class11g, class11d } from "./sheets.js";
 
 const qu1z3xId = "923690530";
 const stepanovId = "5786876945";
@@ -22,6 +39,7 @@ let BotName = "digsch27_bot";
 
 let remindersData = []; // существующие заметки
 let usersData = []; // информация о пользователях
+let playersData = [];
 
 // Приветственные стикеры
 
@@ -42,9 +60,9 @@ bot.setMyCommands([
 
 const newsText = [
 	"",
-	"Новостей нет 😔",
-	`- Обновлен раздел с настройками ✅\n\n- Статистика сыгранных игр 👌\n\n- Объем всего функционала бота, упирается в +4000 строк кода <a href= "https://t.me/${BotName}/?start=minidetail5">🫡</a>\n\n- Я стал быстрее, во всех смыслах 🏎️\n\n- Максимальная нагрузка до 50 запросов в СЕКУНДУ 🤯`,
-	'МБОУ СОШ №27 | Школа с 2023г, разделена на два корпуса, но и в первом, и во втором царит классная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя здесь как одна большая семья, где дружба и знание всегда рядом. Также существует множество спортивных секций в обеих корпусах! \n\nСовсем недавно наша школа заняла 3-е место, в турнире "Кубок памяти А. З. Бакурова", сыграв со всеми школами в округе!',
+	"Новостей нет.. 🤔",
+	`- УРА! Актуальное расписание! 🤗\n\n- Обновлен раздел с настройками ✅\n\n- Статистика сыгранных игр 👌\n\n- Объем всего функционала бота, упирается в +4500 строк кода <a href= "https://t.me/${BotName}/?start=minidetail5">🫡</a>\n\n- Я стал быстрее, во всех смыслах 🏎️\n\n- Максимальная нагрузка до 50 запросов в СЕКУНДУ 🤯`,
+	'МБОУ СОШ №27 | Школа с 2023 года, разделена на два корпуса, но как в первом, так и во втором царит уникальная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя образуют единую большую семью, где дружба и знание всегда рядом. Также у нас существует множество спортивных секций в обоих корпусах!\n\nСовсем недавно наша школа заняла 3-е место в турнире "Кубок памяти А. З. Бакурова", сыграв со всеми школами в округе!',
 ];
 
 // Классы
@@ -75,21 +93,20 @@ const monthNames = [
 	"Декабря",
 ];
 
-const classes11 = [
-	"",
-	"1. Информатика - 220\n2. Математика - 315\n3. Русский язык - 210\n4. Физика - 301\n5. История - 205\n6. Английский язык - 310\n7. Физкультура - Спортзал",
-	"1. Физика - 301\n2. Русский язык - 210\n3. Информатика - 220\n4. Английский язык - 310\n5. История - 205\n6. Математика - 315",
-	"1. Математика - 220\n2. История - 315\n3. Физкультура - Спортзал\n4. Английский язык - 310\n5. Информатика - 205\n6. Физика - 301\n7.Русский язык - 210 ",
-	"1. Химия - 303\n2. Биология - 305\n3. География - 208\n4. Литература - 201\n5. Искусство - 307\n6. Технологии - 312\n7. Музыка - 304",
-	"1. Информатика - 220\n2. Математика - 315\n3. Русский язык - 210\n4. Физика - 301\n5. История - 205\n6. Английский язык - 310\n7. Физкультура - Спортзал",
-	"",
-];
+// const classes11 = [
+// 	"",
+// 	"1. Информатика - 220\n2. Математика - 315\n3. Русский язык - 210\n4. Физика - 301\n5. История - 205\n6. Английский язык - 310\n7. Физкультура - Спортзал",
+// 	"1. Физика - 301\n2. Русский язык - 210\n3. Информатика - 220\n4. Английский язык - 310\n5. История - 205\n6. Математика - 315",
+// 	"1. Математика - 220\n2. История - 315\n3. Физкультура - Спортзал\n4. Английский язык - 310\n5. Информатика - 205\n6. Физика - 301\n7.Русский язык - 210 ",
+// 	"1. Химия - 303\n2. Биология - 305\n3. География - 208\n4. Литература - 201\n5. Искусство - 307\n6. Технологии - 312\n7. Музыка - 304",
+// 	"1. Информатика - 220\n2. Математика - 315\n3. Русский язык - 210\n4. Физика - 301\n5. История - 205\n6. Английский язык - 310\n7. Физкультура - Спортзал",
+// 	"",
+// ];
 let textToSayHello = "",
 	// Raspisanie
 	month,
 	day,
 	dayW,
-	userStatus,
 	maxCountMiniDetails = 10,
 	// games
 	rndNum,
@@ -103,65 +120,90 @@ let textToSayHello = "",
 	],
 	textMessageForAllUsers;
 
+const newFunctionsNotification = [
+	"Напоминание о звонке за 5 минут? 🧐\nВ разделе Звонки - Уведомления! 🤗\n\n",
+	"Говорят, в Крестики-Нолики невозможно выиграть! 🧐\n\n",
+	"Плохая память? Давай я напомню! 😅\n\n",
+	"Актуальное расписание - актуально! ✌️\n\n",
+	"Какой процент побед у тебя в играх? 🧐\n\n",
+	"А правда, что в расписании подчеркивается текущий урок? 🤔\n\n",
+	"Попробуй найди хоть одну смайлик-пасхалку 😉\n\n",
+	"А что же я умею? ⬆️\n\n",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"",
+	"Нижнее предложение каждый раз разное❓\n\n",
+];
+
 const menuHomeText = [
-	`Чем я могу тебе пригодиться? [😉](https://t.me/${BotName}/?start=minidetail0)`,
-	`Чем я могу быть полезен? [🤓](https://t.me/${BotName}/?start=minidetail0)`,
-	`Чем я могу быть полезным? [🥸](https://t.me/${BotName}/?start=minidetail0)`,
-	`Чем я могу тебя облегчить? [🐵](https://t.me/${BotName}/?start=minidetail0)`,
-	`Чем я могу помочь сегодня? [🤖](https://t.me/${BotName}/?start=minidetail0)`,
-	`С чем я могу тебе помочь? [🤔](https://t.me/${BotName}/?start=minidetail0)`,
-	`В чем я могу быть полезен? [👾](https://t.me/${BotName}/?start=minidetail0)`,
-	`Как я могу тебя удовлетворить? [🐤](https://t.me/${BotName}/?start=minidetail0)`,
+	`Чем я могу тебе пригодиться? <a href="https://t.me/${BotName}/?start=minidetail0">😉</a>`,
+	`Чем я могу быть полезен? <a href="https://t.me/${BotName}/?start=minidetail0">🤓</a>`,
+	`Чем я могу быть полезным? <a href="https://t.me/${BotName}/?start=minidetail0">🥸</a>`,
+	`Чем я могу тебя облегчить? <a href="https://t.me/${BotName}/?start=minidetail0">🐵</a>`,
+	`Чем я могу помочь сегодня? <a href="https://t.me/${BotName}/?start=minidetail0">🤖</a>`,
+	`С чем я могу тебе помочь? <a href="https://t.me/${BotName}/?start=minidetail0">🤔</a>`,
+	`В чем я могу быть полезен? <a href="https://t.me/${BotName}/?start=minidetail0">👾</a>`,
+	`Как я могу тебя удовлетворить? <a href="https://t.me/${BotName}/?start=minidetail0">🐤</a>`,
 ];
 
 //?  ФУНКЦИИ
 
 async function menuHome(chatId, exit = true) {
 	rndNum = Math.floor(Math.random() * menuHomeText.length);
+	let rnd2 = Math.floor(Math.random() * newFunctionsNotification.length);
+
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 
 	try {
-		let adminMenuButtonText = "";
-		if (chatId == qu1z3xId || chatId == stepanovId) {
-			adminMenuButtonText = "💠 Управление 💠";
-		}
-
 		if (exit) {
-			await bot.editMessageText(`*${menuHomeText[rndNum]}*`, {
-				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
-				parse_mode: "MarkdownV2",
-				disable_web_page_preview: true,
-				reply_markup: {
-					inline_keyboard: [
-						[
-							{
-								text: "Расписание📚",
-								callback_data: "raspisanie",
-							},
-							{
-								text: "Звонки⏰",
-								callback_data: "calls",
-							},
+			await bot.editMessageText(
+				`<i>${newFunctionsNotification[rnd2]}</i><b>${menuHomeText[rndNum]}</b>`,
+				{
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					parse_mode: "HTML",
+					disable_web_page_preview: true,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "Расписание📚",
+									callback_data: "raspisanie",
+								},
+								{
+									text: "Звонки⏰",
+									callback_data: "calls",
+								},
+							],
+							[
+								{ text: "Развлечения🕹️", callback_data: "games" },
+								{ text: "Интересное❗", callback_data: "news" },
+							],
+							[
+								{ text: "Напоминания🗓️", callback_data: "reminders" },
+								{ text: "Настройки⚙️", callback_data: "options" },
+							],
+							[
+								{
+									text: `${
+										chatId == qu1z3xId || chatId == stepanovId
+											? "💠 Управление 💠"
+											: ""
+									}`,
+									callback_data: "adminMenu",
+								},
+							],
 						],
-						[
-							{ text: "Развлечения🕹️", callback_data: "games" },
-							{ text: "Интересно❗", callback_data: "news" },
-						],
-						[
-							{ text: "Напоминания🗓️", callback_data: "reminders" },
-							{ text: "Настройки⚙️", callback_data: "options" },
-						],
-						[
-							{
-								text: `${adminMenuButtonText}`,
-								callback_data: "adminMenu",
-							},
-						],
-					],
-				},
-			});
+					},
+				}
+			);
 		} else if (!exit) {
 			bot.sendMessage(
 				chatId,
@@ -191,7 +233,11 @@ async function menuHome(chatId, exit = true) {
 							],
 							[
 								{
-									text: `${adminMenuButtonText}`,
+									text: `${
+										chatId == qu1z3xId || chatId == stepanovId
+											? "💠 Управление 💠"
+											: ""
+									}`,
 									callback_data: "adminMenu",
 								},
 							],
@@ -209,15 +255,15 @@ async function menuHome(chatId, exit = true) {
 }
 
 async function rulesBot(chatId, RulesToStart = true) {
-	let rulesText = `*_🤖 Правила пользования 📃_\n\n❗ПОЖАЛУЙСТА, ПРОЧТИ ВСЕ[🙏](https://t.me/${BotName}/?start=minidetail6)\n\n\\-  Пользоваться приложением строго в благих целях🌍\n\n\\-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n\\-  Бот не отвечает \\- команда \\/restart в твоем распоряжении\\!😉\n\n\\-  Нашёл ошибку? Бот по\\-прежнему не отвечает? Есть замечания по работе проекта? \\- пожалуйста, сообщи об этом автору @qu1z3x 👍 *`;
+	let rulesText = `<i>🤖 Правила пользования 📃</i>\n\n❗ПОЖАЛУЙСТА, ПРОЧТИ ВСЕ<a href = "https://t.me/${BotName}/?start=minidetail6">🙏</a>\n\n-  Пользоваться приложением строго в благих целях🌍\n\n-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n-  Бот не отвечает - команда /restart в твоем распоряжении!😉\n\n-  Нашлась ошибка? Бот по-прежнему не отвечает? Есть замечания по работе проекта? - пожалуйста, сообщи об этом автору @qu1z3x 👍\n\n-  Также принимая правила, ты разрешаешь использование личных данных, полученных в рамках школьного бота (т.е. полученные мной) 😉🔒`;
 
 	if (RulesToStart) {
 		try {
-			await bot.editMessageText(rulesText, {
+			await bot.editMessageText(`<b>${rulesText}</b>`, {
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -232,9 +278,9 @@ async function rulesBot(chatId, RulesToStart = true) {
 			console.log(error);
 			bot.sendMessage(
 				chatId,
-				`*Сверху ты ничего не видел 🙈*\n\n${rulesText}`,
+				`<b>Сверху ты ничего не было 🙈\n\n${rulesText}</b>`,
 				{
-					parse_mode: "MarkdownV2",
+					parse_mode: "html",
 					disable_web_page_preview: true,
 					reply_markup: {
 						inline_keyboard: [
@@ -250,11 +296,11 @@ async function rulesBot(chatId, RulesToStart = true) {
 		}
 	} else if (!RulesToStart) {
 		try {
-			await bot.editMessageText(rulesText, {
+			await bot.editMessageText(`<b>${rulesText}</b>`, {
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -267,40 +313,21 @@ async function rulesBot(chatId, RulesToStart = true) {
 			});
 		} catch (error) {
 			console.log(error);
-			bot.sendMessage(
-				chatId,
-				`*Сверху ты ничего не видел 🙈*\n\n${rulesText}`,
-				{
-					parse_mode: "MarkdownV2",
-					disable_web_page_preview: true,
-					reply_markup: {
-						inline_keyboard: [
-							[
-								{ text: "⬅️Назад", callback_data: "options" },
-								{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
-							],
-						],
-					},
-				}
-			);
-
-			sendDataAboutError(chatId, `${String(error)}`);
 		}
 	}
 }
 
 async function ChoosingClass(chatId, start = 1) {
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-
 	try {
 		if (start == 0) {
 			await bot.editMessageText(
-				"*_✏️Изменение класса🔄️_\n\nПожалуйста, выбери свой класс 🙂🔎*",
+				"<i><b>✏️Изменение класса🔄️\n\n</b>Класс используется для составления расписания!🔒</i><b>\n\nПожалуйста, выбери свой класс 🙂🔎</b>",
 				{
 					chat_id: chatId,
 					message_id: usersData.find((obj) => obj.chatId === chatId)
 						.messageId,
-					parse_mode: "MarkdownV2",
+					parse_mode: "html",
 					reply_markup: {
 						inline_keyboard: [
 							[
@@ -345,12 +372,12 @@ async function ChoosingClass(chatId, start = 1) {
 			);
 		} else if (start == 1) {
 			bot.editMessageText(
-				`*Будем ближе знакомиться\\! 😊\n\n[Правила пользования ресурсом](https://t.me/${BotName}/?start=rules)\n\nА теперь выбирай класс* 🙂🔎`,
+				`<b>Будем ближе знакомиться! 😊\n\n<a href ="https://t.me/${BotName}/?start=rules">Правила пользования ресурсом</a>\n\n</b><i>Класс используется для составления расписания!</i><b> 🔒\n\nА теперь выбирай класс 🙂🔎</b>`,
 				{
 					chat_id: chatId,
 					message_id: usersData.find((obj) => obj.chatId === chatId)
 						.messageId,
-					parse_mode: "MarkdownV2",
+					parse_mode: "html",
 					disable_web_page_preview: true,
 					reply_markup: {
 						inline_keyboard: [
@@ -404,13 +431,13 @@ async function ChoosingClass(chatId, start = 1) {
 async function Raspisanie(chatId) {
 	try {
 		await bot.editMessageText(
-			`*_⏰ Расписание 📚_*\n\nСегодня\\: *${weekDayNames[dayW]}, ${day} ${
-				monthNames[month]
-			}*\nКласс: *${
+			`<b><i>⏰ Расписание 📚</i></b>\n\nСегодня: <b>${
+				weekDayNames[dayW]
+			}, ${day} ${monthNames[month]}</b>\nКласс: <b>${
 				usersData.find((obj) => obj.chatId === chatId).className
-			}* \\- [изменить](https://t.me/${BotName}/?start=options) \n\n*На какой день показать расписание❓🤔*`,
+			}</b> - <a href ="https://t.me/${BotName}/?start=options">изменить</a>\n\n<b>На какой день расписание❓🤔</b>`,
 			{
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
@@ -453,9 +480,9 @@ async function RaspisanieText(chatId) {
 	try {
 		if (dataAboutUser.className == "Не определен") {
 			await bot.editMessageText(
-				`*_⏰ Расписание 📚\n\nУ тебя не выбран класс❗_*\n\nЕго можно изменить *в настройках ⬇️😉*`,
+				`<b><i>⏰ Расписание 📚\n\nУ тебя не выбран класс❗</i>\n\nЕго можно изменить в настройках ⬇️😉</b>`,
 				{
-					parse_mode: "MarkdownV2",
+					parse_mode: "html",
 					chat_id: chatId,
 					disable_web_page_preview: true,
 					message_id: usersData.find((obj) => obj.chatId === chatId)
@@ -471,17 +498,153 @@ async function RaspisanieText(chatId) {
 				}
 			);
 		} else {
+			let raspisanieText = "";
+			const dateNowHHMM =
+				new Date().getHours() * 100 + new Date().getMinutes();
+			const classArr =
+				dataAboutUser.className === "10Г"
+					? class10g
+					: dataAboutUser.className === "11Д"
+					? class11d
+					: dataAboutUser.className === "11Г"
+					? class11g
+					: dataAboutUser.className === "11В"
+					? class11v
+					: dataAboutUser.className === "11А"
+					? class11a
+					: [];
+			if (
+				classArr[dataAboutUser.weekday - 1] &&
+				dataAboutUser.weekday != 0
+			) {
+				for (
+					let i = 0;
+					i < classArr[dataAboutUser.weekday - 1].length;
+					i++
+				) {
+					if (classArr[dataAboutUser.weekday - 1][i] != "") {
+						if (i + 1 == 1 && dateNowHHMM >= 700 && dateNowHHMM < 910)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 2 &&
+							dateNowHHMM >= 925 &&
+							dateNowHHMM < 1005
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 3 &&
+							dateNowHHMM >= 1025 &&
+							dateNowHHMM < 1105
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 4 &&
+							dateNowHHMM >= 1125 &&
+							dateNowHHMM < 1205
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 5 &&
+							dateNowHHMM >= 1220 &&
+							dateNowHHMM < 1300
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 6 &&
+							dateNowHHMM >= 1315 &&
+							dateNowHHMM < 1355
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 7 &&
+							dateNowHHMM >= 1410 &&
+							dateNowHHMM < 1450
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 8 &&
+							dateNowHHMM >= 1505 &&
+							dateNowHHMM < 1545
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else if (
+							i + 1 == 9 &&
+							dateNowHHMM >= 1600 &&
+							dateNowHHMM < 1640
+						)
+							raspisanieText += `${i + 1}. <u>${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}</u>\n`;
+						else
+							raspisanieText += `${i + 1}. ${classArr[
+								dataAboutUser.weekday - 1
+							][i].trim()}\n`;
+					}
+				}
+			}
 			await bot.editMessageText(
-				`<b><i><a href="https://t.me/${BotName}/?start=minidetail8">⏰</a> Расписание 📚\n\n</i></b>Класс: <b>${
+				`<b><i><a href="https://t.me/${BotName}/?start=minidetail8">⏰</a> Расписание 📚</i>\n\n${
 					dataAboutUser.className
-				} • ${weekDayNames[dataAboutUser.weekday]}\n\n${
-					dataAboutUser.weekday == 0 || dataAboutUser.weekday == 6
-						? "В этот день уроков нет, отдыхай! 😆"
-						: `${classes11[dataAboutUser.weekday]}`
+				} • ${weekDayNames[dataAboutUser.weekday]} • ${
+					classArr[dataAboutUser.weekday - 1] &&
+					classArr[dataAboutUser.weekday - 1].filter((item) => item !== "")
+						.length
+						? `${
+								classArr[dataAboutUser.weekday - 1].filter(
+									(item) => item !== ""
+								).length
+						  } ${
+								classArr[dataAboutUser.weekday - 1].filter(
+									(item) => item !== ""
+								).length == 1
+									? "занятие"
+									: `${
+											classArr[dataAboutUser.weekday - 1].filter(
+												(item) => item !== ""
+											).length >= 2 &&
+											classArr[dataAboutUser.weekday - 1].filter(
+												(item) => item !== ""
+											).length <= 4
+												? "занятия"
+												: `${
+														classArr[
+															dataAboutUser.weekday - 1
+														].filter((item) => item !== "")
+															.length >= 5 &&
+														classArr[
+															dataAboutUser.weekday - 1
+														].filter((item) => item !== "")
+															.length <= 20
+															? "занятий"
+															: ``
+												  }`
+									  }`
+						  }`
+						: "Занятий нет"
 				}\n\n${
-					dataAboutUser.weekday == 0 || dataAboutUser.weekday == 6
-						? ""
-						: "Расписание всё еще не точное 😔"
+					raspisanieText == ""
+						? "В этот день нет мероприятий! 😉"
+						: `${raspisanieText}\n${
+								dataAboutUser.weekday == dayW
+									? `<a href="https://t.me/${BotName}/?start=calls">Расписание звонков</a>`
+									: ""
+						  }`
 				}</b>`,
 				{
 					parse_mode: "html",
@@ -602,38 +765,6 @@ async function Calls(chatId) {
 
 	try {
 		const dateNowHHMM = new Date().getHours() * 100 + new Date().getMinutes();
-		let lessonNum = 0;
-
-		if (dateNowHHMM >= 830 && dateNowHHMM < 910) {
-			lessonNum = 1;
-		} else if (dateNowHHMM >= 910 && dateNowHHMM < 925) {
-			lessonNum = 11;
-		} else if (dateNowHHMM >= 925 && dateNowHHMM < 1005) {
-			lessonNum = 2;
-		} else if (dateNowHHMM >= 1005 && dateNowHHMM < 1025) {
-			lessonNum = 22;
-		} else if (dateNowHHMM >= 1025 && dateNowHHMM < 1105) {
-			lessonNum = 3;
-		} else if (dateNowHHMM >= 1105 && dateNowHHMM < 1125) {
-			lessonNum = 33;
-		} else if (dateNowHHMM >= 1125 && dateNowHHMM < 1205) {
-			lessonNum = 4;
-		} else if (dateNowHHMM >= 1205 && dateNowHHMM < 1220) {
-			lessonNum = 44;
-		} else if (dateNowHHMM >= 1220 && dateNowHHMM < 1300) {
-			lessonNum = 5;
-		} else if (dateNowHHMM >= 1300 && dateNowHHMM < 1315) {
-			lessonNum = 55;
-		} else if (dateNowHHMM >= 1315 && dateNowHHMM < 1355) {
-			lessonNum = 6;
-		} else if (dateNowHHMM >= 1355 && dateNowHHMM < 1410) {
-			lessonNum = 66;
-		} else if (dateNowHHMM >= 1410 && dateNowHHMM < 1450) {
-			lessonNum = 7;
-		} else if (dateNowHHMM >= 1450 && dateNowHHMM < 1600) {
-			lessonNum = 77;
-		} else {
-		}
 
 		let countCalls = 0;
 		if (dataAboutUser.callOnLesson) countCalls++;
@@ -643,74 +774,281 @@ async function Calls(chatId) {
 		if (dataAboutUser.callOnBreakIn5minutes) countCalls++;
 		if (dataAboutUser.callOnBreakIn10minutes) countCalls++;
 
-		await bot.editMessageText(
-			`<b><i>❗ Звонки  ⏰  |  ${
-				dayW == 6 || dayW == 0
-					? "🔕 - выходной"
-					: `${
-							dataAboutUser &&
-							(dataAboutUser.callOnBreak ||
-								dataAboutUser.callOnLesson ||
-								dataAboutUser.callOnBreakIn5minutes ||
-								dataAboutUser.callOnLessonIn5minutes ||
-								dataAboutUser.callOnBreakIn10minutes ||
-								dataAboutUser.callOnLessonIn10minutes)
-								? `🔔 - ${countCalls} вкл`
-								: "🔕 - выкл"
-					  }`
-			}</i>\n\n• Расписание звонков\n\n- ${
-				lessonNum == 1
-					? "<u>1 урок 08:30 - 09:10</u>"
-					: "1 урок 08:30 - 09:10"
-			} | ${lessonNum == 11 ? "<u>15мин</u>" : "15мин"}\n\n- ${
-				lessonNum == 2
-					? "<u>2 урок 09:25 - 10:05</u>"
-					: "2 урок 09:25 - 10:05"
-			} | ${lessonNum == 22 ? "<u>20мин</u>" : "20мин"}\n\n- ${
-				lessonNum == 3
-					? "<u>3 урок 10:25 - 11:05</u>"
-					: "3 урок 10:25 - 11:05"
-			} | ${lessonNum == 33 ? "<u>20мин</u>" : "20мин"}\n\n- ${
-				lessonNum == 4
-					? "<u>4 урок 11:25 - 12:05</u>"
-					: "4 урок 11:25 - 12:05"
-			} | ${lessonNum == 44 ? "<u>15мин</u>" : "15мин"}\n\n- ${
-				lessonNum == 5
-					? "<u>5 урок 12:20 - 13:00</u>"
-					: "5 урок 12:20 - 13:00"
-			} | ${lessonNum == 55 ? "<u>15мин</u>" : "15мин"}\n\n- ${
-				lessonNum == 6
-					? "<u>6 урок 13:15 - 13:55</u>"
-					: "6 урок 13:15 - 13:55"
-			} | ${lessonNum == 66 ? "<u>15мин</u>" : "15мин"}\n\n- ${
-				lessonNum == 7
-					? "<u>7 урок 14:10 - 14:50</u>"
-					: "7 урок 14:10 - 14:50"
-			} | ${
-				lessonNum == 77 ? "<u>Домой</u>" : "Домой"
-			}\n\n• Я умею напоминать ⬇️</b> `,
+		const classArr =
+			dataAboutUser.className === "10Г"
+				? class10g
+				: dataAboutUser.className === "11Д"
+				? class11d
+				: dataAboutUser.className === "11Г"
+				? class11g
+				: dataAboutUser.className === "11В"
+				? class11v
+				: dataAboutUser.className === "11А"
+				? class11a
+				: [];
 
-			{
-				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
-				parse_mode: "html",
-				reply_markup: {
-					inline_keyboard: [
-						[
-							{
-								text: "Напоминать мне 🔔",
-								callback_data: "callsnotificationsmenu",
-							},
+		if (dataAboutUser.className == "Не определен" || classArr == []) {
+			await bot.editMessageText(
+				`<b><i>🕓 Звонки ⏰\n\nУ тебя не выбран класс❗</i>\n\nЕго можно изменить в настройках 😉</b>`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					disable_web_page_preview: true,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{ text: "⬅️В меню", callback_data: "exit" },
+								{ text: "Настройки⚙️", callback_data: "options" },
+							],
 						],
-						[
-							{ text: "⬅️В меню", callback_data: "exit" },
-							{ text: "Обновить🔄️", callback_data: "calls" },
+					},
+				}
+			);
+		} else {
+			await bot.editMessageText(
+				`<b><i>🕓 Звонки ⏰</i>\n\n${dataAboutUser.className} • ${
+					weekDayNames[dataAboutUser.weekday]
+				} • ${
+					classArr[dayW - 1] &&
+					classArr[dayW - 1].filter((item) => item !== "").length
+						? `${
+								classArr[dayW - 1].filter((item) => item !== "").length
+						  } ${
+								classArr[dayW - 1].filter((item) => item !== "")
+									.length == 1
+									? "занятие"
+									: `${
+											classArr[dayW - 1].filter(
+												(item) => item !== ""
+											).length >= 2 &&
+											classArr[dayW - 1].filter(
+												(item) => item !== ""
+											).length <= 4
+												? "занятия"
+												: `${
+														classArr[dayW - 1].filter(
+															(item) => item !== ""
+														).length >= 5 &&
+														classArr[dayW - 1].filter(
+															(item) => item !== ""
+														).length <= 20
+															? "занятий"
+															: ``
+												  }`
+									  }`
+						  }`
+						: "Занятий нет"
+				}</b>${
+					classArr[dayW - 1]
+						? `${
+								classArr[dayW - 1][0] && classArr[dayW - 1].length > 0
+									? `\n\n - ${
+											dateNowHHMM >= 830 && dateNowHHMM < 910
+												? "<u><b>1</b> урок <b>08:30 - 09:10</b></u>"
+												: "<b>1</b> урок <b>08:30 - 09:10</b>"
+									  } | ${
+											classArr[dayW - 1].length > 1
+												? `${
+														dateNowHHMM >= 910 &&
+														dateNowHHMM < 925
+															? "<u><b>15мин</b></u>"
+															: "<b>15мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 910
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][1] && classArr[dayW - 1].length > 1
+									? `\n\n - ${
+											dateNowHHMM >= 925 && dateNowHHMM < 1005
+												? "<u><b>2</b> урок <b>09:25 - 10:05</b></u>"
+												: "<b>2</b> урок <b>09:25 - 10:05</b>"
+									  } | ${
+											classArr[dayW - 1].length > 2
+												? `${
+														dateNowHHMM >= 1005 &&
+														dateNowHHMM < 1025
+															? "<u><b>20мин</b></u>"
+															: "<b>20мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 1005
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][2] && classArr[dayW - 1].length > 2
+									? `\n\n - ${
+											dateNowHHMM >= 1025 && dateNowHHMM < 1105
+												? "<u><b>3</b> урок <b>10:25 - 11:05</b></u>"
+												: "<b>3</b> урок <b>10:25 - 11:05</b>"
+									  } | ${
+											classArr[dayW - 1].length > 3
+												? `${
+														dateNowHHMM >= 1105 &&
+														dateNowHHMM < 1125
+															? "<u><b>20мин</b></u>"
+															: "<b>20мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 1105
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][3] && classArr[dayW - 1].length > 3
+									? `\n\n - ${
+											dateNowHHMM >= 1125 && dateNowHHMM < 1205
+												? "<u><b>4</b> урок <b>11:25 - 12:05</b></u>"
+												: "<b>4</b> урок <b>11:25 - 12:05</b>"
+									  } | ${
+											classArr[dayW - 1].length > 4
+												? `${
+														dateNowHHMM >= 1205 &&
+														dateNowHHMM < 1220
+															? "<u><b>15мин</b></u>"
+															: "<b>15мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 1205
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][4] && classArr[dayW - 1].length > 4
+									? `\n\n - ${
+											dateNowHHMM >= 1220 && dateNowHHMM < 1300
+												? "<u><b>5</b> урок <b>12:20 - 13:00</b></u>"
+												: "<b>5</b> урок <b>12:20 - 13:00</b>"
+									  } | ${
+											classArr[dayW - 1].length > 5
+												? `${
+														dateNowHHMM >= 1300 &&
+														dateNowHHMM < 1315
+															? "<u><b>15мин</b></u>"
+															: "<b>15мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 1300
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][5] && classArr[dayW - 1].length > 5
+									? `\n\n - ${
+											dateNowHHMM >= 1315 && dateNowHHMM < 1355
+												? "<u><b>6</b> урок <b>13:15 - 13:55</b></u>"
+												: "<b>6</b> урок <b>13:15 - 13:55</b>"
+									  } | ${
+											classArr[dayW - 1].length > 6
+												? `${
+														dateNowHHMM >= 1355 &&
+														dateNowHHMM < 1410
+															? "<u><b>15мин</b></u>"
+															: "<b>15мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 1355
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][6] && classArr[dayW - 1].length > 6
+									? `\n\n - ${
+											dateNowHHMM >= 1410 && dateNowHHMM < 1450
+												? "<u><b>7</b> урок <b>14:10 - 14:50</b></u>"
+												: "<b>7</b> урок <b>14:10 - 14:50</b>"
+									  } | ${
+											classArr[dayW - 1].length > 7
+												? `${
+														dateNowHHMM >= 1450 &&
+														dateNowHHMM < 1505
+															? "<u><b>15мин</b></u>"
+															: "<b>15мин</b>"
+												  }`
+												: `${
+														dateNowHHMM >= 1450
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][7] && classArr[dayW - 1].length > 7
+									? `\n\n - ${
+											dateNowHHMM >= 1505 && dateNowHHMM < 1545
+												? "<u><b>8</b> урок <b>15:05 - 15:45</b></u>"
+												: "<b>8</b> урок <b>15:05 - 15:45</b>"
+									  } | ${
+											classArr[dayW - 1].length > 8
+												? `${
+														dateNowHHMM >= 1545 &&
+														dateNowHHMM < 1600
+															? "<u><b>15мин</b></u>"
+															: "<b>15мин</b>"
+												  }<b>
+												  }`
+												: `${
+														dateNowHHMM >= 1545
+															? "<u><b>Домой</b></u>"
+															: "<b>Домой</b>"
+												  }`
+									  }`
+									: ""
+						  }${
+								classArr[dayW - 1][8] && classArr[dayW - 1].length > 8
+									? `\n\n - ${
+											dateNowHHMM >= 1600 && dateNowHHMM < 1640
+												? "<u>9 урок 16:00 - 16:40</u>"
+												: "9 урок 16:00 - 16:40"
+									  } | ${
+											dateNowHHMM >= 1450 ? "<u>Домой</u>" : "Домой"
+									  }`
+									: ""
+						  }\n\n<b><a href= "https://t.me/${BotName}/?start=raspisanietoday">Расписание уроков</a></b>`
+						: "<b>\n\nСегодня нет мероприятий! 😉</b>"
+				}`,
+				{
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId === chatId)
+						.messageId,
+					parse_mode: "html",
+					disable_web_page_preview: true,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: `🕰️ Уведомления ${
+										countCalls > 0 ? `(${countCalls})` : ""
+									} 🔔`,
+									callback_data: "callsnotificationsmenu",
+								},
+							],
+							[
+								{ text: "⬅️В меню", callback_data: "exit" },
+								{ text: "Обновить🔄️", callback_data: "calls" },
+							],
 						],
-					],
-				},
-			}
-		);
+					},
+				}
+			);
+		}
 	} catch (error) {
 		console.log(error);
 		sendDataAboutError(chatId, `${String(error)}`);
@@ -818,7 +1156,7 @@ async function NotificationsMenuCalls(
 			}\n\n${
 				dayW == 6 || dayW == 0
 					? "_❗Звонки не активны \\- выходной❗_\n\n"
-					: "_❗ПРОВЕРЬТЕ УВЕДОМЛЕНИЯ В ТЕЛЕГРАММЕ❗_\n\n"
+					: "_❗ПРОВЕРЬ УВЕДОМЛЕНИЯ В ТЕЛЕГРАММЕ❗_\n\n"
 			}За сколько до звонка оповещать\\?* 🤔`,
 			{
 				parse_mode: "MarkdownV2",
@@ -880,7 +1218,22 @@ async function NotificationsMenuCalls(
 							},
 						],
 
-						[{ text: "⬅️Назад", callback_data: "calls" }],
+						[
+							{ text: "⬅️Назад", callback_data: "calls" },
+							{
+								text: `${
+									dataAboutUser.callOnLesson ||
+									dataAboutUser.callOnBreak ||
+									dataAboutUser.callOnLessonIn5minutes ||
+									dataAboutUser.callOnLessonIn10minutes ||
+									dataAboutUser.callOnBreakIn5minutes ||
+									dataAboutUser.callOnBreakIn10minutes
+										? "Сброс ❌"
+										: ""
+								}`,
+								callback_data: "resetallcalls",
+							},
+						],
 					],
 				},
 			}
@@ -905,7 +1258,7 @@ async function Games(chatId) {
 					dataAboutUser.game3NiceResults +
 						dataAboutUser.game3BadResults +
 						dataAboutUser.game3DrawResults
-					? "</b>\n\nЛюбимая:\n<b>Угадайка ❓"
+					? "</b>\n\nЛюбимая: <b>Угадайка ❓"
 					: `${
 							dataAboutUser.game2NiceResults +
 								dataAboutUser.game2BadResults +
@@ -918,7 +1271,7 @@ async function Games(chatId) {
 								dataAboutUser.game3NiceResults +
 									dataAboutUser.game3BadResults +
 									dataAboutUser.game3DrawResults
-								? "</b>\n\nЛюбимая:\n<b>Цуе-Фа ✌️"
+								? "</b>\n\nЛюбимая: <b>Цуе-Фа ✌️"
 								: `${
 										dataAboutUser.game3NiceResults +
 											dataAboutUser.game3BadResults +
@@ -931,7 +1284,7 @@ async function Games(chatId) {
 											dataAboutUser.game2NiceResults +
 												dataAboutUser.game2BadResults +
 												dataAboutUser.game2DrawResults
-											? "</b>\n\nЛюбимая:\n<b>❌ Крестики-Нолики ⭕"
+											? "</b>\n\nЛюбимая: <b>❌ Кр-Нолики ⭕"
 											: ""
 								  }`
 					  }`
@@ -948,6 +1301,7 @@ async function Games(chatId) {
 							{ text: "Угадайка ❓", callback_data: "game1" },
 							{ text: "Цуе-Фа ✌️", callback_data: "game2" },
 						],
+						// [{ text: "Рейтинг 🥇", callback_data: "bestplayerslist" }],
 						[{ text: "⬅️В меню", callback_data: "exit" }],
 					],
 				},
@@ -1436,13 +1790,13 @@ async function AllNewsTextEdit(chatId) {
 	} catch (error) {}
 }
 
-async function AllNewsTextEdit_2(chatId) {
+async function AllNewsTextEdit_2(chatId, text) {
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 
 	try {
 		dataAboutUser.userAction = 0;
 		bot.editMessageText(
-			`<b><i>✏️ Редактирование: Новости 📖</i>\n\n🆕 Измененный текст:</b>\n\n<i>"${newsText[0]}"</i>\n\n<b>Применить изменения?🧐</b>`,
+			`<b><i>✏️ Редактирование: Новости 📖</i>\n\n🆕 Измененный текст:</b>\n\n<i>"${text}"</i>\n\n<b>Применить изменения?🧐</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
@@ -1496,11 +1850,6 @@ async function AllNewsTextReset(chatId) {
 }
 
 async function Options(chatId) {
-	if (chatId == qu1z3xId || chatId == stepanovId) {
-		userStatus = "Администратор 👑";
-	} else {
-		userStatus = "Ученик 🧑‍🏫";
-	}
 	const countRem = remindersData.filter((obj) => obj.chatId === chatId).length;
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 
@@ -1514,20 +1863,24 @@ async function Options(chatId) {
 
 	try {
 		await bot.editMessageText(
-			`*_🛠️ Настройки ⚙️_\n\nДанные:*\nТвой логин: *${
-				dataAboutUser.firstName
-			}*\nРоль: *${userStatus}*\nID профиля: _*${chatId}*_\nКласс: *${
+			`<b><i>🛠️ Настройки ⚙️</i>\n\nДанные:</b>\nТвой логин: <b>${
+				dataAboutUser.login
+			}</b> - <a href="https://t.me/${BotName}/?start=editfistname">изменить</a>\nРоль: <b>${
+				dataAboutUser.userStatus
+			}</b>\nID профиля: <b><i>${chatId}</i></b>\nКласс: <b>${
 				dataAboutUser.className
-			}\n\nУведомления:*\nЗвонки: *${
+			}</b> - <a href="https://t.me/${BotName}/?start=editclass">${
+				dataAboutUser.className == "Не определен" ? "выбрать" : "изменить"
+			}</a>\n\n<b>Уведомления:</b>\nЗвонки: <b>${
 				dataAboutUser.callOnLesson ||
 				dataAboutUser.callOnBreak ||
 				dataAboutUser.callOnLessonIn5minutes ||
 				dataAboutUser.callOnLessonIn10minutes ||
 				dataAboutUser.callOnBreakIn5minutes ||
 				dataAboutUser.callOnBreakIn10minutes
-					? `✅ \\(${countCalls}\\)`
+					? `✅ (${countCalls})`
 					: "❌"
-			}* \\- [${
+			}</b> - <a href="https://t.me/${BotName}/?start=notificationsmenucalls">${
 				dataAboutUser.callOnLesson ||
 				dataAboutUser.callOnBreak ||
 				dataAboutUser.callOnLessonIn5minutes ||
@@ -1536,48 +1889,84 @@ async function Options(chatId) {
 				dataAboutUser.callOnBreakIn10minutes
 					? "изменить"
 					: "включить"
-			}](https://t.me/${BotName}/?start=notificationsmenucalls)\nНапоминания: *${"✅🔔"}*\nСоздано: *${countRem}* \\- [${
+			}</a>\nНапоминания: <b>${
+				countRem > 0 ? "✅🔔" : "❌"
+			}</b>\nСоздано: <b>${countRem}</b> - <a href="https://t.me/${BotName}/?start=remindersList">${
 				countRem > 0 ? "список" : "создать"
-			}](https://t.me/${BotName}/?start=remindersList)*\n\nСтатистика в играх:*\nУгадайка: *${
-				dataAboutUser.game1NiceResults
-			}✅\\, ${dataAboutUser.game1BadResults}❌ ${
-				dataAboutUser.game1NiceResults + dataAboutUser.game1BadResults > 0
-					? `из ${
+			}</a><b>\n\nСтатистика в играх:</b>\nУгадайка: <b>${
+				dataAboutUser.game1NiceResults + dataAboutUser.game1BadResults >
+					0 &&
+				Math.round(
+					(dataAboutUser.game1NiceResults /
+						(dataAboutUser.game1NiceResults +
+							dataAboutUser.game1BadResults)) *
+						10000
+				) / 100
+					? `${
+							Math.round(
+								(dataAboutUser.game1NiceResults /
+									(dataAboutUser.game1NiceResults +
+										dataAboutUser.game1BadResults)) *
+									10000
+							) / 100
+					  }% ✅, всего ${
 							dataAboutUser.game1NiceResults +
 							dataAboutUser.game1BadResults
 					  }`
-					: ""
-			}*\nЦуе\\-фа: *${dataAboutUser.game2NiceResults}✅\\, ${
-				dataAboutUser.game2BadResults
-			}❌\\, ${
-				dataAboutUser.game2DrawResults
-			}[🤷‍♂️](https://t.me/${BotName}/?start=minidetail7) ${
+					: "Нет данных"
+			}</b>\nЦуе-фа: <b>${
 				dataAboutUser.game2NiceResults +
 					dataAboutUser.game2BadResults +
 					dataAboutUser.game2DrawResults >
-				0
-					? `из ${
+					0 &&
+				Math.round(
+					(dataAboutUser.game2NiceResults /
+						(dataAboutUser.game2NiceResults +
+							dataAboutUser.game2BadResults +
+							dataAboutUser.game2DrawResults)) *
+						10000
+				) / 100
+					? `${
+							Math.round(
+								(dataAboutUser.game2NiceResults /
+									(dataAboutUser.game2NiceResults +
+										dataAboutUser.game2BadResults +
+										dataAboutUser.game2DrawResults)) *
+									10000
+							) / 100
+					  }% <a href="https://t.me/${BotName}/?start=minidetail7">✅</a>, всего ${
 							dataAboutUser.game2NiceResults +
 							dataAboutUser.game2BadResults +
 							dataAboutUser.game2DrawResults
 					  }`
-					: ""
-			}*\nКрестики\\-нолики: *${dataAboutUser.game3NiceResults}✅\\, ${
-				dataAboutUser.game3BadResults
-			}❌\\, ${
-				dataAboutUser.game3DrawResults
-			}[🤷‍♂️](https://t.me/${BotName}/?start=minidetail7) ${
+					: "Нет данных"
+			}</b>\nКр-нолики: <b>${
 				dataAboutUser.game3NiceResults +
 					dataAboutUser.game3BadResults +
 					dataAboutUser.game3DrawResults >
-				0
-					? `из ${
+					0 &&
+				Math.round(
+					(dataAboutUser.game3NiceResults /
+						(dataAboutUser.game3NiceResults +
+							dataAboutUser.game3BadResults +
+							dataAboutUser.game3DrawResults)) *
+						10000
+				) / 100
+					? `${
+							Math.round(
+								(dataAboutUser.game3NiceResults /
+									(dataAboutUser.game3NiceResults +
+										dataAboutUser.game3BadResults +
+										dataAboutUser.game3DrawResults)) *
+									10000
+							) / 100
+					  }% ✅, всего ${
 							dataAboutUser.game3NiceResults +
 							dataAboutUser.game3BadResults +
 							dataAboutUser.game3DrawResults
 					  }`
-					: ""
-			}*\nПасхалки: *${
+					: "Нет данных"
+			}</b>\nПасхалки: <b>${
 				dataAboutUser.miniDetail666 +
 				dataAboutUser.miniDetail0 +
 				dataAboutUser.miniDetail1 +
@@ -1604,22 +1993,15 @@ async function Options(chatId) {
 				maxCountMiniDetails
 					? "✅"
 					: ""
-			}* \\- [как это?](https://t.me/${BotName}/?start=detailsRules)\n\n*[Правила пользования ресурсом](https://t.me/${BotName}/?start=rules2)*`,
+			}</b> - <a href= "https://t.me/${BotName}/?start=detailsRules">как это?</a>\n\n<b><a href= "https://t.me/${BotName}/?start=rules2">Правила пользования ресурсом</a></b>`,
 			{
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
-						[
-							{
-								text: "Сменить класс 🔄",
-								callback_data: "chooseclass0",
-							},
-						],
-
 						[
 							{ text: "⬅️В меню", callback_data: "exit" },
 							{
@@ -1639,12 +2021,13 @@ async function Options(chatId) {
 async function Options_2(chatId) {
 	try {
 		await bot.editMessageText(
-			`*_🛠️ Прочие настройки ⚙️_\n\n❗Раздел повышенной опасности❗\n*`,
+			`<b><i>🛠️ Прочие настройки ⚙️</i>\n\n❗Раздел повышенной опасности❗\n\nПриглашение по:\n<code>https://t.me/${BotName}/?start=</code></b>`,
 			{
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
+				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -1670,6 +2053,56 @@ async function Options_2(chatId) {
 	}
 }
 
+async function editFistName(chatId, after) {
+	try {
+		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+
+		dataAboutUser.userAction = 6;
+
+		await bot.editMessageText(
+			`<i><b>🛠️ Изменение логина ⚙️\n\n</b>Логин используется для идентификации пользователя! 🔒</i><b>\n\n${
+				after ? "Изменённый:" : "Текущий:"
+			}  <code>${dataAboutUser.login}</code>${
+				after ? "" : "\n\nНапиши изменённый логин ✍️"
+			}</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				disable_web_page_preview: true,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: `${
+									dataAboutUser.login ==
+									dataAboutUser.telegramFirstName
+										? "⬅️Назад"
+										: ""
+								}`,
+								callback_data: "options",
+							},
+							{
+								text: `${
+									dataAboutUser.login !=
+									dataAboutUser.telegramFirstName
+										? "Сбросить❌"
+										: ""
+								}`,
+								callback_data: "resetfirstname",
+							},
+							{ text: "Принять✅", callback_data: "options" },
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 async function adminMenu(chatId) {
 	try {
 		await bot.editMessageText(
@@ -1681,7 +2114,10 @@ async function adminMenu(chatId) {
 					.messageId,
 				reply_markup: {
 					inline_keyboard: [
-						[{ text: "Реестр 💾", callback_data: "usersdatalist" }],
+						[
+							{ text: "Реестр 💾", callback_data: "usersdatalist" },
+							{ text: "", callback_data: "usersdatalist" },
+						],
 						[
 							{
 								text: "Объявление 📢",
@@ -1766,7 +2202,7 @@ async function adminMenuSendMessage_2(chatId) {
 			}
 			setTimeout(() => {
 				adminMenu(chatId);
-			}, 3000);
+			}, 1500);
 			sendDataAboutAction(
 				"Администратор",
 				"",
@@ -1878,16 +2314,25 @@ async function adminMenuEdit(chatId) {
 
 async function RegistryUsersData(chatId, listNum) {
 	try {
-		let text = "";
-
 		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+
+		let text = "";
+		let countCalls = 0;
+
+		if (dataAboutUser.callOnLesson) countCalls++;
+		if (dataAboutUser.callOnBreak) countCalls++;
+		if (dataAboutUser.callOnLessonIn5minutes) countCalls++;
+		if (dataAboutUser.callOnLessonIn10minutes) countCalls++;
+		if (dataAboutUser.callOnBreakIn5minutes) countCalls++;
+		if (dataAboutUser.callOnBreakIn10minutes) countCalls++;
+
 		if (listNum == 1) {
 			for (let i = 0; i < usersData.length; i++) {
-				text += `[${i + 1}]  @${usersData[i].username}\n• ChatId: <code>${
-					usersData[i].chatId
-				}</code>\n• className: "${
-					usersData[i].className
-				}"\n• allGamesPlayed: ${
+				text += `[${i + 1}]  @${usersData[i].username}\n• login: ${
+					usersData[i].login
+				}\n• chatId: <code>${usersData[i].chatId}</code>\n• userStatus: ${
+					usersData[i].userStatus
+				}\n• className: "${usersData[i].className}"\n• gamesPlayed: ${
 					usersData[i].game1BadResults +
 					usersData[i].game1NiceResults +
 					usersData[i].game2BadResults +
@@ -1896,16 +2341,19 @@ async function RegistryUsersData(chatId, listNum) {
 					usersData[i].game3BadResults +
 					usersData[i].game3NiceResults +
 					usersData[i].game3DrawResults
-				}\n• callsNotif: ${
-					dataAboutUser.callOnLesson ||
-					dataAboutUser.callOnBreak ||
-					dataAboutUser.callOnLessonIn5minutes ||
-					dataAboutUser.callOnLessonIn10minutes ||
-					dataAboutUser.callOnBreakIn5minutes ||
-					dataAboutUser.callOnBreakIn10minutes
-						? true
-						: false
-				} \n\n`;
+				}\n• callsReminders: ${countCalls}\n• detailsFound: ${
+					dataAboutUser.miniDetail666 +
+					dataAboutUser.miniDetail0 +
+					dataAboutUser.miniDetail1 +
+					dataAboutUser.miniDetail2 +
+					dataAboutUser.miniDetail3 +
+					dataAboutUser.miniDetail4 +
+					dataAboutUser.miniDetail5 +
+					dataAboutUser.miniDetail6 +
+					dataAboutUser.miniDetail7 +
+					dataAboutUser.miniDetail8 +
+					dataAboutUser.miniDetail9
+				} / ${maxCountMiniDetails} \n\n`;
 			}
 
 			bot.editMessageText(
@@ -2053,15 +2501,13 @@ async function start(chatId, firstName, quickStart = false) {
 	let rndNum = Math.floor(Math.random() * stickers.length);
 
 	const dateNowHHNN = new Date().getHours() * 100 + new Date().getMinutes();
-	if (dateNowHHNN < 1200 && dateNowHHNN >= 600) {
-		lessonNum = "Доброе утро";
-	} else if (dateNowHHNN < 1700 && dateNowHHNN >= 1200) {
+	if (dateNowHHNN < 1200 && dateNowHHNN >= 600) textToSayHello = "Доброе утро";
+	else if (dateNowHHNN < 1700 && dateNowHHNN >= 1200)
 		textToSayHello = "Добрый день";
-	} else if (dateNowHHNN < 2200 && dateNowHHNN >= 1700) {
+	else if (dateNowHHNN < 2200 && dateNowHHNN >= 1700)
 		textToSayHello = "Добрый вечер";
-	} else if (dateNowHHNN >= 2200 || dateNowHHNN < 600) {
+	else if (dateNowHHNN >= 2200 || dateNowHHNN < 600)
 		textToSayHello = "Доброй ночи";
-	}
 
 	try {
 		await bot.sendSticker(chatId, stickers[rndNum]).then((message) => {
@@ -2323,7 +2769,6 @@ async function detailsRules(chatId) {
 }
 
 async function StartAll() {
-	// bot.sendMessage(userChatId, ""); //?                                                         Принудительная отправка сообщений определенному лицу
 	try {
 		if (TOKEN == TOKENs[0]) {
 			BotName = "digsch27_bot";
@@ -2331,16 +2776,23 @@ async function StartAll() {
 			BotName = "digschbot";
 		}
 
-		if (
-			fs.readFileSync("botDB.json") != "[]" &&
-			fs.readFileSync("botDB.json") != ""
-		) {
-			let dataFromDB = JSON.parse(fs.readFileSync("botDB.json"));
-			usersData = dataFromDB.usersData || [];
-			remindersData = dataFromDB.remindersData || [];
-		}
+		// if (
+		// 	fs.readFileSync("botDB.json") != "[]" &&
+		// 	fs.readFileSync("botDB.json") != ""
+		// ) {
+		// 	let dataFromDB = JSON.parse(fs.readFileSync("botDB.json"));
+		// 	usersData = dataFromDB.usersData || [];
+		// 	remindersData = dataFromDB.remindersData || [];
+		// }
 
-		let textToCallReminder = "";
+		get(dataRef).then((snapshot) => {
+			if (snapshot.exists()) {
+				const dataFromDB = snapshot.val();
+				usersData = dataFromDB.usersData || [];
+				remindersData = dataFromDB.remindersData || [];
+			}
+		});
+
 		const timesOnLesson = [
 			"08:30",
 			"09:25",
@@ -2360,194 +2812,199 @@ async function StartAll() {
 			"14:50",
 		];
 
-		const dateNowHHNN = new Date().getHours() * 100 + new Date().getMinutes();
-		if (dateNowHHNN < 1200 && dateNowHHNN >= 600) {
-			lessonNum = "Доброе утро";
-		} else if (dateNowHHNN < 1700 && dateNowHHNN >= 1200) {
-			textToSayHello = "Добрый день";
-		} else if (dateNowHHNN < 2200 && dateNowHHNN >= 1700) {
-			textToSayHello = "Добрый вечер";
-		} else if (dateNowHHNN >= 2200 || dateNowHHNN < 600) {
-			textToSayHello = "Доброй ночи";
-		}
-
-		for (let i = 0; i < usersData.length; i++) {
-			if (
-				usersData[i].messageIdSayHi1 &&
-				usersData[i].messageIdSayHi1 != ""
-			) {
-				bot.editMessageText(
-					`*${textToSayHello}, ${usersData[i].firstName}\\! [✌️](https://t.me/${BotName}/?start=minidetail1)*`,
-					{
-						parse_mode: "MarkdownV2",
-						chat_id: usersData[i].chatId,
-						message_id: usersData[i].messageIdSayHi1,
-						disable_web_page_preview: true,
-					}
-				);
-			}
-		}
 		cron.schedule(`1 * * * * *`, function () {
-			const timeSimple = `${String(new Date().getHours()).padStart(
-				2,
-				"0"
-			)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
-			const time5Minutes = `${String(new Date().getHours()).padStart(
-				2,
-				"0"
-			)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
-			const time10Minutes = `${String(new Date().getHours()).padStart(
-				2,
-				"0"
-			)}:${String(new Date().getMinutes() + 10).padStart(2, "0")}`;
+			let textToCallReminder = "";
 
-			const dateNowHNN = `${String(new Date().getHours())}:${String(
-				new Date().getMinutes()
-			).padStart(2, "0")}`;
-			const dateNowHHNN = `${String(new Date().getHours()).padStart(
-				2,
-				"0"
-			)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+			const dateNowHHNN =
+				new Date().getHours() * 100 + new Date().getMinutes();
+			try {
+				if (dateNowHHNN < 1200 && dateNowHHNN >= 600)
+					textToSayHello = "Доброе утро";
+				else if (dateNowHHNN < 1700 && dateNowHHNN >= 1200)
+					textToSayHello = "Добрый день";
+				else if (dateNowHHNN < 2200 && dateNowHHNN >= 1700)
+					textToSayHello = "Добрый вечер";
+				else if (dateNowHHNN >= 2200 || dateNowHHNN < 600)
+					textToSayHello = "Доброй ночи";
 
-			//! CALLS NOTIFICATION
-
-			dayW = new Date().getDay();
-			for (let j = 0; j < usersData.length; j++) {
-				if (
-					(usersData[j].callOnLessonIn5minutes ||
-						usersData[j].callOnLessonIn10minutes ||
-						usersData[j].callOnBreakIn5minutes ||
-						usersData[j].callOnBreakIn10minutes) &&
-					dayW != 6 &&
-					dayW != 0
-				) {
-					for (let i = 0; i < timesOnLesson.length; i++) {
-						if (
-							(timeSimple == timesOnLesson[i] &&
-								usersData[j].callOnLesson) ||
-							(timeSimple == timesOnBreak[i] &&
-								usersData[j].callOnBreak) ||
-							(time5Minutes == timesOnLesson[i] &&
-								usersData[j].callOnLessonIn5minutes) ||
-							(time5Minutes == timesOnBreak[i] &&
-								usersData[j].callOnBreakIn5minutes) ||
-							(time10Minutes == timesOnLesson[i] &&
-								usersData[j].callOnLessonIn10minutes) ||
-							(time10Minutes == timesOnBreak[i] &&
-								usersData[j].callOnBreakIn10minutes)
-						) {
-							textToCallReminder = "";
-
-							if (
-								timeSimple == timesOnLesson[i] &&
-								usersData[j].callOnLesson
-							)
-								textToCallReminder =
-									"Особое внимание! 🧐\nУ тебя начался урок! 😉";
-							if (
-								timeSimple == timesOnBreak[i] &&
-								usersData[j].callOnBreak
-							)
-								textToCallReminder = `Можно выдохнуть! 😀\nУ тебя началась ${
-									timeSimple == "11:05" || timeSimple == "10:05"
-										? "БОЛЬШАЯ"
-										: "маленькая"
-								} перемена! 😉\n\n${
-									timeSimple == "11:05"
-										? "<i>Время завтрака! 😋</i>"
-										: `${
-												timeSimple == "13:55"
-													? "<i>На этой перемене - Обед! 😀</i>"
-													: ""
-										  }`
-								}`;
-							if (
-								time5Minutes == timesOnLesson[i] &&
-								usersData[j].callOnLessonIn5minutes
-							)
-								textToCallReminder =
-									"Готовься к уроку! 🧑‍🏫\nЧерез 5 минут у тебя урок! 😉";
-							if (
-								time5Minutes == timesOnBreak[i] &&
-								usersData[j].callOnBreakIn5minutes
-							)
-								textToCallReminder = `Совсем скоро отдых! 😎\nРовно через 5 минут ${
-									time5Minutes == "11:05" || time5Minutes == "10:05"
-										? "БОЛЬШАЯ"
-										: "маленькая"
-								} перемена! 😉`;
-							if (
-								time10Minutes == timesOnLesson[i] &&
-								usersData[j].callOnLessonIn10minutes
-							)
-								textToCallReminder =
-									"Будь готовым! 📚\nЧерез 10 минут у тебя урок! 😉";
-							if (
-								time10Minutes == timesOnBreak[i] &&
-								usersData[j].callOnBreakIn10minutes
-							)
-								textToCallReminder = `Скоро отдых! ☺️\nРовно через 10 минут ${
-									time10Minutes == "11:05" || time10Minutes == "10:05"
-										? "БОЛЬШАЯ"
-										: "маленькая"
-								} перемена! 😉`;
-							if (textToCallReminder != "") {
-								bot.sendMessage(
-									usersData[j].chatId,
-									`<b>🔔 ${textToCallReminder}</b>`,
-									{
-										parse_mode: "HTML",
-										reply_markup: {
-											inline_keyboard: [
-												[
-													{
-														text: "Спасибо 👍",
-														callback_data: "deleteexcess",
-													},
-												],
-											],
-										},
-									}
-								);
-							}
-						}
-					}
-				}
-			}
-
-			//! REMINDERS NOTIFICATION
-
-			if (remindersData.length > 0) {
-				for (let i = 0; i < remindersData.length; i++) {
+				for (let i = 0; i < usersData.length; i++) {
 					if (
-						remindersData[i].time == dateNowHNN ||
-						remindersData[i].time == dateNowHHNN
+						usersData[i].messageIdSayHi1 &&
+						usersData[i].messageIdSayHi1 != ""
 					) {
-						bot.sendMessage(
-							remindersData[i].chatId,
-							`<b><a href="https://t.me/${BotName}/?start=minidetail9">🔔</a> Напоминание ❗\n<i>${remindersData[i].text}</i> на ${remindersData[i].time}</b>`,
+						bot.editMessageText(
+							`*${textToSayHello}, ${usersData[i].login}\\! [✌️](https://t.me/${BotName}/?start=minidetail1)*`,
 							{
-								parse_mode: "html",
+								parse_mode: "MarkdownV2",
+								chat_id: usersData[i].chatId,
+								message_id: usersData[i].messageIdSayHi1,
 								disable_web_page_preview: true,
-								reply_markup: {
-									inline_keyboard: [
-										[
-											{
-												text: "Удалить ❌",
-												callback_data: `deletereminder${remindersData[i].reminderId}`,
-											},
-											{
-												text: "Перенести 🔄️",
-												callback_data: `updatetimeforreminder${remindersData[i].reminderId}`,
-											},
-										],
-									],
-								},
 							}
 						);
 					}
 				}
-			}
+				const timeSimple = `${String(new Date().getHours()).padStart(
+					2,
+					"0"
+				)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+				const time5Minutes = `${String(new Date().getHours()).padStart(
+					2,
+					"0"
+				)}:${String(new Date().getMinutes() + 5).padStart(2, "0")}`;
+				const time10Minutes = `${String(new Date().getHours()).padStart(
+					2,
+					"0"
+				)}:${String(new Date().getMinutes() + 10).padStart(2, "0")}`;
+
+				const dateNowHNNText = `${String(new Date().getHours())}:${String(
+					new Date().getMinutes()
+				).padStart(2, "0")}`;
+				const dateNowHHNNText = `${String(new Date().getHours()).padStart(
+					2,
+					"0"
+				)}:${String(new Date().getMinutes()).padStart(2, "0")}`;
+
+				//! CALLS NOTIFICATION
+
+				dayW = new Date().getDay();
+				for (let j = 0; j < usersData.length; j++) {
+					if (
+						(usersData[j].callOnLessonIn5minutes ||
+							usersData[j].callOnLessonIn10minutes ||
+							usersData[j].callOnBreakIn5minutes ||
+							usersData[j].callOnBreakIn10minutes) &&
+						dayW != 6 &&
+						dayW != 0
+					) {
+						for (let i = 0; i < timesOnLesson.length; i++) {
+							if (
+								(timeSimple == timesOnLesson[i] &&
+									usersData[j].callOnLesson) ||
+								(timeSimple == timesOnBreak[i] &&
+									usersData[j].callOnBreak) ||
+								(time5Minutes == timesOnLesson[i] &&
+									usersData[j].callOnLessonIn5minutes) ||
+								(time5Minutes == timesOnBreak[i] &&
+									usersData[j].callOnBreakIn5minutes) ||
+								(time10Minutes == timesOnLesson[i] &&
+									usersData[j].callOnLessonIn10minutes) ||
+								(time10Minutes == timesOnBreak[i] &&
+									usersData[j].callOnBreakIn10minutes)
+							) {
+								textToCallReminder = "";
+
+								if (
+									timeSimple == timesOnLesson[i] &&
+									usersData[j].callOnLesson
+								)
+									textToCallReminder =
+										"Особое внимание! 🧐\nУ тебя начался урок! 😉";
+								if (
+									timeSimple == timesOnBreak[i] &&
+									usersData[j].callOnBreak
+								)
+									textToCallReminder = `Можно выдохнуть! 😀\nУ тебя началась ${
+										timeSimple == "11:05" || timeSimple == "10:05"
+											? "БОЛЬШАЯ"
+											: "маленькая"
+									} перемена! 😉\n\n${
+										timeSimple == "11:05"
+											? "<i>Время завтрака! 😋</i>"
+											: `${
+													timeSimple == "13:55"
+														? "<i>На этой перемене - Обед! 😀</i>"
+														: ""
+											  }`
+									}`;
+								if (
+									time5Minutes == timesOnLesson[i] &&
+									usersData[j].callOnLessonIn5minutes
+								)
+									textToCallReminder =
+										"Готовься к уроку! 🧑‍🏫\nЧерез 5 минут у тебя урок! 😉";
+								if (
+									time5Minutes == timesOnBreak[i] &&
+									usersData[j].callOnBreakIn5minutes
+								)
+									textToCallReminder = `Совсем скоро отдых! 😎\nРовно через 5 минут ${
+										time5Minutes == "11:05" || time5Minutes == "10:05"
+											? "БОЛЬШАЯ"
+											: "маленькая"
+									} перемена! 😉`;
+								if (
+									time10Minutes == timesOnLesson[i] &&
+									usersData[j].callOnLessonIn10minutes
+								)
+									textToCallReminder =
+										"Будь готовым! 📚\nЧерез 10 минут у тебя урок! 😉";
+								if (
+									time10Minutes == timesOnBreak[i] &&
+									usersData[j].callOnBreakIn10minutes
+								)
+									textToCallReminder = `Скоро отдых! ☺️\nРовно через 10 минут ${
+										time10Minutes == "11:05" ||
+										time10Minutes == "10:05"
+											? "БОЛЬШАЯ"
+											: "маленькая"
+									} перемена! 😉`;
+								if (textToCallReminder != "") {
+									bot.sendMessage(
+										usersData[j].chatId,
+										`<b>🔔 ${textToCallReminder}</b>`,
+										{
+											parse_mode: "HTML",
+											reply_markup: {
+												inline_keyboard: [
+													[
+														{
+															text: "Спасибо 👍",
+															callback_data: "deleteexcess",
+														},
+													],
+												],
+											},
+										}
+									);
+								}
+							}
+						}
+					}
+				}
+
+				//! REMINDERS NOTIFICATION
+
+				if (remindersData.length > 0) {
+					for (let i = 0; i < remindersData.length; i++) {
+						if (
+							remindersData[i].time == dateNowHNNText ||
+							remindersData[i].time == dateNowHHNNText
+						) {
+							bot.sendMessage(
+								remindersData[i].chatId,
+								`<b><a href="https://t.me/${BotName}/?start=minidetail9">🔔</a> Напоминание ❗\n<i>${remindersData[i].text}</i> на ${remindersData[i].time}</b>`,
+								{
+									parse_mode: "html",
+									disable_web_page_preview: true,
+									reply_markup: {
+										inline_keyboard: [
+											[
+												{
+													text: "Удалить ❌",
+													callback_data: `deletereminder${remindersData[i].reminderId}`,
+												},
+												{
+													text: "Перенести 🔄️",
+													callback_data: `updatetimeforreminder${remindersData[i].reminderId}`,
+												},
+											],
+										],
+									},
+								}
+							);
+						}
+					}
+				}
+			} catch (error) {}
 		});
 
 		bot.onText(/(.+)/, async (message, match) => {
@@ -2562,6 +3019,13 @@ async function StartAll() {
 				) {
 					textMessageForAllUsers = match[1];
 					adminMenuSendMessageOptions(chatId);
+				} else if (
+					dataAboutUser.userAction == 6 &&
+					match[1] != "/start editfistname" &&
+					match[1] != message.from.first_name
+				) {
+					dataAboutUser.login = match[1];
+					editFistName(chatId, dataAboutUser.telegramFirstName, true);
 				}
 			} catch (error) {}
 		});
@@ -2627,7 +3091,6 @@ async function StartAll() {
 							time: match[2],
 							reminderId: rndId, // присвоение уникального id
 						});
-						console.log(remindersData);
 
 						sendDataAboutAction(
 							message.from.first_name,
@@ -2637,7 +3100,7 @@ async function StartAll() {
 						);
 
 						await bot.editMessageText(
-							`<b>Поставил напоминание</b> 😉🔔\n\n<i>"${match[1]}" - <b>${match[2]}</b></i>`,
+							`<b>Поставил напоминание</b> 😉🔔\n\n<i>"${match[1]}" - <b>${match[2]}\n\n❗ПРОВЕРЬ УВЕДОМЛЕНИЯ В ТЕЛЕГРАММЕ❗</b></i>`,
 							{
 								parse_mode: "html",
 								chat_id: message.chat.id,
@@ -2690,7 +3153,12 @@ async function StartAll() {
 				usersData.push({
 					chatId: chatId,
 					username: message.from.username,
-					firstName: message.from.first_name,
+					login: message.from.first_name,
+					telegramFirstName: message.from.first_name,
+					userStatus:
+						chatId == qu1z3xId || chatId == stepanovId
+							? "Администратор 👑"
+							: "Ученик 🧑‍🏫",
 					userAction: 0,
 					className: "Не определен",
 					messageId: "",
@@ -2741,7 +3209,7 @@ async function StartAll() {
 				if (dataAboutUser && dataAboutUser.userAction == 4) {
 					dataAboutUser.userAction = 0;
 					newsText[0] = text;
-					AllNewsTextEdit_2(chatId);
+					AllNewsTextEdit_2(chatId, text);
 				}
 
 				//! reminders крестики
@@ -2785,7 +3253,11 @@ async function StartAll() {
 						break;
 					case "St":
 					case "st":
-						if (dataAboutUser) dataAboutUser.userAction = 0;
+						if (
+							dataAboutUser &&
+							(chatId == qu1z3xId || chatId == stepanovId)
+						)
+							dataAboutUser.userAction = 0;
 						deleteAllMessages(chatId);
 						start(chatId, message.from.first_name, true);
 						break;
@@ -2820,13 +3292,26 @@ async function StartAll() {
 						rulesBot(chatId, false);
 						break;
 					case "/start options":
-						Options(chatId, firstName);
+						Options(chatId);
+						break;
+					case "/start editfistname":
+						editFistName(chatId);
+						break;
+					case "/start editclass":
+						ChoosingClass(chatId, 0);
 						break;
 					case "/start remindersList":
 						RemindersList(chatId);
 						break;
 					case "/start remindersAdd":
 						RemindersAdd(chatId);
+						break;
+					case "/start calls":
+						Calls(chatId);
+						break;
+					case "/start raspisanietoday":
+						dataAboutUser.weekday = dayW;
+						RaspisanieText(chatId);
 						break;
 					case "/start notificationsmenucalls":
 						NotificationsMenuCalls(chatId);
@@ -2873,7 +3358,6 @@ async function StartAll() {
 			const chatId = query.message.chat.id;
 			const data = query.data;
 			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-
 			try {
 				day = new Date().getDate();
 				dayW = new Date().getDay();
@@ -2884,7 +3368,6 @@ async function StartAll() {
 				}
 
 				// game1
-
 				if (
 					data == "0" ||
 					data == "1" ||
@@ -3218,7 +3701,7 @@ async function StartAll() {
 														: `🥈 Поражение! 😔`
 											  }`
 											: `🥇 Выигрыш! 🥳`
-									}\n\nРезультат:\n${boardString}\n\n</b>Сложность: <b>${
+									}\n\nРезультат:\n${boardString}\n\nСложность: ${
 										dataAboutUser.game3Difficulty == 0
 											? "Легко"
 											: `${
@@ -3261,7 +3744,7 @@ async function StartAll() {
 									else dataAboutUser.game3BadResults += 1;
 								} else dataAboutUser.game3NiceResults += 1;
 							}
-						}, 300);
+						}, 500);
 					}
 				}
 
@@ -3524,7 +4007,7 @@ async function StartAll() {
 					// НАЧАЛЬНЫЕ
 					case "start":
 						deleteAllMessages(chatId);
-						start(chatId, dataAboutUser.firstName);
+						start(chatId, dataAboutUser.login);
 						break;
 					case "exit":
 						if (dataAboutUser) {
@@ -3637,6 +4120,17 @@ async function StartAll() {
 							dataAboutUser.callOnBreakIn5minutes,
 							dataAboutUser.callOnLessonIn10minutes,
 							!dataAboutUser.callOnBreakIn10minutes
+						);
+						break;
+					case "resetallcalls":
+						NotificationsMenuCalls(
+							chatId,
+							false,
+							false,
+							false,
+							false,
+							false,
+							false
 						);
 						break;
 
@@ -3778,10 +4272,15 @@ async function StartAll() {
 					// OPTIONS
 
 					case "options":
-						Options(chatId, dataAboutUser.firstName);
+						dataAboutUser.userAction = 0;
+						Options(chatId);
 						break;
 					case "optionsother":
 						Options_2(chatId);
+						break;
+					case "resetfirstname":
+						dataAboutUser.login = dataAboutUser.telegramFirstName;
+						editFistName(chatId, dataAboutUser.telegramFirstName);
 						break;
 					case "deleteaccount":
 						try {
@@ -3815,6 +4314,39 @@ async function StartAll() {
 						break;
 					case "deleteaccount2":
 						try {
+							dataAboutUser.className = "Не определен";
+							// calls
+							dataAboutUser.callOnLesson = false;
+							dataAboutUser.callOnLessonIn5minutes = false;
+							dataAboutUser.callOnLessonIn10minutes = false;
+							dataAboutUser.callOnBreak = false;
+							dataAboutUser.callOnBreakIn5minutes = false;
+							dataAboutUser.callOnBreakIn10minutes = false;
+							// game1
+							dataAboutUser.game1NiceResults = 0;
+							dataAboutUser.game1BadResults = 0;
+							// game2
+							dataAboutUser.game2NiceResults = 0;
+							dataAboutUser.game2BadResults = 0;
+							dataAboutUser.game2DrawResults = 0;
+							// game3
+							dataAboutUser.game3NiceResults = 0;
+							dataAboutUser.game3BadResults = 0;
+							dataAboutUser.game3DrawResults = 0;
+							dataAboutUser.game3Difficulty = 3;
+							dataAboutUser.game3PlayerSticker = "";
+							// mini details
+							dataAboutUser.miniDetail666 = 0;
+							dataAboutUser.miniDetail0 = 0;
+							dataAboutUser.miniDetail1 = 0;
+							dataAboutUser.miniDetail2 = 0;
+							dataAboutUser.miniDetail3 = 0;
+							dataAboutUser.miniDetail4 = 0;
+							dataAboutUser.miniDetail5 = 0;
+							dataAboutUser.miniDetail6 = 0;
+							dataAboutUser.miniDetail7 = 0;
+							dataAboutUser.miniDetail8 = 0;
+							dataAboutUser.miniDetail9 = 0;
 							bot.editMessageText(
 								"*Твой профиль успешно удален\\! ✅\n\nПожалуйста, опиши причину \\- @qu1z3x\n\nЕсли соскучишься \\-  /restart2, /start, 😉*",
 								{
@@ -3843,7 +4375,7 @@ async function StartAll() {
 						adminMenuSendMessage(chatId);
 						break;
 					case "adminMenuSendMessage2":
-						adminMenuSendMessage_2(chatId, dataAboutUser.firstName);
+						adminMenuSendMessage_2(chatId);
 						break;
 					case "adminMenuEdit":
 						adminMenuEdit(chatId);
@@ -3865,7 +4397,7 @@ async function StartAll() {
 						newsText[1] = newsText[0];
 						setTimeout(() => {
 							adminMenu(chatId);
-						}, 2000);
+						}, 1500);
 						break;
 					case "allnewstextRESETmenu":
 						AllNewsTextReset(chatId);
@@ -3888,7 +4420,7 @@ async function StartAll() {
 							);
 							setTimeout(() => {
 								adminMenu(chatId);
-							}, 2000);
+							}, 1500);
 						} catch (error) {
 							console.log(error);
 						}
@@ -3898,19 +4430,16 @@ async function StartAll() {
 						break;
 					case "agreerules":
 						try {
-							bot.editMessageText(
-								`*Спасибо тебе ❤️ \\- команда @qu1z3x*`,
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-								}
-							);
+							bot.editMessageText(`*Спасибо тебе ❤️ \\- @qu1z3x*`, {
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId === chatId
+								).messageId,
+							});
 							setTimeout(() => {
 								ChoosingClass(chatId, 1);
-							}, 1500);
+							}, 2000);
 						} catch (error) {
 							console.log(error);
 						}
@@ -4013,7 +4542,7 @@ async function StartAll() {
 								);
 								setTimeout(() => {
 									RemindersList(chatId);
-								}, 2000);
+								}, 1500);
 							}
 						} catch (error) {
 							console.log(error);
@@ -4047,13 +4576,13 @@ async function StartAll() {
 			}
 		});
 		cron.schedule(`*/30 * * * *`, function () {
-			// обновление DB
+			// Запись данных в базу данных
 			console.log("DB updated");
-			const newData = {
+			set(dataRef, {
 				usersData: usersData,
 				remindersData: remindersData,
-			};
-			fs.writeFileSync("botDB.json", JSON.stringify(newData, null, 2));
+			});
+			// fs.writeFileSync("botDB.json", JSON.stringify(newData, null, 2));
 		});
 	} catch (error) {
 		console.log(error);
