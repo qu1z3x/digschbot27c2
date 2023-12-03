@@ -1,5 +1,6 @@
 import TelegramBot from "node-telegram-bot-api";
 import cron from "node-cron";
+import fs from "fs";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get } from "firebase/database";
 
@@ -451,7 +452,7 @@ async function Raspisanie(chatId) {
 							},
 							{
 								text: "На завтра 🕰️",
-								callback_data: "tomorrow",
+								callback_data: "nextweekday",
 							},
 						],
 						[
@@ -474,10 +475,15 @@ async function Raspisanie(chatId) {
 	}
 }
 
-async function RaspisanieText(chatId) {
+async function RaspisanieText(
+	chatId,
+	dayForRaspisanie = usersData.find((obj) => obj.chatId === chatId).weekday
+) {
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
 
 	try {
+		dataAboutUser.weekday = dayForRaspisanie;
+
 		if (dataAboutUser.className == "Не определен") {
 			await bot.editMessageText(
 				`<b><i>⏰ Расписание 📚\n\nУ тебя не выбран класс❗</i>\n\nЕго можно изменить в настройках ⬇️😉</b>`,
@@ -523,75 +529,76 @@ async function RaspisanieText(chatId) {
 					i++
 				) {
 					if (classArr[dataAboutUser.weekday - 1][i] != "") {
-						if (i + 1 == 1 && dateNowHHMM >= 700 && dateNowHHMM < 910)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 2 &&
-							dateNowHHMM >= 925 &&
-							dateNowHHMM < 1005
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 3 &&
-							dateNowHHMM >= 1025 &&
-							dateNowHHMM < 1105
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 4 &&
-							dateNowHHMM >= 1125 &&
-							dateNowHHMM < 1205
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 5 &&
-							dateNowHHMM >= 1220 &&
-							dateNowHHMM < 1300
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 6 &&
-							dateNowHHMM >= 1315 &&
-							dateNowHHMM < 1355
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 7 &&
-							dateNowHHMM >= 1410 &&
-							dateNowHHMM < 1450
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 8 &&
-							dateNowHHMM >= 1505 &&
-							dateNowHHMM < 1545
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else if (
-							i + 1 == 9 &&
-							dateNowHHMM >= 1600 &&
-							dateNowHHMM < 1640
-						)
-							raspisanieText += `${i + 1}. <u>${classArr[
-								dataAboutUser.weekday - 1
-							][i].trim()}</u>\n`;
-						else
+						if (dataAboutUser.weekday == dayW) {
+							if (i + 1 == 1 && dateNowHHMM >= 700 && dateNowHHMM < 910)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 2 &&
+								dateNowHHMM >= 925 &&
+								dateNowHHMM < 1005
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 3 &&
+								dateNowHHMM >= 1025 &&
+								dateNowHHMM < 1105
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 4 &&
+								dateNowHHMM >= 1125 &&
+								dateNowHHMM < 1205
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 5 &&
+								dateNowHHMM >= 1220 &&
+								dateNowHHMM < 1300
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 6 &&
+								dateNowHHMM >= 1315 &&
+								dateNowHHMM < 1355
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 7 &&
+								dateNowHHMM >= 1410 &&
+								dateNowHHMM < 1450
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 8 &&
+								dateNowHHMM >= 1505 &&
+								dateNowHHMM < 1545
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+							else if (
+								i + 1 == 9 &&
+								dateNowHHMM >= 1600 &&
+								dateNowHHMM < 1640
+							)
+								raspisanieText += `${i + 1}. <u>${classArr[
+									dataAboutUser.weekday - 1
+								][i].trim()}</u>\n`;
+						} else
 							raspisanieText += `${i + 1}. ${classArr[
 								dataAboutUser.weekday - 1
 							][i].trim()}\n`;
@@ -599,9 +606,9 @@ async function RaspisanieText(chatId) {
 				}
 			}
 			await bot.editMessageText(
-				`<b><i><a href="https://t.me/${BotName}/?start=minidetail8">⏰</a> Расписание 📚</i>\n\n${
+				`<b><i><a href="https://t.me/${BotName}/?start=minidetail8">⏰</a> Расписание</i> • ${
 					dataAboutUser.className
-				} • ${weekDayNames[dataAboutUser.weekday]} • ${
+				} 📚\n\n${weekDayNamesSHORT[dataAboutUser.weekday]} • ${
 					classArr[dataAboutUser.weekday - 1] &&
 					classArr[dataAboutUser.weekday - 1].filter((item) => item !== "")
 						.length
@@ -641,8 +648,8 @@ async function RaspisanieText(chatId) {
 					raspisanieText == ""
 						? "В этот день нет мероприятий! 😉"
 						: `${raspisanieText}\n${
-								dataAboutUser.weekday == dayW
-									? `<a href="https://t.me/${BotName}/?start=calls">Расписание звонков</a>`
+								raspisanieText != ""
+									? `<a href="https://t.me/${BotName}/?start=callson${dataAboutUser.weekday}">Расписание звонков</a>`
 									: ""
 						  }`
 				}</b>`,
@@ -656,12 +663,8 @@ async function RaspisanieText(chatId) {
 						inline_keyboard: [
 							[
 								{
-									text: `${dataAboutUser.weekday == 1 ? "⛔" : "⬅️"}`,
-									callback_data: `${
-										dataAboutUser.weekday == 1
-											? "-"
-											: "previousweekday"
-									}`,
+									text: "⬅️",
+									callback_data: "previousweekday",
 								},
 								{
 									text: `${
@@ -687,10 +690,8 @@ async function RaspisanieText(chatId) {
 									callback_data: "today",
 								},
 								{
-									text: `${dataAboutUser.weekday == 0 ? "⛔" : "➡️"}`,
-									callback_data: `${
-										dataAboutUser.weekday == 0 ? "-" : "nextweekday"
-									}`,
+									text: "➡️",
+									callback_data: "nextweekday",
 								},
 							],
 
@@ -760,11 +761,14 @@ async function netClassaText(chatId, exitMenu = true) {
 	}
 }
 
-async function Calls(chatId) {
+async function Calls(
+	chatId,
+	dayForCalls = usersData.find((obj) => obj.chatId === chatId).weekday
+) {
 	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-
 	try {
 		const dateNowHHMM = new Date().getHours() * 100 + new Date().getMinutes();
+		dataAboutUser.weekday = dayForCalls;
 
 		let countCalls = 0;
 		if (dataAboutUser.callOnLesson) countCalls++;
@@ -789,7 +793,7 @@ async function Calls(chatId) {
 
 		if (dataAboutUser.className == "Не определен" || classArr == []) {
 			await bot.editMessageText(
-				`<b><i>🕓 Звонки ⏰\n\nУ тебя не выбран класс❗</i>\n\nЕго можно изменить в настройках 😉</b>`,
+				`<b><i>⏰ Звонки 🕓\n\nУ тебя не выбран класс❗</i>\n\nЕго можно изменить в настройках 😉</b>`,
 				{
 					parse_mode: "html",
 					chat_id: chatId,
@@ -808,221 +812,430 @@ async function Calls(chatId) {
 			);
 		} else {
 			await bot.editMessageText(
-				`<b><i>🕓 Звонки ⏰</i>\n\n${dataAboutUser.className} • ${
-					weekDayNames[dataAboutUser.weekday]
-				} • ${
-					classArr[dayW - 1] &&
-					classArr[dayW - 1].filter((item) => item !== "").length
-						? `${
-								classArr[dayW - 1].filter((item) => item !== "").length
-						  } ${
-								classArr[dayW - 1].filter((item) => item !== "")
-									.length == 1
-									? "занятие"
+				`<b><i>⏰ Звонки</i> • ${dataAboutUser.className} • ${
+					weekDayNamesSHORT[dataAboutUser.weekday]
+				} 🕓\n</b>${
+					classArr[dataAboutUser.weekday - 1] &&
+					classArr[dataAboutUser.weekday - 1].filter((item) => item !== "")
+						.length > 0
+						? `\n<b><i>${
+								classArr[dataAboutUser.weekday - 1].length == 1 &&
+								dateNowHHMM < 830 &&
+								dataAboutUser.weekday == dayW
+									? `<u>Начало в 8:30</u>`
 									: `${
-											classArr[dayW - 1].filter(
-												(item) => item !== ""
-											).length >= 2 &&
-											classArr[dayW - 1].filter(
-												(item) => item !== ""
-											).length <= 4
-												? "занятия"
+											classArr[dataAboutUser.weekday - 1].length ==
+												2 &&
+											dateNowHHMM < 925 &&
+											dataAboutUser.weekday == dayW
+												? `<u>Начало в 9:25</u>`
 												: `${
-														classArr[dayW - 1].filter(
-															(item) => item !== ""
-														).length >= 5 &&
-														classArr[dayW - 1].filter(
-															(item) => item !== ""
-														).length <= 20
-															? "занятий"
-															: ``
+														classArr[dataAboutUser.weekday - 1]
+															.length == 3 &&
+														dateNowHHMM < 1025 &&
+														dataAboutUser.weekday == dayW
+															? `<u>Начало в 10:25</u>`
+															: `${
+																	classArr[
+																		dataAboutUser.weekday - 1
+																	].length == 4 &&
+																	dateNowHHMM < 1125 &&
+																	dataAboutUser.weekday == dayW
+																		? `<u>Начало в 11:25</u>`
+																		: `${
+																				classArr[
+																					dataAboutUser.weekday -
+																						1
+																				].length == 5 &&
+																				dateNowHHMM <
+																					1220 &&
+																				dataAboutUser.weekday ==
+																					dayW
+																					? `<u>Начало в 12:20</u>`
+																					: `${
+																							classArr[
+																								dataAboutUser.weekday -
+																									1
+																							].length ==
+																								6 &&
+																							dateNowHHMM <
+																								1315 &&
+																							dataAboutUser.weekday ==
+																								dayW
+																								? `<u>Начало в 13:15</u>`
+																								: `${
+																										classArr[
+																											dataAboutUser.weekday -
+																												1
+																										]
+																											.length ==
+																											7 &&
+																										dateNowHHMM <
+																											1410 &&
+																										dataAboutUser.weekday ==
+																											dayW
+																											? `<u>Начало в 14:10</u>`
+																											: `${
+																													classArr[
+																														dataAboutUser.weekday -
+																															1
+																													]
+																														.length ==
+																														8 &&
+																													dateNowHHMM <
+																														1505 &&
+																													dataAboutUser.weekday ==
+																														dayW
+																														? `<u>Начало в 15:05</u>`
+																														: `${
+																																classArr[
+																																	dataAboutUser.weekday -
+																																		1
+																																]
+																																	.length ==
+																																	9 &&
+																																dateNowHHMM <
+																																	1600 &&
+																																dataAboutUser.weekday ==
+																																	dayW
+																																	? `<u>Начало в 16:00</u>`
+																																	: `${
+																																			classArr[
+																																				dataAboutUser.weekday -
+																																					1
+																																			][0] !=
+																																			""
+																																				? `Начало в 8:30`
+																																				: `${
+																																						classArr[
+																																							dataAboutUser.weekday -
+																																								1
+																																						][1] !=
+																																						""
+																																							? `Начало в 9:25`
+																																							: `${
+																																									classArr[
+																																										dataAboutUser.weekday -
+																																											1
+																																									][2] !=
+																																									""
+																																										? `Начало в 10:25`
+																																										: `${
+																																												classArr[
+																																													dataAboutUser.weekday -
+																																														1
+																																												][3] !=
+																																												""
+																																													? `Начало в 11:25`
+																																													: `${
+																																															classArr[
+																																																dataAboutUser.weekday -
+																																																	1
+																																															][4] !=
+																																															""
+																																																? `Начало в 12:20`
+																																																: `${
+																																																		classArr[
+																																																			dataAboutUser.weekday -
+																																																				1
+																																																		][5] !=
+																																																		""
+																																																			? `Начало в 13:15`
+																																																			: `${
+																																																					classArr[
+																																																						dataAboutUser.weekday -
+																																																							1
+																																																					][6] !=
+																																																					""
+																																																						? `Начало в 14:10`
+																																																						: `${
+																																																								classArr[
+																																																									dataAboutUser.weekday -
+																																																										1
+																																																								][7] !=
+																																																								""
+																																																									? `Начало в 15:05`
+																																																									: `${
+																																																											classArr[
+																																																												dataAboutUser.weekday -
+																																																													1
+																																																											][8] !=
+																																																											""
+																																																												? `Начало в 16:00`
+																																																												: ``
+																																																									  }`
+																																																						  }`
+																																																			  }`
+																																																  }`
+																																													  }`
+																																										  }`
+																																							  }`
+																																				  }`
+																																	  }`
+																														  }`
+																											  }`
+																								  }`
+																					  }`
+																		  }`
+															  }`
 												  }`
 									  }`
-						  }`
-						: "Занятий нет"
-				}</b>${
-					classArr[dayW - 1]
-						? `${
-								classArr[dayW - 1][0] && classArr[dayW - 1].length > 0
-									? `\n\n - ${
+						  }</i>\n</b>${
+								classArr[dataAboutUser.weekday - 1][0] &&
+								classArr[dataAboutUser.weekday - 1].length > 0
+									? `\n - ${
 											dateNowHHMM >= 830 && dateNowHHMM < 910
 												? "<u><b>1</b> урок <b>08:30 - 09:10</b></u>"
 												: "<b>1</b> урок <b>08:30 - 09:10</b>"
-									  } | ${
-											classArr[dayW - 1].length > 1
-												? `${
-														dateNowHHMM >= 910 &&
-														dateNowHHMM < 925
-															? "<u><b>15мин</b></u>"
-															: "<b>15мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 910
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][1] && classArr[dayW - 1].length > 1
-									? `\n\n - ${
-											dateNowHHMM >= 925 && dateNowHHMM < 1005
+								classArr[dataAboutUser.weekday - 1][1] &&
+								classArr[dataAboutUser.weekday - 1].length > 1
+									? `\n - ${
+											dateNowHHMM >= 910 && dateNowHHMM < 1005
 												? "<u><b>2</b> урок <b>09:25 - 10:05</b></u>"
 												: "<b>2</b> урок <b>09:25 - 10:05</b>"
-									  } | ${
-											classArr[dayW - 1].length > 2
-												? `${
-														dateNowHHMM >= 1005 &&
-														dateNowHHMM < 1025
-															? "<u><b>20мин</b></u>"
-															: "<b>20мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 1005
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][2] && classArr[dayW - 1].length > 2
-									? `\n\n - ${
-											dateNowHHMM >= 1025 && dateNowHHMM < 1105
+								classArr[dataAboutUser.weekday - 1][2] &&
+								classArr[dataAboutUser.weekday - 1].length > 2
+									? `\n - ${
+											dateNowHHMM >= 1005 && dateNowHHMM < 1105
 												? "<u><b>3</b> урок <b>10:25 - 11:05</b></u>"
 												: "<b>3</b> урок <b>10:25 - 11:05</b>"
-									  } | ${
-											classArr[dayW - 1].length > 3
-												? `${
-														dateNowHHMM >= 1105 &&
-														dateNowHHMM < 1125
-															? "<u><b>20мин</b></u>"
-															: "<b>20мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 1105
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][3] && classArr[dayW - 1].length > 3
-									? `\n\n - ${
-											dateNowHHMM >= 1125 && dateNowHHMM < 1205
+								classArr[dataAboutUser.weekday - 1][3] &&
+								classArr[dataAboutUser.weekday - 1].length > 3
+									? `\n - ${
+											dateNowHHMM >= 1105 && dateNowHHMM < 1205
 												? "<u><b>4</b> урок <b>11:25 - 12:05</b></u>"
 												: "<b>4</b> урок <b>11:25 - 12:05</b>"
-									  } | ${
-											classArr[dayW - 1].length > 4
-												? `${
-														dateNowHHMM >= 1205 &&
-														dateNowHHMM < 1220
-															? "<u><b>15мин</b></u>"
-															: "<b>15мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 1205
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][4] && classArr[dayW - 1].length > 4
-									? `\n\n - ${
-											dateNowHHMM >= 1220 && dateNowHHMM < 1300
+								classArr[dataAboutUser.weekday - 1][4] &&
+								classArr[dataAboutUser.weekday - 1].length > 4
+									? `\n - ${
+											dateNowHHMM >= 1205 && dateNowHHMM < 1300
 												? "<u><b>5</b> урок <b>12:20 - 13:00</b></u>"
 												: "<b>5</b> урок <b>12:20 - 13:00</b>"
-									  } | ${
-											classArr[dayW - 1].length > 5
-												? `${
-														dateNowHHMM >= 1300 &&
-														dateNowHHMM < 1315
-															? "<u><b>15мин</b></u>"
-															: "<b>15мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 1300
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][5] && classArr[dayW - 1].length > 5
-									? `\n\n - ${
-											dateNowHHMM >= 1315 && dateNowHHMM < 1355
+								classArr[dataAboutUser.weekday - 1][5] &&
+								classArr[dataAboutUser.weekday - 1].length > 5
+									? `\n - ${
+											dateNowHHMM >= 1300 && dateNowHHMM < 1355
 												? "<u><b>6</b> урок <b>13:15 - 13:55</b></u>"
 												: "<b>6</b> урок <b>13:15 - 13:55</b>"
-									  } | ${
-											classArr[dayW - 1].length > 6
-												? `${
-														dateNowHHMM >= 1355 &&
-														dateNowHHMM < 1410
-															? "<u><b>15мин</b></u>"
-															: "<b>15мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 1355
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][6] && classArr[dayW - 1].length > 6
-									? `\n\n - ${
-											dateNowHHMM >= 1410 && dateNowHHMM < 1450
+								classArr[dataAboutUser.weekday - 1][6] &&
+								classArr[dataAboutUser.weekday - 1].length > 6
+									? `\n - ${
+											dateNowHHMM >= 1355 && dateNowHHMM < 1450
 												? "<u><b>7</b> урок <b>14:10 - 14:50</b></u>"
 												: "<b>7</b> урок <b>14:10 - 14:50</b>"
-									  } | ${
-											classArr[dayW - 1].length > 7
-												? `${
-														dateNowHHMM >= 1450 &&
-														dateNowHHMM < 1505
-															? "<u><b>15мин</b></u>"
-															: "<b>15мин</b>"
-												  }`
-												: `${
-														dateNowHHMM >= 1450
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][7] && classArr[dayW - 1].length > 7
-									? `\n\n - ${
-											dateNowHHMM >= 1505 && dateNowHHMM < 1545
+								classArr[dataAboutUser.weekday - 1][7] &&
+								classArr[dataAboutUser.weekday - 1].length > 7
+									? `\n - ${
+											dateNowHHMM >= 1450 && dateNowHHMM < 1545
 												? "<u><b>8</b> урок <b>15:05 - 15:45</b></u>"
 												: "<b>8</b> урок <b>15:05 - 15:45</b>"
-									  } | ${
-											classArr[dayW - 1].length > 8
-												? `${
-														dateNowHHMM >= 1545 &&
-														dateNowHHMM < 1600
-															? "<u><b>15мин</b></u>"
-															: "<b>15мин</b>"
-												  }<b>
-												  }`
-												: `${
-														dateNowHHMM >= 1545
-															? "<u><b>Домой</b></u>"
-															: "<b>Домой</b>"
-												  }`
-									  }`
+									  }\n`
 									: ""
 						  }${
-								classArr[dayW - 1][8] && classArr[dayW - 1].length > 8
-									? `\n\n - ${
-											dateNowHHMM >= 1600 && dateNowHHMM < 1640
-												? "<u>9 урок 16:00 - 16:40</u>"
-												: "9 урок 16:00 - 16:40"
-									  } | ${
-											dateNowHHMM >= 1450 ? "<u>Домой</u>" : "Домой"
-									  }`
+								classArr[dataAboutUser.weekday - 1][8] &&
+								classArr[dataAboutUser.weekday - 1].length > 8
+									? `\n - ${
+											dateNowHHMM >= 1545 && dateNowHHMM < 1640
+												? "<u><b>9</b> урок <b>16:00 - 16:40</b></u>"
+												: "<b>9</b> урок <b>16:00 - 16:40</b>"
+									  }\n`
 									: ""
-						  }\n\n<b><a href= "https://t.me/${BotName}/?start=raspisanietoday">Расписание уроков</a></b>`
-						: "<b>\n\nСегодня нет мероприятий! 😉</b>"
+						  }<b>\n<i>${
+								classArr[dataAboutUser.weekday - 1].length == 1 &&
+								dateNowHHMM >= 910 &&
+								dataAboutUser.weekday == dayW
+									? `<u>Домой</u>`
+									: `${
+											classArr[dataAboutUser.weekday - 1].length ==
+												2 &&
+											dateNowHHMM >= 1005 &&
+											dataAboutUser.weekday == dayW
+												? `<u>Домой</u>`
+												: `${
+														classArr[dataAboutUser.weekday - 1]
+															.length == 3 &&
+														dateNowHHMM >= 1105 &&
+														dataAboutUser.weekday == dayW
+															? `<u>Домой</u>`
+															: `${
+																	classArr[
+																		dataAboutUser.weekday - 1
+																	].length == 4 &&
+																	dateNowHHMM >= 1205 &&
+																	dataAboutUser.weekday == dayW
+																		? `<u>Домой</u>`
+																		: `${
+																				classArr[
+																					dataAboutUser.weekday -
+																						1
+																				].length == 5 &&
+																				dateNowHHMM >=
+																					1300 &&
+																				dataAboutUser.weekday ==
+																					dayW
+																					? `<u>Домой</u>`
+																					: `${
+																							classArr[
+																								dataAboutUser.weekday -
+																									1
+																							].length ==
+																								6 &&
+																							dateNowHHMM >=
+																								1355 &&
+																							dataAboutUser.weekday ==
+																								dayW
+																								? `<u>Домой</u>`
+																								: `${
+																										classArr[
+																											dataAboutUser.weekday -
+																												1
+																										]
+																											.length ==
+																											7 &&
+																										dateNowHHMM >=
+																											1450 &&
+																										dataAboutUser.weekday ==
+																											dayW
+																											? `<u>Домой</u>`
+																											: `${
+																													classArr[
+																														dataAboutUser.weekday -
+																															1
+																													]
+																														.length ==
+																														8 &&
+																													dateNowHHMM >=
+																														1545 &&
+																													dataAboutUser.weekday ==
+																														dayW
+																														? `<u>Домой</u>`
+																														: `${
+																																classArr[
+																																	dataAboutUser.weekday -
+																																		1
+																																]
+																																	.length ==
+																																	9 &&
+																																dateNowHHMM >=
+																																	1640 &&
+																																dataAboutUser.weekday ==
+																																	dayW
+																																	? `<u>Домой</u>`
+																																	: `Домой в ${
+																																			classArr[
+																																				dataAboutUser.weekday -
+																																					1
+																																			]
+																																				.length ==
+																																			1
+																																				? `9:10`
+																																				: `${
+																																						classArr[
+																																							dataAboutUser.weekday -
+																																								1
+																																						]
+																																							.length ==
+																																						2
+																																							? `10:05`
+																																							: `${
+																																									classArr[
+																																										dataAboutUser.weekday -
+																																											1
+																																									]
+																																										.length ==
+																																									3
+																																										? `11:05`
+																																										: `${
+																																												classArr[
+																																													dataAboutUser.weekday -
+																																														1
+																																												]
+																																													.length ==
+																																												4
+																																													? `12:05`
+																																													: `${
+																																															classArr[
+																																																dataAboutUser.weekday -
+																																																	1
+																																															]
+																																																.length ==
+																																															5
+																																																? `13:00`
+																																																: `${
+																																																		classArr[
+																																																			dataAboutUser.weekday -
+																																																				1
+																																																		]
+																																																			.length ==
+																																																		6
+																																																			? `13:55`
+																																																			: `${
+																																																					classArr[
+																																																						dataAboutUser.weekday -
+																																																							1
+																																																					]
+																																																						.length ==
+																																																					7
+																																																						? `14:55`
+																																																						: `${
+																																																								classArr[
+																																																									dataAboutUser.weekday -
+																																																										1
+																																																								]
+																																																									.length ==
+																																																								8
+																																																									? `15:45`
+																																																									: `${
+																																																											classArr[
+																																																												dataAboutUser.weekday -
+																																																													1
+																																																											]
+																																																												.length ==
+																																																											9
+																																																												? `16:40`
+																																																												: ``
+																																																									  }`
+																																																						  }`
+																																																			  }`
+																																																  }`
+																																													  }`
+																																										  }`
+																																							  }`
+																																				  }`
+																																	  }`
+																														  }`
+																											  }`
+																								  }`
+																					  }`
+																		  }`
+															  }`
+												  }`
+									  }`
+						  }</i></b>\n\n<b><a href= "https://t.me/${BotName}/?start=raspisanieon${
+								dataAboutUser.weekday
+						  }">Расписание уроков</a></b>`
+						: "<b>\nСегодня нет мероприятий! 😉</b>"
 				}`,
 				{
 					chat_id: chatId,
@@ -1034,15 +1247,45 @@ async function Calls(chatId) {
 						inline_keyboard: [
 							[
 								{
-									text: `🕰️ Уведомления ${
-										countCalls > 0 ? `(${countCalls})` : ""
-									} 🔔`,
-									callback_data: "callsnotificationsmenu",
+									text: "⬅️",
+									callback_data: "previousweekdaycalls",
+								},
+								{
+									text: `${
+										dataAboutUser.weekday == dayW
+											? `Сегодня`
+											: `${
+													dataAboutUser.weekday == dayW + 1
+														? `Завтра`
+														: `${
+																dataAboutUser.weekday ==
+																	dayW - 1 &&
+																dataAboutUser.weekday != 0
+																	? "Вчера"
+																	: `${
+																			weekDayNamesSHORT[
+																				dataAboutUser
+																					.weekday
+																			]
+																	  }`
+														  }`
+											  }`
+									}`,
+									callback_data: "todaycalls",
+								},
+								{
+									text: "➡️",
+									callback_data: "nextweekdaycalls",
 								},
 							],
 							[
 								{ text: "⬅️В меню", callback_data: "exit" },
-								{ text: "Обновить🔄️", callback_data: "calls" },
+								{
+									text: `Звонки ${
+										countCalls > 0 ? `(${countCalls})` : ""
+									} 🔔`,
+									callback_data: "callsnotificationsmenu",
+								},
 							],
 						],
 					},
@@ -1156,7 +1399,7 @@ async function NotificationsMenuCalls(
 			}\n\n${
 				dayW == 6 || dayW == 0
 					? "_❗Звонки не активны \\- выходной❗_\n\n"
-					: "_❗ПРОВЕРЬ УВЕДОМЛЕНИЯ В ТЕЛЕГРАММЕ❗_\n\n"
+					: "_❗ПРОВЕРЬ УВЕДОМЛЕНИЯ❗_\n\n"
 			}За сколько до звонка оповещать\\?* 🤔`,
 			{
 				parse_mode: "MarkdownV2",
@@ -2165,6 +2408,36 @@ async function adminMenuSendMessage(chatId) {
 async function adminMenuSendMessage_2(chatId) {
 	try {
 		await bot.editMessageText(
+			`<b><i>📋 Создание объявления 📢</i>\n\nКому адресовать объявление?</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId === chatId)
+					.messageId,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{
+								text: "Удалить ❌",
+								callback_data: "deleteexcess",
+							},
+							{
+								text: "Спасибо 👍",
+								callback_data: "deleteexcess",
+							},
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function adminMenuSendMessage_3(chatId, recipient) {
+	try {
+		await bot.editMessageText(
 			`<b><i>📋 Создание объявления 📢</i>\n\nОбъявление опубликовано! 😉✅</b>`,
 			{
 				parse_mode: "html",
@@ -2173,43 +2446,46 @@ async function adminMenuSendMessage_2(chatId) {
 					.messageId,
 			}
 		);
-		for (let i = 0; i < usersData.length; i++) {
-			if (
-				usersData[i].chatId != qu1z3xId &&
-				usersData[i].chatId != stepanovId
-			) {
-				bot.sendMessage(
-					usersData[i].chatId,
-					`<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}</b>`,
-					{
-						parse_mode: "html",
-						reply_markup: {
-							inline_keyboard: [
-								[
-									{
-										text: "Удалить ❌",
-										callback_data: "deleteexcess",
-									},
-									{
-										text: "Спасибо 👍",
-										callback_data: "deleteexcess",
-									},
+		if (recipient == "all") {
+			for (let i = 0; i < usersData.length; i++) {
+				if (
+					usersData[i].chatId != qu1z3xId &&
+					usersData[i].chatId != stepanovId
+				) {
+					bot.sendMessage(
+						usersData[i].chatId,
+						`<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}</b>`,
+						{
+							parse_mode: "html",
+							reply_markup: {
+								inline_keyboard: [
+									[
+										{
+											text: "Удалить ❌",
+											callback_data: "deleteexcess",
+										},
+										{
+											text: "Спасибо 👍",
+											callback_data: "deleteexcess",
+										},
+									],
 								],
-							],
-						},
-					}
-				);
+							},
+						}
+					);
+				}
 			}
-			setTimeout(() => {
-				adminMenu(chatId);
-			}, 1500);
-			sendDataAboutAction(
-				"Администратор",
-				"",
-				chatId,
-				`❗Опубликовано объявление:\n\n${textMessageForAllUsers}`
-			);
+		} else if (recipient == "all") {
 		}
+		setTimeout(() => {
+			adminMenu(chatId);
+		}, 1500);
+		sendDataAboutAction(
+			"Администратор",
+			"",
+			chatId,
+			`❗Опубликовано объявление:\n\n${textMessageForAllUsers}`
+		);
 	} catch (error) {
 		console.log(error);
 	}
@@ -2288,7 +2564,7 @@ async function adminMenuSendMessageOptions(chatId) {
 async function adminMenuEdit(chatId) {
 	try {
 		await bot.editMessageText(
-			"*_📖 Изменение ✏️_ \n\nКакие правки вы хотите внести\\?🤖*",
+			"*_📖 Изменение ✏️ \n\nПримечание:_\nРасписание обновляется каждые 15 минут\\!\n\nКакие правки вы хотите внести\\? 🤖*",
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
@@ -2298,7 +2574,13 @@ async function adminMenuEdit(chatId) {
 					inline_keyboard: [
 						[
 							{
-								text: `✏️Измененить "Новости📖"`,
+								text: `✏️Изменить "Расписание ⏰"`,
+								url: "https://docs.google.com/spreadsheets/d/18xSi-VnqkjKbY9se4Q4bYeVPZAVqfHZd97nkVtYTiwY/edit#gid=0",
+							},
+						],
+						[
+							{
+								text: `✏️Изменить "Новости📖"`,
 								callback_data: "allnewsEDIT",
 							},
 						],
@@ -2772,26 +3054,26 @@ async function StartAll() {
 	try {
 		if (TOKEN == TOKENs[0]) {
 			BotName = "digsch27_bot";
-		} else if (TOKEN == TOKENs[1]) {
-			BotName = "digschbot";
-		}
-
-		// if (
-		// 	fs.readFileSync("botDB.json") != "[]" &&
-		// 	fs.readFileSync("botDB.json") != ""
-		// ) {
-		// 	let dataFromDB = JSON.parse(fs.readFileSync("botDB.json"));
-		// 	usersData = dataFromDB.usersData || [];
-		// 	remindersData = dataFromDB.remindersData || [];
-		// }
-
-		get(dataRef).then((snapshot) => {
-			if (snapshot.exists()) {
-				const dataFromDB = snapshot.val();
+			// База данных ПРОТОТИП
+			if (
+				fs.readFileSync("botDB.json") != "[]" &&
+				fs.readFileSync("botDB.json") != ""
+			) {
+				let dataFromDB = JSON.parse(fs.readFileSync("botDB.json"));
 				usersData = dataFromDB.usersData || [];
 				remindersData = dataFromDB.remindersData || [];
 			}
-		});
+		} else if (TOKEN == TOKENs[1]) {
+			BotName = "digschbot";
+			// База данных ОРИГИНАЛ
+			get(dataRef).then((snapshot) => {
+				if (snapshot.exists()) {
+					const dataFromDB = snapshot.val();
+					usersData = dataFromDB.usersData || [];
+					remindersData = dataFromDB.remindersData || [];
+				}
+			});
+		}
 
 		const timesOnLesson = [
 			"08:30",
@@ -3100,7 +3382,7 @@ async function StartAll() {
 						);
 
 						await bot.editMessageText(
-							`<b>Поставил напоминание</b> 😉🔔\n\n<i>"${match[1]}" - <b>${match[2]}\n\n❗ПРОВЕРЬ УВЕДОМЛЕНИЯ В ТЕЛЕГРАММЕ❗</b></i>`,
+							`<b>Поставил напоминание</b> 😉🔔\n\n<i>"${match[1]}" - <b>${match[2]}\n\n❗ПРОВЕРЬ УВЕДОМЛЕНИЯ❗</b></i>`,
 							{
 								parse_mode: "html",
 								chat_id: message.chat.id,
@@ -3243,6 +3525,18 @@ async function StartAll() {
 					miniDetails(chatId, miniDetailNum);
 				}
 
+				if (text.includes("/start raspisanieon")) {
+					let dayForRaspisanie = text.match(/^\/start raspisanieon(\d+)$/);
+					dayForRaspisanie = parseInt(dayForRaspisanie[1]);
+					RaspisanieText(chatId, dayForRaspisanie);
+				}
+
+				if (text.includes("/start callson")) {
+					let dayForCalls = text.match(/^\/start callson(\d+)$/);
+					dayForCalls = parseInt(dayForCalls[1]);
+					Calls(chatId, dayForCalls);
+				}
+
 				//? КОМАНДЫ
 
 				switch (text) {
@@ -3305,13 +3599,6 @@ async function StartAll() {
 						break;
 					case "/start remindersAdd":
 						RemindersAdd(chatId);
-						break;
-					case "/start calls":
-						Calls(chatId);
-						break;
-					case "/start raspisanietoday":
-						dataAboutUser.weekday = dayW;
-						RaspisanieText(chatId);
 						break;
 					case "/start notificationsmenucalls":
 						NotificationsMenuCalls(chatId);
@@ -3785,6 +4072,12 @@ async function StartAll() {
 								inline_keyboard: [
 									[
 										{
+											text: "На завтра",
+											callback_data: `reschedulereminder${remId}on${0}`,
+										},
+									],
+									[
+										{
 											text: "1м",
 											callback_data: `reschedulereminder${remId}on${1}`,
 										},
@@ -3845,6 +4138,9 @@ async function StartAll() {
 						.map(Number);
 
 					switch (countTime) {
+						case 0:
+							remId = 1000000;
+							break;
 						case 1:
 							minutes += 1;
 							if (minutes >= 60) {
@@ -3913,7 +4209,11 @@ async function StartAll() {
 					remindersData[index].time = newTime;
 
 					bot.editMessageText(
-						`<i><b>🔄️ Перенёс напоминание 😉🔔\n\nНовое:</b>\n"${remindersData[index].text}" - <b>${remindersData[index].time}</b></i>`,
+						`<i><b>🔄️ Перенёс напоминание 😉🔔\n\nНовое:</b>\n"${
+							remindersData[index].text
+						}" - <b>${remId == 1000000 ? "завтра в " : ""}${
+							remindersData[index].time
+						}</b></i>`,
 						{
 							parse_mode: "html",
 							chat_id: chatId,
@@ -3983,22 +4283,16 @@ async function StartAll() {
 						dataAboutUser.weekday = dayW;
 						RaspisanieText(chatId);
 						break;
-					case "tomorrow":
-						if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
-						else if (dataAboutUser.weekday != 6)
-							dataAboutUser.weekday = dayW + 1;
-						RaspisanieText(chatId);
-						break;
 					case "nextweekday":
 						if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
 						else if (dataAboutUser.weekday < 6)
-							dataAboutUser.weekday = ++dataAboutUser.weekday;
+							dataAboutUser.weekday += 1;
 						RaspisanieText(chatId);
 						break;
 					case "previousweekday":
 						if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
 						else if (dataAboutUser.weekday > 0)
-							dataAboutUser.weekday = --dataAboutUser.weekday;
+							dataAboutUser.weekday -= 1;
 						RaspisanieText(chatId);
 						break;
 
@@ -4048,6 +4342,22 @@ async function StartAll() {
 					// CALLS
 
 					case "calls":
+						Calls(chatId);
+						break;
+					case "todaycalls":
+						dataAboutUser.weekday = dayW;
+						Calls(chatId);
+						break;
+					case "nextweekdaycalls":
+						if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
+						else if (dataAboutUser.weekday < 6)
+							dataAboutUser.weekday += 1;
+						Calls(chatId);
+						break;
+					case "previousweekdaycalls":
+						if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
+						else if (dataAboutUser.weekday > 0)
+							dataAboutUser.weekday -= 1;
 						Calls(chatId);
 						break;
 					case "callsnotificationsmenu":
@@ -4575,14 +4885,20 @@ async function StartAll() {
 				console.log(error);
 			}
 		});
+
+		// Запись данных в базу данных
+
 		cron.schedule(`*/30 * * * *`, function () {
-			// Запись данных в базу данных
 			console.log("DB updated");
-			set(dataRef, {
-				usersData: usersData,
-				remindersData: remindersData,
-			});
-			// fs.writeFileSync("botDB.json", JSON.stringify(newData, null, 2));
+
+			if (TOKEN == TOKENs[0]) {
+				fs.writeFileSync("botDB.json", JSON.stringify(newData, null, 2));
+			} else if (TOKEN == TOKENs[1]) {
+				set(dataRef, {
+					usersData: usersData,
+					remindersData: remindersData,
+				});
+			}
 		});
 	} catch (error) {
 		console.log(error);
