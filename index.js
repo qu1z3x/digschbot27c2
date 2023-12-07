@@ -4,12 +4,14 @@ import fs from "fs";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get } from "firebase/database";
 
+import { updateSheetsData } from "./sheets.js";
+
 const TOKENs = [
 	"6654105779:AAEnCdIzKS_cgJUg4rMY8yNM3LPP5iZ-d_A",
 	"6452076729:AAGds4jdMEUT-idcutZdLGVjKu5kyLs3Md4",
 ];
 
-const TOKEN = TOKENs[1]; // 1 - оригинал
+const TOKEN = TOKENs[0]; // 1 - оригинал
 const bot = new TelegramBot(TOKEN, { polling: true });
 
 const firebaseConfig = {
@@ -112,6 +114,7 @@ let textToSayHello = "",
 	// games
 	rndNum,
 	// adminMenu
+	buttonUpdateActive = true,
 	numberArr = 0,
 	paragrafs = [
 		"❗ВНИМАНИЕ❗",
@@ -2572,9 +2575,13 @@ async function adminMenuSendMessageOptions(chatId) {
 async function adminMenuEdit(chatId) {
 	try {
 		await bot.editMessageText(
-			"*_📖 Изменение ✏️ \n\nПримечание:_\nРасписание обновляется каждые 15 минут\\!\n\nКакие правки вы хотите внести\\? 🤖*",
+			`<b><i>📖 Изменение ✏️</i>${
+				buttonUpdateActive
+					? ""
+					: `\n\n<i>Примечание:</i>\n</b>Интервал обновления таблиц 5 мин 🕑<b>`
+			}\n\nКакие правки вы хотите внести? 🤖</b>`,
 			{
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				chat_id: chatId,
 				message_id: usersData.find((obj) => obj.chatId === chatId)
 					.messageId,
@@ -2582,8 +2589,16 @@ async function adminMenuEdit(chatId) {
 					inline_keyboard: [
 						[
 							{
-								text: `✏️Изменить "Расписание ⏰"`,
+								text: `${
+									buttonUpdateActive
+										? `Расписание ✏️`
+										: `✏️Изменить "Расписание📚"`
+								}`,
 								url: "https://docs.google.com/spreadsheets/d/18xSi-VnqkjKbY9se4Q4bYeVPZAVqfHZd97nkVtYTiwY/edit#gid=0",
+							},
+							{
+								text: `${buttonUpdateActive ? "Обновить ✅" : ""}`,
+								callback_data: "updateraspisaniesheets",
 							},
 						],
 						[
@@ -3109,6 +3124,10 @@ async function StartAll() {
 			"13:55",
 			"14:50",
 		];
+
+		cron.schedule(`*/5 * * * *`, function () {
+			buttonUpdateActive = true;
+		});
 
 		cron.schedule(`1 * * * * *`, function () {
 			let textToCallReminder = "";
@@ -4329,11 +4348,9 @@ async function StartAll() {
 						RaspisanieText(chatId);
 						break;
 					case "today":
-						dataAboutUser.weekday = dayW;
-						RaspisanieText(chatId);
+						RaspisanieText(chatId, dayW);
 					case "tomorrow":
-						dataAboutUser.weekday = dayW + 1;
-						RaspisanieText(chatId);
+						RaspisanieText(chatId, dayW + 1);
 						break;
 					case "nextweekday":
 						if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
@@ -4738,6 +4755,11 @@ async function StartAll() {
 						break;
 					case "adminMenuSendMessage2":
 						adminMenuSendMessage_2(chatId);
+						break;
+					case "updateraspisaniesheets":
+						buttonUpdateActive = false;
+						updateSheetsData();
+						adminMenuEdit(chatId);
 						break;
 					case "adminMenuEdit":
 						adminMenuEdit(chatId);

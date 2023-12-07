@@ -1,5 +1,4 @@
 import { google } from "googleapis";
-import cron from "node-cron";
 
 let class10g, class11a, class11v, class11g, class11d;
 const sheetId = "18xSi-VnqkjKbY9se4Q4bYeVPZAVqfHZd97nkVtYTiwY";
@@ -110,8 +109,5 @@ async function updateSheetsData() {
 
 updateSheetsData();
 
-cron.schedule(`*/15 * * * *`, function () {
-	updateSheetsData();
-});
-
+export { updateSheetsData };
 export { class10g, class11a, class11v, class11g, class11d };
