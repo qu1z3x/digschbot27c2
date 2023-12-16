@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 
-let class10g, class11a, class11v, class11g, class11d;
+let class10a, class10b, class10g, class11a, class11v, class11g, class11d;
 const sheetId = "18xSi-VnqkjKbY9se4Q4bYeVPZAVqfHZd97nkVtYTiwY";
 
 function NodeGoogleSheets(file, sheetId, keyMass, fun) {
@@ -62,12 +62,13 @@ function NodeGoogleSheets(file, sheetId, keyMass, fun) {
 async function updateSheetsData() {
 	try {
 		console.log("sheets updated");
+
 		NodeGoogleSheets(
 			"google_file.json",
 			sheetId,
 			{ values: "B2:J7" },
 			(data) => {
-				class10g = data.data.values;
+				class10a = data.data.values;
 			}
 		);
 		NodeGoogleSheets(
@@ -75,7 +76,7 @@ async function updateSheetsData() {
 			sheetId,
 			{ values: "B12:J17" },
 			(data) => {
-				class11a = data.data.values;
+				class10b = data.data.values;
 			}
 		);
 		NodeGoogleSheets(
@@ -83,7 +84,7 @@ async function updateSheetsData() {
 			sheetId,
 			{ values: "B22:J27" },
 			(data) => {
-				class11v = data.data.values;
+				class10g = data.data.values;
 			}
 		);
 		NodeGoogleSheets(
@@ -91,13 +92,29 @@ async function updateSheetsData() {
 			sheetId,
 			{ values: "B32:J37" },
 			(data) => {
-				class11g = data.data.values;
+				class11a = data.data.values;
 			}
 		);
 		NodeGoogleSheets(
 			"google_file.json",
 			sheetId,
 			{ values: "B42:J47" },
+			(data) => {
+				class11v = data.data.values;
+			}
+		);
+		NodeGoogleSheets(
+			"google_file.json",
+			sheetId,
+			{ values: "B52:J57" },
+			(data) => {
+				class11g = data.data.values;
+			}
+		);
+		NodeGoogleSheets(
+			"google_file.json",
+			sheetId,
+			{ values: "B62:J67" },
 			(data) => {
 				class11d = data.data.values;
 			}
@@ -110,4 +127,4 @@ async function updateSheetsData() {
 updateSheetsData();
 
 export { updateSheetsData };
-export { class10g, class11a, class11v, class11g, class11d };
+export { class10a, class10b, class10g, class11a, class11v, class11g, class11d };

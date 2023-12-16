@@ -1,6 +1,7 @@
 import TelegramBot from "node-telegram-bot-api";
 import cron from "node-cron";
 import fs from "fs";
+
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get } from "firebase/database";
 import { updateSheetsData } from "./sheets.js";
@@ -24,6 +25,7 @@ const firebaseConfig = {
 	measurementId: "G-9Z5EGQ2GBM",
 };
 const app = initializeApp(firebaseConfig);
+
 // Получение ссылки на базу данных Firebase Realtime Database
 const db = getDatabase(app);
 const dataRef = ref(db);
@@ -31,7 +33,15 @@ const dataRef = ref(db);
 import { sendDataAboutButton } from "./tgterminal.js";
 import { sendDataAboutError } from "./tgterminal.js";
 import { sendDataAboutAction } from "./tgterminal.js";
-import { class10g, class11a, class11v, class11g, class11d } from "./sheets.js";
+import {
+	class10a,
+	class10b,
+	class10g,
+	class11a,
+	class11v,
+	class11g,
+	class11d,
+} from "./sheets.js";
 
 const qu1z3xId = "923690530";
 const stepanovId = "5786876945";
@@ -50,6 +60,7 @@ const stickers = [
 	"CAACAgIAAxkBAAIXJWU1QdMJWNfIOh9odZH8Q25K98A-AAJvAAPBnGAMyw59i8DdTVYwBA",
 	"CAACAgIAAxkBAAIXJmU1QdsTofm7uh7hi3mNYNE837HpAAJ6AAPBnGAM0GBdiVRCvP4wBA",
 ];
+
 bot.setMyCommands([
 	{
 		command: "/restart",
@@ -132,15 +143,6 @@ const timesOnBreak = [
 	"16:40",
 ];
 
-// const classes11 = [
-// 	"",
-// 	"1. Информатика - 220\n2. Математика - 315\n3. Русский язык - 210\n4. Физика - 301\n5. История - 205\n6. Английский язык - 310\n7. Физкультура - Спортзал",
-// 	"1. Физика - 301\n2. Русский язык - 210\n3. Информатика - 220\n4. Английский язык - 310\n5. История - 205\n6. Математика - 315",
-// 	"1. Математика - 220\n2. История - 315\n3. Физкультура - Спортзал\n4. Английский язык - 310\n5. Информатика - 205\n6. Физика - 301\n7.Русский язык - 210 ",
-// 	"1. Химия - 303\n2. Биология - 305\n3. География - 208\n4. Литература - 201\n5. Искусство - 307\n6. Технологии - 312\n7. Музыка - 304",
-// 	"1. Информатика - 220\n2. Математика - 315\n3. Русский язык - 210\n4. Физика - 301\n5. История - 205\n6. Английский язык - 310\n7. Физкультура - Спортзал",
-// 	"",
-// ];
 let textToSayHello = "",
 	// Raspisanie
 	month,
@@ -373,10 +375,24 @@ async function ChoosingClass(chatId, start = 1) {
 							[
 								{
 									text: `${
+										dataAboutUser.className == "10А" ? "•10А•" : "10А"
+									}`,
+									callback_data: "10a",
+								},
+								{
+									text: `${
+										dataAboutUser.className == "10Б" ? "•10Б•" : "10Б"
+									}`,
+									callback_data: "10b",
+								},
+								{
+									text: `${
 										dataAboutUser.className == "10Г" ? "•10Г•" : "10Г"
 									}`,
 									callback_data: "10g",
 								},
+							],
+							[
 								{
 									text: `${
 										dataAboutUser.className == "11А" ? "•11A•" : "11A"
@@ -422,7 +438,11 @@ async function ChoosingClass(chatId, start = 1) {
 					reply_markup: {
 						inline_keyboard: [
 							[
+								{ text: "10А", callback_data: "10a" },
+								{ text: "10Б", callback_data: "10b" },
 								{ text: "10Г", callback_data: "10g" },
+							],
+							[
 								{ text: "11A", callback_data: "11a" },
 								{ text: "11В", callback_data: "11v" },
 								{ text: "11Г", callback_data: "11g" },
@@ -445,9 +465,19 @@ async function ChoosingClass(chatId, start = 1) {
 						inline_keyboard: [
 							[
 								{
+									text: "10A",
+									url: `https://t.me/${BotName}`,
+								},
+								{
+									text: "10Б",
+									url: `https://t.me/${BotName}`,
+								},
+								{
 									text: "10Г",
 									url: `https://t.me/${BotName}`,
 								},
+							],
+							[
 								{ text: "11A", url: `https://t.me/${BotName}` },
 								{ text: "11В", url: `https://t.me/${BotName}` },
 								{ text: "11Г", url: `https://t.me/${BotName}` },
@@ -549,6 +579,10 @@ async function RaspisanieText(
 			const classArr =
 				dataAboutUser.className === "10Г"
 					? class10g
+					: dataAboutUser.className === "10Б"
+					? class10b
+					: dataAboutUser.className === "10А"
+					? class10a
 					: dataAboutUser.className === "11Д"
 					? class11d
 					: dataAboutUser.className === "11Г"
@@ -830,6 +864,10 @@ async function Calls(
 		const classArr =
 			dataAboutUser.className === "10Г"
 				? class10g
+				: dataAboutUser.className === "10Б"
+				? class10b
+				: dataAboutUser.className === "10А"
+				? class10a
 				: dataAboutUser.className === "11Д"
 				? class11d
 				: dataAboutUser.className === "11Г"
@@ -4069,6 +4107,14 @@ async function StartAll() {
 				//? КЛАССЫ/РАСПИСАНИЕ
 
 				switch (data) {
+					case "10а":
+						dataAboutUser.className = "10A";
+						menuHome(chatId);
+						break;
+					case "10b":
+						dataAboutUser.className = "10Б";
+						menuHome(chatId);
+						break;
 					case "10g":
 						dataAboutUser.className = "10Г";
 						menuHome(chatId);
