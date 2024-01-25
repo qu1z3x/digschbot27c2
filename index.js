@@ -42,9 +42,11 @@ import {
 	class11g,
 	class11d,
 } from "./sheets.js";
+import { foodmenu27c1, foodmenu27c2 } from "./sheets.js";
 
 const qu1z3xId = "923690530";
 const stepanovId = "5786876945";
+const jackId = "6815420098";
 let BotName = "digschbot";
 
 //? БАЗА ДАННЫХ
@@ -73,7 +75,7 @@ bot.setMyCommands([
 const newsText = [
 	"",
 	"Новостей нет.. 🤔",
-	`- УРА! Актуальное расписание! 🤗\n\n- Обновлен раздел с настройками ✅\n\n- Статистика сыгранных игр 👌\n\n- Объем всего функционала бота, упирается в +4500 строк кода <a href= "https://t.me/${BotName}/?start=minidetail5">🫡</a>\n\n- Я стал быстрее, во всех смыслах 🏎️\n\n- Максимальная нагрузка до 50 запросов в СЕКУНДУ 🤯`,
+	`- УРА! Актуальное расписание! 🤗\n\n- Обновлен раздел с настройками ✅\n\n- Статистика сыгранных игр 👌\n\n- Объем всего функционала бота, упирается в +5500 строк кода <a href= "https://t.me/${BotName}/?start=minidetail5">🫡</a>\n\n- Я стал быстрее, во всех смыслах 🏎️\n\n- Максимальная нагрузка до 50 запросов в СЕКУНДУ 🤯`,
 	'МБОУ СОШ №27 | Школа с 2023 года, разделена на два корпуса, но как в первом, так и во втором царит уникальная ученическая атмосфера! Здесь каждый день — новое приключение. Ученики и учителя образуют единую большую семью, где дружба и знание всегда рядом. Также у нас существует множество спортивных секций в обоих корпусах!\n\nСовсем недавно наша школа заняла 3-е место в турнире "Кубок памяти А. З. Бакурова", сыграв со всеми школами в округе!',
 ];
 
@@ -152,6 +154,7 @@ let textToSayHello = "",
 	// games
 	rndNum,
 	// adminMenu
+	chatIdForBlacklist = "",
 	buttonUpdateActive = true,
 	numberArr = 0,
 	paragrafs = [
@@ -200,7 +203,7 @@ async function menuHome(chatId, exit = true) {
 	rndNum = Math.floor(Math.random() * menuHomeText.length);
 	let rnd2 = Math.floor(Math.random() * newFunctionsNotification.length);
 
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
 		if (exit) {
@@ -208,7 +211,7 @@ async function menuHome(chatId, exit = true) {
 				`<i>${newFunctionsNotification[rnd2]}</i><b>${menuHomeText[rndNum]}</b>`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "HTML",
 					disable_web_page_preview: true,
@@ -216,21 +219,27 @@ async function menuHome(chatId, exit = true) {
 						inline_keyboard: [
 							[
 								{
-									text: "Расписание📚",
+									text: "📆 Расписание 📚",
 									callback_data: "today",
-								},
-								{
-									text: "Звонки⏰",
-									callback_data: "calls",
 								},
 							],
 							[
-								{ text: "Развлечения🕹️", callback_data: "games" },
+								{
+									text: "Звонки ⏰",
+									callback_data: "calls",
+								},
+								{ text: "Напоминания 🗓️", callback_data: "reminders" },
+							],
+							[
+								{
+									text: "Столовая 🍜",
+									callback_data: "foodmenutoday",
+								},
 								{ text: "Интересное❗", callback_data: "news" },
 							],
 							[
-								{ text: "Напоминания🗓️", callback_data: "reminders" },
-								{ text: "Настройки⚙️", callback_data: "options" },
+								{ text: "Развлечения 🕹️", callback_data: "games" },
+								{ text: "Настройки ⚙️", callback_data: "options" },
 							],
 							[
 								{
@@ -249,29 +258,35 @@ async function menuHome(chatId, exit = true) {
 		} else if (!exit) {
 			bot.sendMessage(
 				chatId,
-				`*Сверху ты ничего не видел 🙈\n\n${menuHomeText[rndNum]}*`,
+				`<i>${newFunctionsNotification[rnd2]}</i><b>${menuHomeText[rndNum]}</b>`,
 				{
-					parse_mode: "MarkdownV2",
+					parse_mode: "html",
 					disable_web_page_preview: true,
 					reply_markup: {
 						inline_keyboard: [
 							[
 								{
-									text: "Расписание📚",
+									text: "📆 Расписание 📚",
 									callback_data: "today",
-								},
-								{
-									text: "Звонки⏰",
-									callback_data: "calls",
 								},
 							],
 							[
-								{ text: "Развлечения🕹️", callback_data: "games" },
+								{
+									text: "Звонки ⏰",
+									callback_data: "calls",
+								},
+								{ text: "Напоминания 🗓️", callback_data: "reminders" },
+							],
+							[
+								{
+									text: "Столовая 🍜",
+									callback_data: "foodmenutoday",
+								},
 								{ text: "Интересное❗", callback_data: "news" },
 							],
 							[
-								{ text: "Напоминания🗓️", callback_data: "reminders" },
-								{ text: "Настройки⚙️", callback_data: "options" },
+								{ text: "Развлечения 🕹️", callback_data: "games" },
+								{ text: "Настройки ⚙️", callback_data: "options" },
 							],
 							[
 								{
@@ -297,20 +312,19 @@ async function menuHome(chatId, exit = true) {
 }
 
 async function rulesBot(chatId, RulesToStart = true) {
-	let rulesText = `<i>🤖 Правила пользования 📃</i>\n\n❗ПОЖАЛУЙСТА, ПРОЧТИ ВСЕ<a href = "https://t.me/${BotName}/?start=minidetail6">🙏</a>\n\n-  Пользоваться приложением строго в благих целях🌍\n\n-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n-  Бот не отвечает - команда /restart в твоем распоряжении!😉\n\n-  Нашлась ошибка? Бот по-прежнему не отвечает? Есть замечания по работе проекта? - пожалуйста, сообщи об этом автору @qu1z3x 👍\n\n-  Также принимая правила, ты разрешаешь использование личных данных, полученных в рамках школьного бота (т.е. полученные мной) 😉🔒`;
+	let rulesText = `<i>🤖 Правила пользования 📃</i>\n\n❗ПОЖАЛУЙСТА, ПРОЧТИ ВСЕ<a href = "https://t.me/${BotName}/?start=minidetail6">🙏</a>\n\n-  Обязательно ознакомься с <a href = "https://t.me/${BotName}/?start=showhi2">Что умеет этот чат-бот?</a>\n\n-  Пользоваться приложением строго в благих целях🌍\n\n-  Не совершать намеренные нарушения правил, или создание сбоев❌\n\n-  Бот не отвечает - команда /restart в твоем распоряжении!😉\n\n-  Нашлась ошибка? Бот по-прежнему не отвечает? Есть замечания по работе проекта? - пожалуйста, сообщи об этом автору @qu1z3x 👍\n\n-  Также принимая правила, ты разрешаешь использование личных данных, полученных в рамках школьного бота (т.е. полученные мной) 😉🔒`;
 
 	if (RulesToStart) {
 		try {
 			await bot.editMessageText(`<b>${rulesText}</b>`, {
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				parse_mode: "html",
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
 						[
-							{ text: "⬅️Назад", callback_data: "chooseclass2" },
+							{ text: "⬅️Назад", callback_data: "chooseclass1" },
 							{ text: "Принять✅", callback_data: "agreerules" },
 						],
 					],
@@ -320,14 +334,14 @@ async function rulesBot(chatId, RulesToStart = true) {
 			console.log(error);
 			bot.sendMessage(
 				chatId,
-				`<b>Сверху ты ничего не было 🙈\n\n${rulesText}</b>`,
+				`<b>Сверху ничего не было 🙈\n\n${rulesText}</b>`,
 				{
 					parse_mode: "html",
 					disable_web_page_preview: true,
 					reply_markup: {
 						inline_keyboard: [
 							[
-								{ text: "⬅️Назад", callback_data: "chooseclass2" },
+								{ text: "⬅️Назад", callback_data: "chooseclass1" },
 								{ text: "Принять✅", callback_data: "agreerules" },
 							],
 						],
@@ -340,8 +354,7 @@ async function rulesBot(chatId, RulesToStart = true) {
 		try {
 			await bot.editMessageText(`<b>${rulesText}</b>`, {
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				parse_mode: "html",
 				disable_web_page_preview: true,
 				reply_markup: {
@@ -360,14 +373,30 @@ async function rulesBot(chatId, RulesToStart = true) {
 }
 
 async function ChoosingClass(chatId, start = 1) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 	try {
 		if (start == 0) {
 			await bot.editMessageText(
-				"<i><b>✏️Изменение класса🔄️\n\n</b>Класс используется для составления расписания!🔒</i><b>\n\nПожалуйста, выбери свой класс 🙂🔎</b>",
+				`<i><b>✏️ Изменение класса 🔄️\n\n</b>Класс используется для составления расписания!🔒</i><b>\n\n${
+					dataAboutUser.className != "Не определен"
+						? `</b>Текущий: <b>${dataAboutUser.className} • ${
+								dataAboutUser.schoolName == "27c2"
+									? "№27к2"
+									: `${
+											dataAboutUser.schoolName == "27c1"
+												? "№27к1"
+												: `${
+														dataAboutUser.schoolName == ""
+															? "Нет данных"
+															: ""
+												  }`
+									  }`
+						  }`
+						: ``
+				}\n\n</b>Пожалуйста, выбери <b>свой</b> класс 🙂🔎`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "html",
 					reply_markup: {
@@ -428,10 +457,10 @@ async function ChoosingClass(chatId, start = 1) {
 			);
 		} else if (start == 1) {
 			bot.editMessageText(
-				`<b>Будем ближе знакомиться! 😊\n\n<a href ="https://t.me/${BotName}/?start=rules">Правила пользования ресурсом</a>\n\n</b><i>Класс используется для составления расписания!</i><b> 🔒\n\nА теперь выбирай класс 🙂🔎</b>`,
+				`<b><a href ="https://t.me/${BotName}/?start=rules">Правила пользования ресурсом</a>\n\n</b><i>Класс используется для составления расписания!</i><b> 🔒\n\nА теперь выбирай класс 🙂🔎</b>`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "html",
 					disable_web_page_preview: true,
@@ -448,16 +477,17 @@ async function ChoosingClass(chatId, start = 1) {
 								{ text: "11Г", callback_data: "11g" },
 								{ text: "11Д", callback_data: "11d" },
 							],
+							[{ text: "Нет моего😞", callback_data: "netclassa1" }],
 						],
 					},
 				}
 			);
-		} else if (start === 2) {
+		} else if (start == 2) {
 			bot.editMessageText(
-				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста, _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](https://t.me/${BotName}/?start=rules)❗\n\nИ выбери свой класс* 🙂🔎`,
+				`*Будем ближе знакомиться\\! 😊\n\nПожалуйста, _ознакомься и СОГЛАСИСЬ_ с [правилами пользования ресурсом](https://t.me/${BotName}/?start=rules)❗🙂* `,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "MarkdownV2",
 					disable_web_page_preview: true,
@@ -465,28 +495,10 @@ async function ChoosingClass(chatId, start = 1) {
 						inline_keyboard: [
 							[
 								{
-									text: "10A",
-									url: `https://t.me/${BotName}`,
-								},
-								{
-									text: "10Б",
-									url: `https://t.me/${BotName}`,
-								},
-								{
-									text: "10Г",
-									url: `https://t.me/${BotName}`,
+									text: "Правила пользования 📃",
+									callback_data: `rules1`,
 								},
 							],
-							[
-								{ text: "11A", url: `https://t.me/${BotName}` },
-								{ text: "11В", url: `https://t.me/${BotName}` },
-								{ text: "11Г", url: `https://t.me/${BotName}` },
-								{
-									text: "11Д",
-									url: `https://t.me/${BotName}`,
-								},
-							],
-							[{ text: "Нет моего😞", callback_data: "netclassa2" }],
 						],
 					},
 				}
@@ -499,18 +511,20 @@ async function ChoosingClass(chatId, start = 1) {
 }
 
 async function Raspisanie(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
 	try {
+		dataAboutUser.weekday = dayW;
 		await bot.editMessageText(
 			`<b><i>⏰ День расписания 📚</i></b>\n\nСегодня: <b>${
 				weekDayNames[dayW]
 			}, ${day} ${monthNames[month]}</b>\nКласс: <b>${
-				usersData.find((obj) => obj.chatId === chatId).className
+				usersData.find((obj) => obj.chatId == chatId).className
 			}</b> - <a href ="https://t.me/${BotName}/?start=options">изменить</a>\n\n<b>На какой день расписание❓🤔</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -521,7 +535,7 @@ async function Raspisanie(chatId) {
 							},
 							{
 								text: "На завтра 🕰️",
-								callback_data: "tomorrow",
+								callback_data: "nextweekday",
 							},
 						],
 						[
@@ -530,7 +544,7 @@ async function Raspisanie(chatId) {
 							{ text: "Ср 🎯", callback_data: "wen" },
 						],
 						[
-							{ text: "⬅️В меню", callback_data: "exit" },
+							{ text: "⬅️Назад", callback_data: "today" },
 							{ text: "Чт ☀️", callback_data: "thu" },
 							{ text: "Пт 🥇", callback_data: "fri" },
 						],
@@ -546,21 +560,23 @@ async function Raspisanie(chatId) {
 
 async function RaspisanieText(
 	chatId,
-	dayForRaspisanie = usersData.find((obj) => obj.chatId === chatId).weekday
+	dayForRaspisanie = usersData.find((obj) => obj.chatId == chatId).weekday
 ) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
+	dataAboutUser.userAction = "RaspisanieText";
 
 	try {
 		dataAboutUser.weekday = dayForRaspisanie;
 
 		if (dataAboutUser.className == "Не определен") {
 			await bot.editMessageText(
-				`<b><i>⏰ Расписание 📚\n\nУ тебя не выбран класс❗</i>\n\nЕго можно изменить в настройках ⬇️😉</b>`,
+				`<b><i>📆 Расписание 📚\n\nУ тебя не выбран класс❗</i>\n\n</b>Его можно изменить <b>в настройках ⬇️😉</b>`,
 				{
 					parse_mode: "html",
 					chat_id: chatId,
 					disable_web_page_preview: true,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					reply_markup: {
 						inline_keyboard: [
@@ -577,19 +593,19 @@ async function RaspisanieText(
 			const dateNowHHMM =
 				new Date().getHours() * 100 + new Date().getMinutes();
 			const classArr =
-				dataAboutUser.className === "10Г"
+				dataAboutUser.className == "10Г"
 					? class10g
-					: dataAboutUser.className === "10Б"
+					: dataAboutUser.className == "10Б"
 					? class10b
-					: dataAboutUser.className === "10А"
+					: dataAboutUser.className == "10А"
 					? class10a
-					: dataAboutUser.className === "11Д"
+					: dataAboutUser.className == "11Д"
 					? class11d
-					: dataAboutUser.className === "11Г"
+					: dataAboutUser.className == "11Г"
 					? class11g
-					: dataAboutUser.className === "11В"
+					: dataAboutUser.className == "11В"
 					? class11v
-					: dataAboutUser.className === "11А"
+					: dataAboutUser.className == "11А"
 					? class11a
 					: [];
 			if (
@@ -689,9 +705,9 @@ async function RaspisanieText(
 				}
 			}
 			await bot.editMessageText(
-				`<b><i><a href="https://t.me/${BotName}/?start=minidetail8">⏰</a> Расписание</i> • ${
+				`<b><i><a href="https://t.me/${BotName}/?start=minidetail8">📆</a> Расписание</i> • <a href = "https://t.me/${BotName}/?start=editclass">${
 					dataAboutUser.className
-				} 📚\n\n${weekDayNamesSHORT[dataAboutUser.weekday]} • ${
+				}</a> 📚\n\n${weekDayNamesSHORT[dataAboutUser.weekday]} • ${
 					classArr[dataAboutUser.weekday - 1] &&
 					classArr[dataAboutUser.weekday - 1].filter((item) => item !== "")
 						.length
@@ -739,7 +755,7 @@ async function RaspisanieText(
 				{
 					parse_mode: "html",
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					disable_web_page_preview: true,
 					reply_markup: {
@@ -753,22 +769,7 @@ async function RaspisanieText(
 									text: `${
 										dataAboutUser.weekday == dayW
 											? `Сегодня`
-											: `${
-													dataAboutUser.weekday == dayW + 1
-														? `Завтра`
-														: `${
-																dataAboutUser.weekday ==
-																	dayW - 1 &&
-																dataAboutUser.weekday != 0
-																	? "Вчера"
-																	: `${
-																			weekDayNamesSHORT[
-																				dataAboutUser
-																					.weekday
-																			]
-																	  }`
-														  }`
-											  }`
+											: `${weekDayNamesSHORT[dataAboutUser.weekday]}`
 									}`,
 									callback_data: "raspisanie",
 								},
@@ -804,7 +805,7 @@ async function netClassaText(chatId, exitMenu = true) {
 				{
 					parse_mode: "MarkdownV2",
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					reply_markup: {
 						inline_keyboard: [
@@ -822,12 +823,12 @@ async function netClassaText(chatId, exitMenu = true) {
 				{
 					parse_mode: "MarkdownV2",
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					reply_markup: {
 						inline_keyboard: [
 							[
-								{ text: "⬅️К выбору", callback_data: "chooseclass2" },
+								{ text: "⬅️К выбору", callback_data: "chooseclass1" },
 								{
 									text: "Написать✍️",
 									url: "https://t.me/qu1z3x",
@@ -844,14 +845,110 @@ async function netClassaText(chatId, exitMenu = true) {
 	}
 }
 
+async function foodMenu(
+	chatId,
+	dayForFoodMenu = usersData.find((obj) => obj.chatId == chatId).weekday
+) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+	const dateNowHHMM = new Date().getHours() * 100 + new Date().getMinutes();
+
+	try {
+		if (true) {
+			await bot.editMessageText(
+				`<b><i>🍜 Столовая</i> • ${
+					dataAboutUser.schoolName == "27c2"
+						? "№27к2"
+						: `${
+								dataAboutUser.schoolName == "27c1"
+									? "№27к1"
+									: `Не указано`
+						  }`
+				} 😋\n\n<i>• ${
+					dateNowHHMM >= 925 &&
+					dateNowHHMM < 1105 &&
+					dayW != 6 &&
+					dayW != 0
+						? "<u>Завтрак</u>"
+						: "Завтрак"
+				}:</i>\n\n</b>${
+					(dataAboutUser.schoolName == dataAboutUser.schoolName) == "27c2"
+						? `${foodmenu27c2[0]}`
+						: `${
+								dataAboutUser.schoolName == "27c1"
+									? `${foodmenu27c1[0]}`
+									: `Не указано`
+						  }`
+				}<b>\n\n<i>• ${
+					dateNowHHMM >= 1300 &&
+					dateNowHHMM < 1505 &&
+					dayW != 6 &&
+					dayW != 0
+						? "<u>Обед</u>"
+						: "Обед"
+				}:</i>\n\n</b>${
+					(dataAboutUser.schoolName == dataAboutUser.schoolName) == "27c2"
+						? `${foodmenu27c2[1]}`
+						: `${
+								dataAboutUser.schoolName == "27c1"
+									? `${foodmenu27c1[1]}`
+									: `Не указано`
+						  }`
+				}\n\n<b>Приношу извенения:</b>\n<i>"Я только учусь работать со столовым меню!"</i> ☹️`,
+				{
+					parse_mode: "html",
+					chat_id: chatId,
+					message_id: usersData.find((obj) => obj.chatId == chatId)
+						.messageId,
+					disable_web_page_preview: true,
+					reply_markup: {
+						inline_keyboard: [
+							[
+								{
+									text: "⬅️",
+									callback_data: "previousweekdayfoodmenu",
+								},
+								{
+									text: `${
+										dataAboutUser.weekday == dayW
+											? `Сегодня`
+											: `${weekDayNamesSHORT[dataAboutUser.weekday]}`
+									}`,
+									callback_data: "foodmenutoday",
+								},
+								{
+									text: "➡️",
+									callback_data: "nextweekdayfoodmenu",
+								},
+							],
+
+							[
+								{ text: "⬅️Назад", callback_data: "exit" },
+								{
+									text: "Всё меню",
+									callback_data: "reminders",
+								},
+							],
+						],
+					},
+				}
+			);
+		} else {
+			console.log(1);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 async function Calls(
 	chatId,
-	dayForCalls = usersData.find((obj) => obj.chatId === chatId).weekday
+	dayForCalls = usersData.find((obj) => obj.chatId == chatId).weekday
 ) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 	try {
 		const dateNowHHMM = new Date().getHours() * 100 + new Date().getMinutes();
 		dataAboutUser.weekday = dayForCalls;
+		dataAboutUser.userAction = "Calls";
 
 		let countCalls = 0;
 		if (dataAboutUser.callOnLesson) countCalls++;
@@ -862,19 +959,19 @@ async function Calls(
 		if (dataAboutUser.callOnBreakIn10minutes) countCalls++;
 
 		const classArr =
-			dataAboutUser.className === "10Г"
+			dataAboutUser.className == "10Г"
 				? class10g
-				: dataAboutUser.className === "10Б"
+				: dataAboutUser.className == "10Б"
 				? class10b
-				: dataAboutUser.className === "10А"
+				: dataAboutUser.className == "10А"
 				? class10a
-				: dataAboutUser.className === "11Д"
+				: dataAboutUser.className == "11Д"
 				? class11d
-				: dataAboutUser.className === "11Г"
+				: dataAboutUser.className == "11Г"
 				? class11g
-				: dataAboutUser.className === "11В"
+				: dataAboutUser.className == "11В"
 				? class11v
-				: dataAboutUser.className === "11А"
+				: dataAboutUser.className == "11А"
 				? class11a
 				: [];
 
@@ -885,7 +982,7 @@ async function Calls(
 					parse_mode: "html",
 					chat_id: chatId,
 					disable_web_page_preview: true,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					reply_markup: {
 						inline_keyboard: [
@@ -965,9 +1062,9 @@ async function Calls(
 			}
 
 			await bot.editMessageText(
-				`<b><i>⏰ Звонки</i> • ${dataAboutUser.className} • ${
-					weekDayNamesSHORT[dataAboutUser.weekday]
-				} 🕓\n</b>${
+				`<b><i>⏰ Звонки</i> • <a href ="https://t.me/${BotName}/?start=editclass">${
+					dataAboutUser.className
+				}</a> • ${weekDayNamesSHORT[dataAboutUser.weekday]} 🕓\n</b>${
 					classArr[dataAboutUser.weekday - 1] &&
 					classArr[dataAboutUser.weekday - 1].filter((item) => item !== "")
 						.length > 0
@@ -1059,7 +1156,7 @@ async function Calls(
 				}`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "html",
 					disable_web_page_preview: true,
@@ -1074,22 +1171,7 @@ async function Calls(
 									text: `${
 										dataAboutUser.weekday == dayW
 											? `Сегодня`
-											: `${
-													dataAboutUser.weekday == dayW + 1
-														? `Завтра`
-														: `${
-																dataAboutUser.weekday ==
-																	dayW - 1 &&
-																dataAboutUser.weekday != 0
-																	? "Вчера"
-																	: `${
-																			weekDayNamesSHORT[
-																				dataAboutUser
-																					.weekday
-																			]
-																	  }`
-														  }`
-											  }`
+											: `${weekDayNamesSHORT[dataAboutUser.weekday]}`
 									}`,
 									callback_data: "todaycalls",
 								},
@@ -1120,18 +1202,18 @@ async function Calls(
 
 async function NotificationsMenuCalls(
 	chatId,
-	callOnLesson = usersData.find((obj) => obj.chatId === chatId).callOnLesson,
-	callOnBreak = usersData.find((obj) => obj.chatId === chatId).callOnBreak,
-	callOnLessonIn5minutes = usersData.find((obj) => obj.chatId === chatId)
+	callOnLesson = usersData.find((obj) => obj.chatId == chatId).callOnLesson,
+	callOnBreak = usersData.find((obj) => obj.chatId == chatId).callOnBreak,
+	callOnLessonIn5minutes = usersData.find((obj) => obj.chatId == chatId)
 		.callOnLessonIn5minutes,
-	callOnBreakIn5minutes = usersData.find((obj) => obj.chatId === chatId)
+	callOnBreakIn5minutes = usersData.find((obj) => obj.chatId == chatId)
 		.callOnBreakIn5minutes,
-	callOnLessonIn10minutes = usersData.find((obj) => obj.chatId === chatId)
+	callOnLessonIn10minutes = usersData.find((obj) => obj.chatId == chatId)
 		.callOnLessonIn10minutes,
-	callOnBreakIn10minutes = usersData.find((obj) => obj.chatId === chatId)
+	callOnBreakIn10minutes = usersData.find((obj) => obj.chatId == chatId)
 		.callOnBreakIn10minutes
 ) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	// Присваивание данных
 
@@ -1224,8 +1306,7 @@ async function NotificationsMenuCalls(
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -1307,10 +1388,10 @@ async function NotificationsMenuCalls(
 }
 
 async function Games(chatId) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
-		dataAboutUser.userAction = 0;
+		dataAboutUser.userAction = "menuHome";
 		await bot.editMessageText(
 			`<b><i>😆 Развлечения 🕹️</i>${
 				dataAboutUser.game1NiceResults + dataAboutUser.game1BadResults >
@@ -1321,7 +1402,7 @@ async function Games(chatId) {
 					dataAboutUser.game3NiceResults +
 						dataAboutUser.game3BadResults +
 						dataAboutUser.game3DrawResults
-					? "</b>\n\nЛюбимая: <b>Угадайка ❓"
+					? "</b>\n\nЛюбимая: <b>Угадай-ка ❓"
 					: `${
 							dataAboutUser.game2NiceResults +
 								dataAboutUser.game2BadResults +
@@ -1354,14 +1435,13 @@ async function Games(chatId) {
 			}\n\nВо что сыграем? 🤔</b>`,
 			{
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				parse_mode: "html",
 				reply_markup: {
 					inline_keyboard: [
 						[{ text: "❌ Крестики-Нолики ⭕", callback_data: "game3" }],
 						[
-							{ text: "Угадайка ❓", callback_data: "game1" },
+							{ text: "Угадай-ка ❓", callback_data: "game1" },
 							{ text: "Цуе-Фа ✌️", callback_data: "game2" },
 						],
 						// [{ text: "Рейтинг 🥇", callback_data: "bestplayerslist" }],
@@ -1382,14 +1462,13 @@ async function game1(chatId, startGame = true) {
 			//? загаданное число
 			rndNum = Math.floor(Math.random() * 10);
 		bot.editMessageText(
-			`*_❓ Угадайка ❓_\n\nЯ загадал цифру\\! ${
+			`*_❓ Угадай\\-ка ❓_\n\nЯ загадал цифру\\! ${
 				chatId == qu1z3xId ? rndNum : ""
 			}\n\nОтгадывай 😉*`,
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -1428,8 +1507,7 @@ async function game2(chatId) {
 			"*_✋ Цуе\\-Фа ✌️_\n\nСоперник уже на подходе❗😥\n\nЧто выберешь❓*",
 			{
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				parse_mode: "MarkdownV2",
 				reply_markup: {
 					inline_keyboard: [
@@ -1450,13 +1528,13 @@ async function game2(chatId) {
 }
 
 async function game2_2(chatId, playerNum) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	const options = ["✊", "✌️", "🖐️"];
 	rndNum = Math.floor(Math.random() * options.length);
 
 	try {
-		if (options[playerNum - 1] === options[rndNum]) {
+		if (options[playerNum - 1] == options[rndNum]) {
 			bot.editMessageText(
 				`*_🪨 Камень\\-Ножницы\\-Бумага ✂️_\n\n🤷‍♂️ Ничья\\! 🤷‍♀️\n\nРезультат\\:\n 👤${
 					options[playerNum - 1]
@@ -1465,7 +1543,7 @@ async function game2_2(chatId, playerNum) {
 				}](https://t.me/${BotName}/?start=minidetail3)🤖\n\n[Статистика](https://t.me/${BotName}/?start=options)\n\nЕще партейку\\? 🤔*`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "MarkdownV2",
 					disable_web_page_preview: true,
@@ -1481,9 +1559,9 @@ async function game2_2(chatId, playerNum) {
 			);
 			dataAboutUser.game2DrawResults += 1;
 		} else if (
-			(options[playerNum - 1] === "✊" && options[rndNum] === "✌️") ||
-			(options[playerNum - 1] === "✌️" && options[rndNum] === "🖐️") ||
-			(options[playerNum - 1] === "🖐️" && options[rndNum] === "✊")
+			(options[playerNum - 1] == "✊" && options[rndNum] == "✌️") ||
+			(options[playerNum - 1] == "✌️" && options[rndNum] == "🖐️") ||
+			(options[playerNum - 1] == "🖐️" && options[rndNum] == "✊")
 		) {
 			bot.editMessageText(
 				`*_🪨 Камень\\-Ножницы\\-Бумага ✂️_\n\n🥇 Выигрыш\\! 🥳\n\nРезультат:\n 👤${
@@ -1494,7 +1572,7 @@ async function game2_2(chatId, playerNum) {
 				{
 					parse_mode: "MarkdownV2",
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					disable_web_page_preview: true,
 					reply_markup: {
@@ -1518,7 +1596,7 @@ async function game2_2(chatId, playerNum) {
 				{
 					parse_mode: "MarkdownV2",
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					disable_web_page_preview: true,
 					reply_markup: {
@@ -1540,10 +1618,10 @@ async function game2_2(chatId, playerNum) {
 }
 
 async function game3(chatId) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
-		dataAboutUser.userAction = 0;
+		dataAboutUser.userAction = "menuHome";
 		await bot.editMessageText(
 			`<b><i>❌ Крестики-Нолики ⭕</i></b>\n\nТы ходишь за: <b>${
 				dataAboutUser.game3PlayerSticker == "❌"
@@ -1568,8 +1646,7 @@ async function game3(chatId) {
 			}\n\nПараметры игры ⚙️</b>`,
 			{
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				parse_mode: "HTML",
 				reply_markup: {
 					inline_keyboard: [
@@ -1646,10 +1723,10 @@ async function game3(chatId) {
 }
 
 async function game3_2(chatId) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
-		dataAboutUser.userAction = 5;
+		dataAboutUser.userAction = "game3_2";
 
 		dataAboutUser.playerGame3Board = [
 			[" ", " ", " "],
@@ -1661,8 +1738,7 @@ async function game3_2(chatId) {
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -1692,16 +1768,16 @@ async function game3_2(chatId) {
 }
 
 function game3Result(chatId, gameIsDraw = false) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
 		for (let i = 0; i < 3; i++) {
 			// Горизонтали
 			if (
 				dataAboutUser.playerGame3Board[i][0] !== " " &&
-				dataAboutUser.playerGame3Board[i][0] ===
+				dataAboutUser.playerGame3Board[i][0] ==
 					dataAboutUser.playerGame3Board[i][1] &&
-				dataAboutUser.playerGame3Board[i][1] ===
+				dataAboutUser.playerGame3Board[i][1] ==
 					dataAboutUser.playerGame3Board[i][2]
 			) {
 				return `${dataAboutUser.playerGame3Board[i][0]}`;
@@ -1709,26 +1785,26 @@ function game3Result(chatId, gameIsDraw = false) {
 			// Вертикали
 			else if (
 				dataAboutUser.playerGame3Board[0][i] !== " " &&
-				dataAboutUser.playerGame3Board[0][i] ===
+				dataAboutUser.playerGame3Board[0][i] ==
 					dataAboutUser.playerGame3Board[1][i] &&
-				dataAboutUser.playerGame3Board[1][i] ===
+				dataAboutUser.playerGame3Board[1][i] ==
 					dataAboutUser.playerGame3Board[2][i]
 			) {
 				return `${dataAboutUser.playerGame3Board[0][i]}`;
 				// Диогонали
 			} else if (
 				dataAboutUser.playerGame3Board[0][0] !== " " &&
-				dataAboutUser.playerGame3Board[0][0] ===
+				dataAboutUser.playerGame3Board[0][0] ==
 					dataAboutUser.playerGame3Board[1][1] &&
-				dataAboutUser.playerGame3Board[1][1] ===
+				dataAboutUser.playerGame3Board[1][1] ==
 					dataAboutUser.playerGame3Board[2][2]
 			) {
 				return `${dataAboutUser.playerGame3Board[0][0]}`;
 			} else if (
 				dataAboutUser.playerGame3Board[0][2] !== " " &&
-				dataAboutUser.playerGame3Board[0][2] ===
+				dataAboutUser.playerGame3Board[0][2] ==
 					dataAboutUser.playerGame3Board[1][1] &&
-				dataAboutUser.playerGame3Board[1][1] ===
+				dataAboutUser.playerGame3Board[1][1] ==
 					dataAboutUser.playerGame3Board[2][0]
 			) {
 				return `${dataAboutUser.playerGame3Board[0][2]}`;
@@ -1745,32 +1821,106 @@ function game3Result(chatId, gameIsDraw = false) {
 }
 
 function game3InlineKeyboard(chatId, isPlayer = true) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 	let buttons = [];
 
-	if (isPlayer) {
-		buttons = dataAboutUser.playerGame3Board.map((row, rowIndex) => {
-			return row.map((cell, colIndex) => {
-				const text = cell === " " ? " " : cell;
-				const callbackData = `${rowIndex}|${colIndex}`;
-				return { text, callback_data: callbackData };
+	try {
+		if (isPlayer) {
+			buttons = dataAboutUser.playerGame3Board.map((row, rowIndex) => {
+				return row.map((cell, colIndex) => {
+					const text = cell == " " ? " " : cell;
+					const callbackData = `${rowIndex}|${colIndex}`;
+					return { text, callback_data: callbackData };
+				});
 			});
-		});
-	} else if (!isPlayer) {
-		buttons = dataAboutUser.playerGame3Board.map((row, rowIndex) => {
-			return row.map((cell, colIndex) => {
-				const text = cell === " " ? " " : cell;
-				return { text, callback_data: "-" };
+		} else if (!isPlayer) {
+			buttons = dataAboutUser.playerGame3Board.map((row, rowIndex) => {
+				return row.map((cell, colIndex) => {
+					const text = cell == " " ? " " : cell;
+					return { text, callback_data: "-" };
+				});
 			});
-		});
+		}
+
+		buttons.push([
+			{ text: "⬅️Назад", callback_data: "game3" },
+			{ text: "Заново🔄️", callback_data: "game3_2" },
+		]);
+
+		return { inline_keyboard: buttons };
+	} catch (error) {
+		console.log(error);
 	}
+}
 
-	buttons.push([
-		{ text: "⬅️Назад", callback_data: "game3" },
-		{ text: "Заново🔄️", callback_data: "game3_2" },
-	]);
+function checkUsersActivity() {
+	try {
+		for (let i = 0; i < usersData.length; i++) {
+			const currentTime = Date.now();
+			let lastActivityTime = usersData[i].lastActivity;
 
-	return { inline_keyboard: buttons };
+			if (
+				currentTime - lastActivityTime >= 3 * 24 * 60 * 60 * 1000 &&
+				currentTime - lastActivityTime < 6 * 24 * 60 * 60 * 1000 &&
+				!usersData[i].reminderForReturn1
+			) {
+				usersData[i].reminderForReturn1 = true;
+				sendNotificationForReturn(usersData[i].chatId);
+			} else if (
+				currentTime - lastActivityTime >= 6 * 24 * 60 * 60 * 1000 &&
+				currentTime - lastActivityTime < 9 * 24 * 60 * 60 * 1000 &&
+				!usersData[i].reminderForReturn2
+			) {
+				usersData[i].reminderForReturn2 = true;
+				sendNotificationForReturn(usersData[i].chatId);
+			} else if (
+				currentTime - lastActivityTime >= 9 * 24 * 60 * 60 * 1000 &&
+				currentTime - lastActivityTime < 14 * 24 * 60 * 60 * 1000 &&
+				!usersData[i].reminderForReturn3
+			) {
+				usersData[i].reminderForReturn3 = true;
+				sendNotificationForReturn(usersData[i].chatId);
+			} else if (
+				currentTime - lastActivityTime >= 14 * 24 * 60 * 60 * 1000 &&
+				!usersData[i].reminderForReturn4
+			) {
+				usersData[i].reminderForReturn4 = true;
+				sendNotificationForReturn(usersData[i].chatId);
+			}
+		}
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+function sendNotificationForReturn(chatId) {
+	const textsForUsersReturn = [
+		"Без тебя совсем не то! Не пропадай, загляни как сможешь! 🙏",
+		"Без твоего присутствия что-то не хватает! Заглядывай, когда у тебя будет время! 😉",
+		"А какой в среду 3-й урок? Я могу тебе подсказать! Возвращайся! 😉",
+		"Мы давно не встречались! Заходи почаще! 🙏",
+		"Моя цифровая память подсказывает, что тебя со мной давно не было! ☹️",
+	];
+	let rndNum = Math.floor(Math.random() * textsForUsersReturn.length);
+
+	try {
+		bot.sendMessage(chatId, `<b>${textsForUsersReturn[rndNum]}</b>`, {
+			parse_mode: "html",
+			disable_web_page_preview: true,
+			reply_markup: {
+				inline_keyboard: [
+					[
+						{
+							text: "Удалить ❌",
+							callback_data: `deleteexcess`,
+						},
+					],
+				],
+			},
+		});
+	} catch (error) {
+		console.log(error);
+	}
 }
 
 async function News(chatId, newsNum, newsName) {
@@ -1805,8 +1955,7 @@ async function News(chatId, newsNum, newsName) {
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -1825,18 +1974,17 @@ async function News(chatId, newsNum, newsName) {
 	}
 }
 
-async function AllNewsTextEdit(chatId) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+async function allNewsTextEdit(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
-		dataAboutUser.userAction = 4;
+		dataAboutUser.userAction = "allNewsTextEdit";
 		bot.editMessageText(
 			`<b><i>✏️ Редактирование: Новости 📖</i>\n\n📖 Текущий текст:</b>\n\n<code>${newsText[1]}</code>\n\n<b>Напиши измененный текст ниже ✍️</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -1853,18 +2001,17 @@ async function AllNewsTextEdit(chatId) {
 	} catch (error) {}
 }
 
-async function AllNewsTextEdit_2(chatId, text) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+async function allNewsTextEdit_2(chatId, text) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
-		dataAboutUser.userAction = 0;
+		dataAboutUser.userAction = "menuHome";
 		bot.editMessageText(
 			`<b><i>✏️ Редактирование: Новости 📖</i>\n\n🆕 Измененный текст:</b>\n\n<i>"${text}"</i>\n\n<b>Применить изменения?🧐</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -1892,8 +2039,7 @@ async function AllNewsTextReset(chatId) {
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -1914,9 +2060,9 @@ async function AllNewsTextReset(chatId) {
 
 async function Options(chatId) {
 	const countRem = remindersData.filter(
-		(obj) => obj.chatId === chatId && obj.isDone == false
+		(obj) => obj.chatId == chatId && obj.isDone == false
 	).length;
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	let countCalls = 0;
 	if (dataAboutUser.callOnLesson) countCalls++;
@@ -1928,11 +2074,21 @@ async function Options(chatId) {
 
 	try {
 		await bot.editMessageText(
-			`<b><i>🛠️ Настройки ⚙️</i>\n\nДанные:</b>\nТвой логин: <b>${
+			`<b><i>🛠️ Настройки • <code>${chatId}</code> ⚙️</i>\n\nДанные:</b>\nТвой логин: <b>${
 				dataAboutUser.login
 			}</b> - <a href="https://t.me/${BotName}/?start=editfistname">изменить</a>\nРоль: <b>${
 				dataAboutUser.userStatus
-			}</b>\nID профиля: <b><i>${chatId}</i></b>\nКласс: <b>${
+			}</b>\nШкола: <b>${
+				dataAboutUser.schoolName == "27c2"
+					? "МБОУ СОШ №27к2"
+					: `${
+							dataAboutUser.schoolName == "27c1"
+								? "МБОУ СОШ №27к1"
+								: `${
+										dataAboutUser.schoolName == "" ? "Нет данных" : ""
+								  }`
+					  }`
+			}</b>\nКласс: <b>${
 				dataAboutUser.className
 			}</b> - <a href="https://t.me/${BotName}/?start=editclass">${
 				dataAboutUser.className == "Не определен" ? "выбрать" : "изменить"
@@ -1957,8 +2113,10 @@ async function Options(chatId) {
 			}</a>\nНапоминания: <b>${
 				countRem > 0 ? "✅🔔" : "❌"
 			}</b>\nСоздано: <b>${countRem}</b> - <a href="https://t.me/${BotName}/?start=remindersList">${
-				countRem > 0 ? "список" : "создать"
-			}</a><b>\n\nСтатистика в играх:</b>\nУгадайка: <b>${
+				countRem > 0
+					? `<a href="https://t.me/${BotName}/?start=remindersList">список</a>`
+					: `<a href="https://t.me/${BotName}/?start=remindersAdd">создать</a>`
+			}<b>\n\nСтатистика в играх:</b>\nУгадай-ка: <b>${
 				dataAboutUser.game1NiceResults + dataAboutUser.game1BadResults >
 					0 &&
 				Math.round(
@@ -1974,7 +2132,7 @@ async function Options(chatId) {
 										dataAboutUser.game1BadResults)) *
 									10000
 							) / 100
-					  }% ✅, всего ${
+					  }% ✅, из ${
 							dataAboutUser.game1NiceResults +
 							dataAboutUser.game1BadResults
 					  }`
@@ -1999,7 +2157,7 @@ async function Options(chatId) {
 										dataAboutUser.game2DrawResults)) *
 									10000
 							) / 100
-					  }% <a href="https://t.me/${BotName}/?start=minidetail7">✅</a>, всего ${
+					  }% <a href="https://t.me/${BotName}/?start=minidetail7">✅</a>, из ${
 							dataAboutUser.game2NiceResults +
 							dataAboutUser.game2BadResults +
 							dataAboutUser.game2DrawResults
@@ -2025,7 +2183,7 @@ async function Options(chatId) {
 										dataAboutUser.game3DrawResults)) *
 									10000
 							) / 100
-					  }% ✅, всего ${
+					  }% ✅, из ${
 							dataAboutUser.game3NiceResults +
 							dataAboutUser.game3BadResults +
 							dataAboutUser.game3DrawResults
@@ -2062,8 +2220,7 @@ async function Options(chatId) {
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -2084,14 +2241,28 @@ async function Options(chatId) {
 }
 
 async function Options_2(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
 	try {
 		await bot.editMessageText(
-			`<b><i>🛠️ Прочие настройки ⚙️</i>\n\n❗Раздел повышенной опасности❗\n\nПриглашение по:\n<code>https://t.me/${BotName}/?start=</code></b>`,
+			`<b><i>🛠️ Прочие настройки ⚙️</i>\n\n❗Раздел повышенной опасности❗\n\nАктивность:\n</b>Игр сыграно: <b>${
+				dataAboutUser.game1NiceResults +
+				dataAboutUser.game1BadResults +
+				dataAboutUser.game2NiceResults +
+				dataAboutUser.game2BadResults +
+				dataAboutUser.game2DrawResults +
+				dataAboutUser.game3NiceResults +
+				dataAboutUser.game3BadResults +
+				dataAboutUser.game3DrawResults
+			}\n</b>Действий всего: <b>${
+				dataAboutUser.countOfActions
+			}\n</b>Регистрация: <b>${
+				dataAboutUser.dateOfRegistration
+			}\n\nПригласительный:\n<code>https://t.me/${BotName}/?start=</code></b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -2107,7 +2278,7 @@ async function Options_2(chatId) {
 						],
 						[
 							{ text: "⬅️Назад", callback_data: "options" },
-							{ text: "Написать✍️", url: "https://t.me/qu1z3x" },
+							{ text: "Связь ✍️", url: "https://t.me/qu1z3x" },
 						],
 					],
 				},
@@ -2120,9 +2291,9 @@ async function Options_2(chatId) {
 
 async function editFistName(chatId, after) {
 	try {
-		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+		const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
-		dataAboutUser.userAction = 6;
+		dataAboutUser.userAction = "editFistName";
 
 		await bot.editMessageText(
 			`<i><b>🛠️ Изменение логина ⚙️\n\n</b>Логин используется для идентификации пользователя! 🔒</i><b>\n\n${
@@ -2133,8 +2304,7 @@ async function editFistName(chatId, after) {
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -2169,19 +2339,25 @@ async function editFistName(chatId, after) {
 }
 
 async function adminMenu(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
 	try {
+		dataAboutUser.userAction = "menuHome";
+
 		await bot.editMessageText(
-			`*_💠Центр управления💠_\n\nЧем я могу быть полезен\\? 🤖*`,
+			`<b><i>💠Центр управления💠</i>\n\nЧем я могу быть полезен? 🤖</b>`,
 			{
-				parse_mode: "MarkdownV2",
+				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
 							{ text: "Реестр 💾", callback_data: "usersdatalist" },
-							{ text: "", callback_data: "usersdatalist" },
+							{
+								text: "Черный список 📋",
+								callback_data: "usersblacklist",
+							},
 						],
 						[
 							{
@@ -2204,17 +2380,17 @@ async function adminMenu(chatId) {
 }
 
 async function adminMenuSendMessage(chatId) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
-		dataAboutUser.userAction = 2;
+		dataAboutUser.userAction = "adminMenuSendMessage";
+
 		await bot.editMessageText(
 			"<b><i>📋 Объявление 📢 \n\n❗ВНИМАНИЕ❗</i>\n\nВсе пользователи получат уведомление!\n\n<i>Пример:</i>\n</b><code>В школе родительское собрание❗😉</code><b>\n\nНапиши объявление ниже ✍️</b>",
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[{ text: "⬅️Назад", callback_data: "adminMenu" }],
@@ -2227,81 +2403,55 @@ async function adminMenuSendMessage(chatId) {
 	}
 }
 
-async function adminMenuSendMessage_2(chatId) {
+async function adminMenuSendMessage_2(chatId, recipient) {
 	try {
 		await bot.editMessageText(
-			`<b><i>📋 Создание объявления 📢</i>\n\nКому адресовать объявление?</b>`,
+			`<b><i>📋 Создание объявления 📢</i>\n\n</b>Объявление <b>успешно</b> опубликовано! 😉✅`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
+							{ text: "⬅️Назад", callback_data: "adminMenu" },
 							{
-								text: "Удалить ❌",
-								callback_data: "deleteexcess",
-							},
-							{
-								text: "Спасибо 👍",
-								callback_data: "deleteexcess",
+								text: "Создать еше ➕",
+								callback_data: "adminMenuSendMessage",
 							},
 						],
 					],
 				},
 			}
 		);
-	} catch (error) {
-		console.log(error);
-	}
-}
-
-async function adminMenuSendMessage_3(chatId, recipient) {
-	try {
-		await bot.editMessageText(
-			`<b><i>📋 Создание объявления 📢</i>\n\nОбъявление опубликовано! 😉✅</b>`,
-			{
-				parse_mode: "html",
-				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
-			}
-		);
-		if (recipient == "all") {
-			for (let i = 0; i < usersData.length; i++) {
-				if (
-					usersData[i].chatId != qu1z3xId &&
-					usersData[i].chatId != stepanovId
-				) {
-					bot.sendMessage(
-						usersData[i].chatId,
-						`<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}</b>`,
-						{
-							parse_mode: "html",
-							reply_markup: {
-								inline_keyboard: [
-									[
-										{
-											text: "Удалить ❌",
-											callback_data: "deleteexcess",
-										},
-										{
-											text: "Спасибо 👍",
-											callback_data: "deleteexcess",
-										},
-									],
+		for (let i = 0; i < usersData.length; i++) {
+			if (
+				usersData[i].chatId != qu1z3xId &&
+				usersData[i].chatId != stepanovId
+			) {
+				bot.sendMessage(
+					usersData[i].chatId,
+					`<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}</b>`,
+					{
+						parse_mode: "html",
+						reply_markup: {
+							inline_keyboard: [
+								[
+									{
+										text: "Удалить ❌",
+										callback_data: "deleteexcess",
+									},
+									{
+										text: "Спасибо 👍",
+										callback_data: "deleteexcess",
+									},
 								],
-							},
-						}
-					);
-				}
+							],
+						},
+					}
+				);
 			}
-		} else if (recipient == "all") {
 		}
-		setTimeout(() => {
-			adminMenu(chatId);
-		}, 1500);
 		sendDataAboutAction(
 			"Администратор",
 			"",
@@ -2316,12 +2466,11 @@ async function adminMenuSendMessage_3(chatId, recipient) {
 async function adminMenuSendMessageOptions(chatId) {
 	try {
 		await bot.editMessageText(
-			`<b><i>📋 Создание объявления 📢\n\n</i></b>Объявление выглядит так:\n\n<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}\n\nВыберите заголовок объявления:</b>`,
+			`<b><i>📋 Заголовок объявления 📢\n\n</i></b>Объявление выглядит так:\n\n<b><i>${paragrafs[numberArr]}</i>\n\n${textMessageForAllUsers}</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -2390,12 +2539,11 @@ async function adminMenuEdit(chatId) {
 				buttonUpdateActive
 					? ""
 					: `\n\n<i>Примечание:</i>\n</b>Интервал обновления таблиц 5 мин 🕑<b>`
-			}\n\nКакие правки вы хотите внести? 🤖</b>`,
+			}\n\nКакие правки нужно внести? 🤖</b>`,
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -2428,12 +2576,13 @@ async function adminMenuEdit(chatId) {
 	}
 }
 
-async function RegistryUsersData(chatId, listNum) {
+async function registryUsersData(chatId, listNum) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
 	try {
-		const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+		dataAboutUser.userAction = "registryUsersData";
 
 		let text = "";
-
 		if (listNum == 1) {
 			for (let i = 0; i < usersData.length; i++) {
 				let countCalls = 0;
@@ -2444,7 +2593,21 @@ async function RegistryUsersData(chatId, listNum) {
 				if (usersData[i].callOnBreakIn5minutes) countCalls++;
 				if (usersData[i].callOnBreakIn10minutes) countCalls++;
 
-				text += `[${i + 1}]  @${usersData[i].username}\n• login: ${
+				text += `[${i + 1}]  ${
+					usersData[i].inBlackList
+						? `<a href="https://t.me/${BotName}/?start=deletefromblacklistuser${usersData[i].chatId}">❌</a>`
+						: ``
+				} @${usersData[i].username}${
+					usersData[i].chatId != qu1z3xId &&
+					usersData[i].chatId != stepanovId &&
+					!usersData[i].inBlackList
+						? `${
+								!usersData[i].inBlackList
+									? `<a href="https://t.me/${BotName}/?start=addtoblacklistuser${usersData[i].chatId}"> - забанить ❌</a>`
+									: ``
+						  }`
+						: ""
+				}\n${usersData[i].inBlackList ? `<s>` : ``}• login: ${
 					usersData[i].login
 				}\n• chatId: <code>${usersData[i].chatId}</code>\n• userStatus: ${
 					usersData[i].userStatus
@@ -2457,7 +2620,9 @@ async function RegistryUsersData(chatId, listNum) {
 					usersData[i].game3BadResults +
 					usersData[i].game3NiceResults +
 					usersData[i].game3DrawResults
-				}\n• callsReminders: ${countCalls}\n• detailsFound: ${
+				}\n• totalActions: ${
+					usersData[i].countOfActions
+				} \n• callsReminders: ${countCalls}\n• detailsFound: ${
 					usersData[i].miniDetail666 +
 					usersData[i].miniDetail0 +
 					usersData[i].miniDetail1 +
@@ -2469,7 +2634,9 @@ async function RegistryUsersData(chatId, listNum) {
 					usersData[i].miniDetail7 +
 					usersData[i].miniDetail8 +
 					usersData[i].miniDetail9
-				} / ${maxCountMiniDetails} \n\n`;
+				} / ${maxCountMiniDetails}\n• registration: ${
+					usersData[i].dateOfRegistration
+				}${usersData[i].inBlackList ? `</s>` : ``}\n\n`;
 			}
 
 			bot.editMessageText(
@@ -2477,8 +2644,9 @@ async function RegistryUsersData(chatId, listNum) {
 				{
 					parse_mode: "HTML",
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
+					disable_web_page_preview: true,
 					reply_markup: {
 						inline_keyboard: [
 							[
@@ -2495,8 +2663,187 @@ async function RegistryUsersData(chatId, listNum) {
 	}
 }
 
+async function usersBlacklist(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
+	try {
+		dataAboutUser.userAction = "usersBlacklist";
+		let blacklistText = "";
+		const blacklist = usersData.filter((obj) => obj.inBlackList == true);
+		if (blacklist.length > 0) {
+			blacklist.forEach((obj) => {
+				blacklistText += `<b><a href="https://t.me/${BotName}/?start=deletefromblacklistuser${
+					obj.chatId
+				}">❌</a>  ${
+					obj.username != null ? `@${obj.username}` : `${obj.login}`
+				} - <i>${obj.chatId}</i></b>\n\n`;
+			});
+		} else if (blacklist.length == 0) {
+			blacklistText = "</b>Черный список <b>пуст 🏝️\n\n";
+		}
+
+		bot.editMessageText(
+			`<b><i>🤬 Черный список 📋</i>\n\n${blacklistText}${
+				blacklist.length != 0
+					? `Всего: ${blacklist.length} ${
+							blacklist.length == 1
+								? `неудачник`
+								: `${
+										blacklist.length >= 2 && blacklist.length <= 4
+											? `неудачника`
+											: `${
+													blacklist.length >= 5 &&
+													blacklist.length <= 20
+														? `неудачников`
+														: ``
+											  }`
+								  }`
+					  }`
+					: ""
+			}</b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
+				disable_web_page_preview: true,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️Назад", callback_data: "adminMenu" },
+							{ text: "Добавить✅", callback_data: "addinblacklist" },
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function addInBlacklist(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
+	try {
+		dataAboutUser.userAction = "addInBlacklist";
+
+		bot.editMessageText(
+			`<b><i>🤬 Добавление в список 📋</i></b>\n\nНужен <b>только Id</b> пользователя! 🙏`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
+				disable_web_page_preview: true,
+				reply_markup: {
+					inline_keyboard: [
+						[{ text: "⬅️Назад", callback_data: "usersblacklist" }],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function addInBlacklist_2(chatId, chatIdForBlacklist) {
+	const dataAboutUser = usersData.find(
+		(obj) => obj.chatId == chatIdForBlacklist
+	);
+
+	try {
+		let countCalls = 0;
+		if (dataAboutUser.callOnLesson) countCalls++;
+		if (dataAboutUser.callOnBreak) countCalls++;
+		if (dataAboutUser.callOnLessonIn5minutes) countCalls++;
+		if (dataAboutUser.callOnLessonIn10minutes) countCalls++;
+		if (dataAboutUser.callOnBreakIn5minutes) countCalls++;
+		if (dataAboutUser.callOnBreakIn10minutes) countCalls++;
+
+		bot.editMessageText(
+			`<b><i>🤬 Добавление в список 📋\n\nДанные о пользователе:\n\n@${
+				dataAboutUser.username
+			}\n• login: ${dataAboutUser.login}\n• chatId: <code>${
+				dataAboutUser.chatId
+			}</code>\n• userStatus: ${dataAboutUser.userStatus}\n• className: "${
+				dataAboutUser.className
+			}"\n• gamesPlayed: ${
+				dataAboutUser.game1BadResults +
+				dataAboutUser.game1NiceResults +
+				dataAboutUser.game2BadResults +
+				dataAboutUser.game2NiceResults +
+				dataAboutUser.game2DrawResults +
+				dataAboutUser.game3BadResults +
+				dataAboutUser.game3NiceResults +
+				dataAboutUser.game3DrawResults
+			}\n• totalActions: ${
+				dataAboutUser.countOfActions
+			} \n• callsReminders: ${countCalls}\n• detailsFound: ${
+				dataAboutUser.miniDetail666 +
+				dataAboutUser.miniDetail0 +
+				dataAboutUser.miniDetail1 +
+				dataAboutUser.miniDetail2 +
+				dataAboutUser.miniDetail3 +
+				dataAboutUser.miniDetail4 +
+				dataAboutUser.miniDetail5 +
+				dataAboutUser.miniDetail6 +
+				dataAboutUser.miniDetail7 +
+				dataAboutUser.miniDetail8 +
+				dataAboutUser.miniDetail9
+			} / ${maxCountMiniDetails}\n• registration: ${
+				dataAboutUser.dateOfRegistration
+			}\n\n</i></b>`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
+				disable_web_page_preview: true,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️Назад", callback_data: "usersblacklist" },
+							{ text: "Кинуть ❌", callback_data: "addinblacklistend" },
+						],
+					],
+				},
+			}
+		);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+async function addInBlacklistEnd(chatId) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
+	try {
+		bot.editMessageText(
+			`<b><i>🤬 Черный список 📋</i></b>\n\nПользователь <b>успешно</b> стал неудачником! 😉✅`,
+			{
+				parse_mode: "html",
+				chat_id: chatId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
+				disable_web_page_preview: true,
+				reply_markup: {
+					inline_keyboard: [
+						[
+							{ text: "⬅️Назад", callback_data: "exit" },
+							{ text: "Список 📋", callback_data: "usersblacklist" },
+						],
+					],
+				},
+			}
+		);
+		usersData[
+			usersData.findIndex((obj) => obj.chatId == chatIdForBlacklist)
+		].inBlackList = true;
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 async function Reminders(chatId) {
-	const countRem = remindersData.filter((obj) => obj.chatId === chatId).length;
+	const countRem = remindersData.filter((obj) => obj.chatId == chatId).length;
 
 	try {
 		bot.editMessageText(
@@ -2504,8 +2851,7 @@ async function Reminders(chatId) {
 			{
 				parse_mode: "MarkdownV2",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[
@@ -2528,9 +2874,7 @@ async function Reminders(chatId) {
 async function RemindersList(chatId) {
 	try {
 		let reminderText = "";
-		const userReminders = remindersData.filter(
-			(obj) => obj.chatId === chatId
-		);
+		const userReminders = remindersData.filter((obj) => obj.chatId == chatId);
 		if (userReminders.length > 0) {
 			let i = 1;
 			userReminders.forEach((obj) => {
@@ -2556,8 +2900,7 @@ async function RemindersList(chatId) {
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				disable_web_page_preview: true,
 				reply_markup: {
 					inline_keyboard: [
@@ -2582,7 +2925,7 @@ async function RemindersList(chatId) {
 	}
 }
 
-async function RemindersAdd(chatId) {
+async function remindersAdd(chatId) {
 	let hours = new Date().getHours(),
 		minutes = new Date().getMinutes();
 
@@ -2593,9 +2936,9 @@ async function RemindersAdd(chatId) {
 	}
 	if (hours >= 24) hours -= 24;
 
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 	try {
-		dataAboutUser.userAction = 1;
+		dataAboutUser.userAction = "remindersAdd";
 		bot.editMessageText(
 			`<b><i>🔔 Создание напоминания 📝\n\nПример:</i></b>\n<code>Сесть за уроки в <b>${String(
 				hours
@@ -2606,8 +2949,7 @@ async function RemindersAdd(chatId) {
 			{
 				parse_mode: "html",
 				chat_id: chatId,
-				message_id: usersData.find((obj) => obj.chatId === chatId)
-					.messageId,
+				message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 				reply_markup: {
 					inline_keyboard: [
 						[{ text: "⬅️Назад", callback_data: "reminders" }],
@@ -2620,8 +2962,13 @@ async function RemindersAdd(chatId) {
 	}
 }
 
-async function start(chatId, firstName, quickStart = false) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+async function start(
+	chatId,
+	firstName,
+	quickStart = false,
+	afterAbsenceData = false
+) {
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 	let rndNum = Math.floor(Math.random() * stickers.length);
 
 	const dateNowHHNN = new Date().getHours() * 100 + new Date().getMinutes();
@@ -2634,10 +2981,24 @@ async function start(chatId, firstName, quickStart = false) {
 		textToSayHello = "Доброй ночи";
 
 	try {
+		if (afterAbsenceData) {
+			await bot
+				.sendMessage(
+					chatId,
+					`<b>Ух.. Извини меня вдвойне! 🙏\n\n</b><i>Я старался, но не смог убрать сообщения <b>сверху! ⬆️</b></i><b>\n\nПожалуйста, удали и забудь про них! 😉</b>`,
+					{
+						parse_mode: "HTML",
+						disable_web_page_preview: true,
+					}
+				)
+				.then((message) => {
+					dataAboutUser.messageIdForApologies = message.message_id;
+				});
+		}
+
 		await bot.sendSticker(chatId, stickers[rndNum]).then((message) => {
 			dataAboutUser.messageIdSayHi0 = message.message_id;
 		});
-
 		await bot
 			.sendMessage(
 				chatId,
@@ -2654,9 +3015,9 @@ async function start(chatId, firstName, quickStart = false) {
 		await bot
 			.sendMessage(
 				chatId,
-				`*[Что умеет этот чат\\-бот\\?](https://t.me/${BotName}/?start=showhi2)*`,
+				`<b><a href = "https://t.me/${BotName}/?start=showhi2">Что умеет этот чат-бот?</a></b>`,
 				{
-					parse_mode: "MarkdownV2",
+					parse_mode: "html",
 					disable_web_page_preview: true,
 				}
 			)
@@ -2678,7 +3039,7 @@ async function start(chatId, firstName, quickStart = false) {
 }
 
 async function deleteAllMessages(chatId) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
 		bot.deleteMessage(chatId, dataAboutUser.messageIdSayHi0);
@@ -2691,7 +3052,7 @@ async function deleteAllMessages(chatId) {
 }
 
 async function miniDetails(chatId, numberOfDetail) {
-	const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+	const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 	try {
 		let foundDetailsDoneText = [
@@ -2770,7 +3131,7 @@ async function miniDetails(chatId, numberOfDetail) {
 				}`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "html",
 					reply_markup: {
@@ -2847,7 +3208,7 @@ async function miniDetails(chatId, numberOfDetail) {
 				}`,
 				{
 					chat_id: chatId,
-					message_id: usersData.find((obj) => obj.chatId === chatId)
+					message_id: usersData.find((obj) => obj.chatId == chatId)
 						.messageId,
 					parse_mode: "html",
 					reply_markup: {
@@ -2876,7 +3237,7 @@ async function detailsRules(chatId) {
 		{
 			parse_mode: "MarkdownV2",
 			chat_id: chatId,
-			message_id: usersData.find((obj) => obj.chatId === chatId).messageId,
+			message_id: usersData.find((obj) => obj.chatId == chatId).messageId,
 			disable_web_page_preview: true,
 			reply_markup: {
 				inline_keyboard: [
@@ -3120,23 +3481,34 @@ async function StartAll() {
 
 		bot.onText(/(.+)/, async (message, match) => {
 			const chatId = message.chat.id;
-			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+			const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 			try {
 				const chatId = message.chat.id;
 				if (
 					(chatId == qu1z3xId || chatId == stepanovId) &&
 					dataAboutUser &&
-					dataAboutUser.userAction == 2
+					dataAboutUser.userAction == "adminMenuSendMessage"
 				) {
 					textMessageForAllUsers = match[1];
 					adminMenuSendMessageOptions(chatId);
 				} else if (
-					dataAboutUser.userAction == 6 &&
+					dataAboutUser.userAction == "editFistName" &&
+					dataAboutUser &&
 					match[1] != "/start editfistname" &&
 					match[1] != message.from.first_name
 				) {
 					dataAboutUser.login = match[1];
 					editFistName(chatId, dataAboutUser.telegramFirstName, true);
+				} else if (
+					dataAboutUser.userAction == "addInBlacklist" &&
+					dataAboutUser &&
+					match[1] != stepanovId &&
+					match[1] != qu1z3xId
+				) {
+					if (usersData.find((obj) => obj.chatId == match[1])) {
+						chatIdForBlacklist = match[1];
+						addInBlacklist_2(chatId, chatIdForBlacklist);
+					}
 				}
 			} catch (error) {}
 		});
@@ -3145,8 +3517,8 @@ async function StartAll() {
 
 		bot.onText(/^(.+?) в (.+)/, async (message, match) => {
 			const chatId = message.chat.id;
-			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
-			if (dataAboutUser && dataAboutUser.userAction == 1) {
+			const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+			if (dataAboutUser && dataAboutUser.userAction == "remindersAdd") {
 				let formatIsNice = true,
 					hours,
 					minutes;
@@ -3192,7 +3564,7 @@ async function StartAll() {
 							rndId = Math.floor(Math.random() * 1000);
 						} while (
 							remindersData.some(
-								(remindersData) => remindersData.reminderId === rndId
+								(remindersData) => remindersData.reminderId == rndId
 							) &&
 							remindersData.length != 0
 						);
@@ -3225,7 +3597,7 @@ async function StartAll() {
 								parse_mode: "html",
 								chat_id: message.chat.id,
 								message_id: usersData.find(
-									(obj) => obj.chatId === chatId
+									(obj) => obj.chatId == chatId
 								).messageId,
 								reply_markup: {
 									inline_keyboard: [
@@ -3233,7 +3605,7 @@ async function StartAll() {
 											{
 												text: `Текущие ${
 													remindersData.filter(
-														(obj) => obj.chatId === chatId
+														(obj) => obj.chatId == chatId
 													).length
 												} 📃`,
 												callback_data: "reminderslist",
@@ -3261,17 +3633,20 @@ async function StartAll() {
 			}
 		});
 
+		bot.onText(/(.+)/, async (message, match) => {});
+
 		bot.on("message", async (message) => {
 			const chatId = message.chat.id;
 			const text = message.text;
 
 			let firstName = message.from.first_name;
 
-			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+			const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 			if (!dataAboutUser) {
 				usersData.push({
 					chatId: chatId,
+					inBlackList: false,
 					username: message.from.username,
 					login: message.from.first_name,
 					telegramFirstName: message.from.first_name,
@@ -3280,6 +3655,17 @@ async function StartAll() {
 							? "Администратор 👑"
 							: "Ученик 🧑‍🏫",
 					userAction: 0,
+					countOfActions: 1,
+					lastActivity: Date.now(),
+					dateOfRegistration: `${new Date()
+						.getDate()
+						.toString()
+						.padStart(2, "0")}.${(new Date().getMonth() + 1)
+						.toString()
+						.padStart(2, "0")}.${(new Date().getFullYear() % 100)
+						.toString()
+						.padStart(2, "0")}`,
+					schoolName: "",
 					className: "Не определен",
 					messageId: "",
 					messageIdSayHi0: "",
@@ -3326,183 +3712,236 @@ async function StartAll() {
 				});
 			}
 			try {
-				if (dataAboutUser && dataAboutUser.userAction == 4) {
-					dataAboutUser.userAction = 0;
-					newsText[0] = text;
-					AllNewsTextEdit_2(chatId, text);
-				}
-
-				//! reminders крестики
-
-				if (text.includes("/start deleterem")) {
-					let remNum = text.match(/^\/start deleterem(\d+)$/);
-					remNum = parseInt(remNum[1]) - 1;
-					const userReminders = remindersData.filter(
-						(obj) => obj.chatId === chatId
-					);
-					if (userReminders.length != 0) {
-						remindersData.splice(
-							remindersData.indexOf(
-								remindersData.find(
-									(obj) =>
-										obj.reminderId ===
-										userReminders[remNum].reminderId
-								)
-							),
-							1
-						);
+				if (
+					(dataAboutUser && !dataAboutUser.inBlackList) ||
+					text == "/start" ||
+					text == "/start afterabsencedata"
+				) {
+					if (
+						dataAboutUser &&
+						dataAboutUser.userAction == "allNewsTextEdit"
+					) {
+						dataAboutUser.userAction = "menuHome";
+						newsText[0] = text;
+						allNewsTextEdit_2(chatId, text);
 					}
-					RemindersList(chatId);
-				}
-				if (text.includes("/start crossoutrem")) {
-					let remNum = text.match(/^\/start crossoutrem(\d+)$/);
-					remNum = parseInt(remNum[1]) - 1;
-					const userReminders = remindersData.filter(
-						(obj) => obj.chatId === chatId
-					);
+
+					//! reminders крестики
+
+					if (text.includes("/start deleterem")) {
+						let remNum = text.match(/^\/start deleterem(\d+)$/);
+						remNum = parseInt(remNum[1]) - 1;
+						const userReminders = remindersData.filter(
+							(obj) => obj.chatId == chatId
+						);
+						if (userReminders.length != 0) {
+							remindersData.splice(
+								remindersData.indexOf(
+									remindersData.find(
+										(obj) =>
+											obj.reminderId ==
+											userReminders[remNum].reminderId
+									)
+								),
+								1
+							);
+						}
+						RemindersList(chatId);
+					}
+					if (text.includes("/start crossoutrem")) {
+						let remNum = text.match(/^\/start crossoutrem(\d+)$/);
+						remNum = parseInt(remNum[1]) - 1;
+						const userReminders = remindersData.filter(
+							(obj) => obj.chatId == chatId
+						);
+
+						if (
+							userReminders.length != 0 &&
+							remindersData[
+								remindersData.indexOf(
+									remindersData.find(
+										(obj) =>
+											obj.reminderId ==
+											userReminders[remNum].reminderId
+									)
+								)
+							]
+						) {
+							remindersData[
+								remindersData.indexOf(
+									remindersData.find(
+										(obj) =>
+											obj.reminderId ==
+											userReminders[remNum].reminderId
+									)
+								)
+							].isDone = true;
+						}
+						RemindersList(chatId);
+					}
+
+					//! Мини пасхалки
+
+					if (text.includes("/start minidetail")) {
+						let miniDetailNum = text.match(/^\/start minidetail(\d+)$/);
+						miniDetailNum = parseInt(miniDetailNum[1]);
+						miniDetails(chatId, miniDetailNum);
+					}
+
+					if (text.includes("/start raspisanieon")) {
+						let dayForRaspisanie = text.match(
+							/^\/start raspisanieon(\d+)$/
+						);
+						dayForRaspisanie = parseInt(dayForRaspisanie[1]);
+						RaspisanieText(chatId, dayForRaspisanie);
+					}
 
 					if (
-						userReminders.length != 0 &&
-						remindersData[
-							remindersData.indexOf(
-								remindersData.find(
-									(obj) =>
-										obj.reminderId ===
-										userReminders[remNum].reminderId
-								)
-							)
-						]
+						text.includes("/start addtoblacklistuser") &&
+						(chatId == qu1z3xId || chatId == stepanovId)
 					) {
-						remindersData[
-							remindersData.indexOf(
-								remindersData.find(
-									(obj) =>
-										obj.reminderId ===
-										userReminders[remNum].reminderId
-								)
-							)
-						].isDone = true;
+						let idToAdd = text.match(/^\/start addtoblacklistuser(\d+)$/);
+						chatIdForBlacklist = parseInt(idToAdd[1]);
+
+						addInBlacklist_2(chatId, chatIdForBlacklist);
 					}
-					RemindersList(chatId);
-				}
 
-				//! Мини пасхалки
+					if (
+						text.includes("/start deletefromblacklistuser") &&
+						(chatId == qu1z3xId || chatId == stepanovId)
+					) {
+						let idToKill = text.match(
+							/^\/start deletefromblacklistuser(\d+)$/
+						);
+						idToKill = parseInt(idToKill[1]);
 
-				if (text.includes("/start minidetail")) {
-					let miniDetailNum = text.match(/^\/start minidetail(\d+)$/);
-					miniDetailNum = parseInt(miniDetailNum[1]);
-					miniDetails(chatId, miniDetailNum);
-				}
+						usersData[
+							usersData.findIndex((obj) => obj.chatId == idToKill)
+						].inBlackList = false;
 
-				if (text.includes("/start raspisanieon")) {
-					let dayForRaspisanie = text.match(/^\/start raspisanieon(\d+)$/);
-					dayForRaspisanie = parseInt(dayForRaspisanie[1]);
-					RaspisanieText(chatId, dayForRaspisanie);
-				}
-
-				if (text.includes("/start callson")) {
-					let dayForCalls = text.match(/^\/start callson(\d+)$/);
-					dayForCalls = parseInt(dayForCalls[1]);
-					Calls(chatId, dayForCalls);
-				}
-
-				//? КОМАНДЫ
-
-				switch (text) {
-					case "/start":
-						if (dataAboutUser) dataAboutUser.userAction = 0;
-						deleteAllMessages(chatId);
-						start(chatId, message.from.first_name);
-						break;
-					case "St":
-					case "st":
-						if (
-							dataAboutUser &&
-							(chatId == qu1z3xId || chatId == stepanovId)
-						)
-							dataAboutUser.userAction = 0;
-						deleteAllMessages(chatId);
-						start(chatId, message.from.first_name, true);
-						break;
-					case "/restart":
-						if (!dataAboutUser) {
-							try {
-								start(chatId, firstName, false);
-							} catch (error) {}
-						} else if (dataAboutUser && dataAboutUser.messageId != "") {
-							menuHome(chatId);
-						} else if (dataAboutUser && dataAboutUser.messageId == "") {
-							try {
-								await bot.deleteMessage(
-									chatId,
-									dataAboutUser.messageId
-								);
-							} catch (error) {
-								console.log(error);
-							}
-							menuHome(chatId, false);
+						if (dataAboutUser.userAction == "usersBlacklist") {
+							usersBlacklist(chatId);
+						} else if (dataAboutUser.userAction == "registryUsersData") {
+							registryUsersData(chatId, 1);
 						}
-						break;
-					case "/restart2":
-						try {
-							ChoosingClass(chatId, 2);
-						} catch (error) {}
-						break;
-					case "/start rules":
-						rulesBot(chatId);
-						break;
-					case "/start rules2":
-						rulesBot(chatId, false);
-						break;
-					case "/start options":
-						Options(chatId);
-						break;
-					case "/start editfistname":
-						editFistName(chatId);
-						break;
-					case "/start editclass":
-						ChoosingClass(chatId, 0);
-						break;
-					case "/start remindersList":
-						RemindersList(chatId);
-						break;
-					case "/start remindersAdd":
-						RemindersAdd(chatId);
-						break;
-					case "/start notificationsmenucalls":
-						NotificationsMenuCalls(chatId);
-						break;
-					case "/start showhi2":
-						bot.editMessageText(
-							`*[Скрыть](https://t.me/${BotName}/?start=hidehi2)\n\nЯ чат\\-бот 🤖, поддерживаю _цифровое_ обучение🏫\\. Я буду твоим верным учебным помощником\\!😉\n • Нужно уточнить распиание?📚\n • Подсказать когда идти на урок?⏰\n • Напомнить о твоих планах?📝\n • Сыграть партейку в Цуе\\-Фа?✌️\n • Рассказать школьные новости?📖\nТогда я к твоим услугам\\! Поехали\\![🚀](https://t.me/${BotName}/?start=minidetail2)*`,
-							{
-								parse_mode: "MarkdownV2",
-								chat_id: dataAboutUser.chatId,
-								message_id: dataAboutUser.messageIdSayHi2,
-								disable_web_page_preview: true,
+					}
+
+					if (text.includes("/start callson")) {
+						let dayForCalls = text.match(/^\/start callson(\d+)$/);
+						dayForCalls = parseInt(dayForCalls[1]);
+						Calls(chatId, dayForCalls);
+					}
+
+					//? КОМАНДЫ
+
+					switch (text) {
+						case "/start afterabsencedata":
+							deleteAllMessages(chatId);
+							start(chatId, message.from.first_name, false, true);
+							break;
+						case "/start":
+							if (dataAboutUser) dataAboutUser.userAction = "menuHome";
+							deleteAllMessages(chatId);
+							start(chatId, message.from.first_name);
+							break;
+						case "St":
+						case "st":
+							if (
+								dataAboutUser &&
+								(chatId == qu1z3xId ||
+									chatId == stepanovId ||
+									chatId == jackId)
+							) {
+								dataAboutUser.userAction = "menuHome";
+								deleteAllMessages(chatId);
+								start(chatId, message.from.first_name, true);
 							}
-						);
-						break;
-					case "/start hidehi2":
-						bot.editMessageText(
-							`*[Что умеет этот чат\\-бот\\?](https://t.me/${BotName}/?start=showhi2)*`,
-							{
-								parse_mode: "MarkdownV2",
-								chat_id: dataAboutUser.chatId,
-								message_id: dataAboutUser.messageIdSayHi2,
-								disable_web_page_preview: true,
+							break;
+						case "/restart":
+							if (!dataAboutUser) {
+								try {
+									start(chatId, firstName, false);
+								} catch (error) {}
+							} else if (
+								dataAboutUser &&
+								dataAboutUser.messageId != ""
+							) {
+								menuHome(chatId);
+							} else if (
+								dataAboutUser &&
+								dataAboutUser.messageId == ""
+							) {
+								try {
+									await bot.deleteMessage(
+										chatId,
+										dataAboutUser.messageId
+									);
+								} catch (error) {
+									console.log(error);
+								}
+								menuHome(chatId, false);
 							}
-						);
-						break;
-					case "/start detailsRules":
-						detailsRules(chatId);
-						break;
-					default:
-						break;
+							break;
+						case "/start rules":
+							rulesBot(chatId);
+							break;
+						case "/start rules2":
+							rulesBot(chatId, false);
+							break;
+						case "/start options":
+							Options(chatId);
+							break;
+						case "/start editfistname":
+							editFistName(chatId);
+							break;
+						case "/start editclass":
+							ChoosingClass(chatId, 0);
+							break;
+						case "/start remindersList":
+							RemindersList(chatId);
+							break;
+						case "/start remindersAdd":
+							remindersAdd(chatId);
+							break;
+						case "/start notificationsmenucalls":
+							NotificationsMenuCalls(chatId);
+							break;
+						case "/start showhi2":
+							bot.editMessageText(
+								`*[Скрыть](https://t.me/${BotName}/?start=hidehi2)\n\nЯ чат\\-бот 🤖, поддерживаю _цифровое_ обучение 🏫\\. Я буду твоим верным учебным помощником\\! 😉\n • Нужно уточнить распиание? 📚\n • Подсказать когда идти на урок? ⏰\n • Напомнить о твоих планах? 📝\n • Сыграть партейку в Цуе\\-Фа? ✌️\n • Рассказать школьные новости? 📖\nТогда я к твоим услугам\\! Поехали\\! [🚀](https://t.me/${BotName}/?start=minidetail2)*`,
+								{
+									parse_mode: "MarkdownV2",
+									chat_id: dataAboutUser.chatId,
+									message_id: dataAboutUser.messageIdSayHi2,
+									disable_web_page_preview: true,
+								}
+							);
+							break;
+						case "/start hidehi2":
+							bot.editMessageText(
+								`<b><a href = "https://t.me/${BotName}/?start=showhi2">Что умеет этот чат-бот?</a></b>`,
+								{
+									parse_mode: "html",
+									chat_id: dataAboutUser.chatId,
+									message_id: dataAboutUser.messageIdSayHi2,
+									disable_web_page_preview: true,
+								}
+							);
+							break;
+						case "/start detailsRules":
+							detailsRules(chatId);
+							break;
+						default:
+							break;
+					}
+					dataAboutUser.countOfActions += 1;
+					dataAboutUser.lastActivity = Date.now();
+					dataAboutUser.reminderForReturn1 = false;
+					dataAboutUser.reminderForReturn2 = false;
+					dataAboutUser.reminderForReturn3 = false;
+					dataAboutUser.reminderForReturn4 = false;
 				}
-				try {
-					bot.deleteMessage(chatId, message.message_id);
-				} catch (error) {}
+				bot.deleteMessage(chatId, message.message_id);
 			} catch (error) {
 				console.log(error);
 			}
@@ -3513,272 +3952,130 @@ async function StartAll() {
 		bot.on("callback_query", (query) => {
 			const chatId = query.message.chat.id;
 			const data = query.data;
-			const dataAboutUser = usersData.find((obj) => obj.chatId === chatId);
+			const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
+
 			try {
-				day = new Date().getDate();
-				dayW = new Date().getDay();
-				month = new Date().getMonth();
-
-				if (dataAboutUser) {
+				if (
+					(dataAboutUser && !dataAboutUser.inBlackList) ||
+					data == "rules2"
+				) {
+					day = new Date().getDate();
+					dayW = new Date().getDay();
+					month = new Date().getMonth();
 					dataAboutUser.messageId = query.message.message_id;
-				}
 
-				// game1
-				if (
-					data == "0" ||
-					data == "1" ||
-					data == "2" ||
-					data == "3" ||
-					data == "4" ||
-					data == "5" ||
-					data == "6" ||
-					data == "7" ||
-					data == "8" ||
-					data == "9"
-				) {
-					bot.editMessageText(
-						`*_❓ Угадайка ❓_\n\n${
-							data == rndNum
-								? `✅ Правильно ${rndNum}\\!🥳`
-								: `${
-										data == "0" ||
-										data == "1" ||
-										data == "2" ||
-										data == "3" ||
-										data == "4" ||
-										data == "5" ||
-										data == "6" ||
-										data == "7" ||
-										data == "8" ||
-										data == "9"
-											? `❌ Не правильно 😔\nОтвет: ${rndNum}\\!`
-											: ``
-								  }`
-						}\n\n[Статистика](https://t.me/${BotName}/?start=options)\n\nЕщё партейку\\? 🤔*`,
-						{
-							parse_mode: "MarkdownV2",
-							chat_id: chatId,
-							message_id: usersData.find((obj) => obj.chatId === chatId)
-								.messageId,
-							disable_web_page_preview: true,
-							reply_markup: {
-								inline_keyboard: [
-									[
-										{ text: "⬅️Назад", callback_data: "games" },
-										{ text: "Давай👌", callback_data: "game1" },
+					// game1
+					if (
+						data == "0" ||
+						data == "1" ||
+						data == "2" ||
+						data == "3" ||
+						data == "4" ||
+						data == "5" ||
+						data == "6" ||
+						data == "7" ||
+						data == "8" ||
+						data == "9"
+					) {
+						bot.editMessageText(
+							`*_❓ Угадай\\-ка ❓_\n\n${
+								data == rndNum
+									? `✅ Правильно ${rndNum}\\!🥳`
+									: `${
+											data == "0" ||
+											data == "1" ||
+											data == "2" ||
+											data == "3" ||
+											data == "4" ||
+											data == "5" ||
+											data == "6" ||
+											data == "7" ||
+											data == "8" ||
+											data == "9"
+												? `❌ Не правильно 😔\nОтвет: ${rndNum}\\!`
+												: ``
+									  }`
+							}\n\n[Статистика](https://t.me/${BotName}/?start=options)\n\nЕщё партейку\\? 🤔*`,
+							{
+								parse_mode: "MarkdownV2",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId == chatId
+								).messageId,
+								disable_web_page_preview: true,
+								reply_markup: {
+									inline_keyboard: [
+										[
+											{ text: "⬅️Назад", callback_data: "games" },
+											{ text: "Давай👌", callback_data: "game1" },
+										],
 									],
-								],
-							},
-						}
-					);
-				}
-				if (data == rndNum) dataAboutUser.game1NiceResults += 1;
-				else if (
-					data == "0" ||
-					data == "1" ||
-					data == "2" ||
-					data == "3" ||
-					data == "4" ||
-					data == "5" ||
-					data == "6" ||
-					data == "7" ||
-					data == "8" ||
-					data == "9"
-				)
-					dataAboutUser.game1BadResults += 1;
+								},
+							}
+						);
+					}
+					if (data == rndNum) dataAboutUser.game1NiceResults += 1;
+					else if (
+						data == "0" ||
+						data == "1" ||
+						data == "2" ||
+						data == "3" ||
+						data == "4" ||
+						data == "5" ||
+						data == "6" ||
+						data == "7" ||
+						data == "8" ||
+						data == "9"
+					)
+						dataAboutUser.game1BadResults += 1;
 
-				// game3
+					// game3
 
-				if (
-					dataAboutUser &&
-					dataAboutUser.userAction == 5 &&
-					data != "game3" &&
-					data != "games" &&
-					data != "game3_2"
-				) {
-					const [row, col] = data.split("|").map(Number);
-					if (dataAboutUser.playerGame3Board[row][col] == " ") {
-						dataAboutUser.playerGame3Board[row][col] =
-							dataAboutUser.game3PlayerSticker;
+					if (
+						dataAboutUser &&
+						dataAboutUser.userAction == "game3_2" &&
+						data != "game3" &&
+						data != "games" &&
+						data != "game3_2"
+					) {
+						const [row, col] = data.split("|").map(Number);
+						if (dataAboutUser.playerGame3Board[row][col] == " ") {
+							dataAboutUser.playerGame3Board[row][col] =
+								dataAboutUser.game3PlayerSticker;
 
-						let res = game3Result(chatId);
-						if (!res) {
-							bot.editMessageText(
-								`<b><i>❌ Крестики-Нолики ⭕</i>\n\nТеперь хожу я ${
-									dataAboutUser.game3PlayerSticker == "❌"
-										? "⭕"
-										: "❌"
-								}</b>`,
-								{
-									chat_id: chatId,
-									message_id: dataAboutUser.messageId,
-									parse_mode: "HTML",
-									reply_markup: game3InlineKeyboard(chatId, false),
-								}
-							);
+							let res = game3Result(chatId);
+							if (!res) {
+								bot.editMessageText(
+									`<b><i>❌ Крестики-Нолики ⭕</i>\n\nТеперь хожу я ${
+										dataAboutUser.game3PlayerSticker == "❌"
+											? "⭕"
+											: "❌"
+									}</b>`,
+									{
+										chat_id: chatId,
+										message_id: dataAboutUser.messageId,
+										parse_mode: "HTML",
+										reply_markup: game3InlineKeyboard(chatId, false),
+									}
+								);
 
-							if (dataAboutUser && dataAboutUser.userAction == 5) {
-								let botRow,
-									botCol,
-									count = 0,
-									difficultyMiddleCount = 2;
-								if (dataAboutUser.game3Difficulty == 2) {
-									difficultyMiddleCount = Math.floor(
-										Math.random() * 2
-									);
-								}
 								if (
-									dataAboutUser.game3Difficulty == 0 ||
-									difficultyMiddleCount == 0
+									dataAboutUser &&
+									dataAboutUser.userAction == "game3_2"
 								) {
-									do {
-										botRow = Math.floor(Math.random() * 3);
-										botCol = Math.floor(Math.random() * 3);
-										count++;
-										if (count == 40) {
-											res = "Ничья!";
-											break;
-										}
-									} while (
-										dataAboutUser.playerGame3Board[botRow][botCol] !=
-										" "
-									);
-								}
-								if (
-									dataAboutUser.game3Difficulty == 1 ||
-									difficultyMiddleCount == 1
-								) {
-									let botMoveMade = false;
-									// Проверка горизонтальных линий для блокировки/победы
-									for (let i = 0; i < 3; i++) {
-										if (
-											dataAboutUser.playerGame3Board[i][0] ==
-												dataAboutUser.playerGame3Board[i][1] &&
-											dataAboutUser.playerGame3Board[i][0] != " " &&
-											dataAboutUser.playerGame3Board[i][2] == " "
-										) {
-											botRow = i;
-											botCol = 2;
-											botMoveMade = true;
-											break;
-										} else if (
-											dataAboutUser.playerGame3Board[i][1] ==
-												dataAboutUser.playerGame3Board[i][2] &&
-											dataAboutUser.playerGame3Board[i][1] != " " &&
-											dataAboutUser.playerGame3Board[i][0] == " "
-										) {
-											botRow = i;
-											botCol = 0;
-											botMoveMade = true;
-											break;
-										} else if (
-											dataAboutUser.playerGame3Board[i][0] ==
-												dataAboutUser.playerGame3Board[i][2] &&
-											dataAboutUser.playerGame3Board[i][0] != " " &&
-											dataAboutUser.playerGame3Board[i][1] == " "
-										) {
-											botRow = i;
-											botCol = 1;
-											botMoveMade = true;
-											break;
-										}
+									let botRow,
+										botCol,
+										count = 0,
+										difficultyMiddleCount = 2;
+									if (dataAboutUser.game3Difficulty == 2) {
+										difficultyMiddleCount = Math.floor(
+											Math.random() * 2
+										);
 									}
-									// Проверка вертикальных линий для блокировки/победы
-									for (let i = 0; i < 3; i++) {
-										// Проверка победы в вертикальных линиях
-										if (
-											dataAboutUser.playerGame3Board[0][i] ==
-												dataAboutUser.playerGame3Board[1][i] &&
-											dataAboutUser.playerGame3Board[0][i] != " " &&
-											dataAboutUser.playerGame3Board[2][i] == " "
-										) {
-											botRow = 2;
-											botCol = i;
-											botMoveMade = true;
-											break;
-										} else if (
-											dataAboutUser.playerGame3Board[1][i] ==
-												dataAboutUser.playerGame3Board[2][i] &&
-											dataAboutUser.playerGame3Board[1][i] != " " &&
-											dataAboutUser.playerGame3Board[0][i] == " "
-										) {
-											botRow = 0;
-											botCol = i;
-											botMoveMade = true;
-											break;
-										} else if (
-											dataAboutUser.playerGame3Board[0][i] ==
-												dataAboutUser.playerGame3Board[2][i] &&
-											dataAboutUser.playerGame3Board[0][i] != " " &&
-											dataAboutUser.playerGame3Board[1][i] == " "
-										) {
-											botRow = 1;
-											botCol = i;
-											botMoveMade = true;
-											break;
-										}
-									}
-									// Проверка диагоналей для блокировки/победы
-									// Проверка победы в диагональной линии (слева направо)
 									if (
-										dataAboutUser.playerGame3Board[0][0] ==
-											dataAboutUser.playerGame3Board[1][1] &&
-										dataAboutUser.playerGame3Board[0][0] != " " &&
-										dataAboutUser.playerGame3Board[2][2] == " "
+										dataAboutUser.game3Difficulty == 0 ||
+										difficultyMiddleCount == 0
 									) {
-										botRow = 2;
-										botCol = 2;
-										botMoveMade = true;
-									} else if (
-										dataAboutUser.playerGame3Board[1][1] ==
-											dataAboutUser.playerGame3Board[2][2] &&
-										dataAboutUser.playerGame3Board[1][1] != " " &&
-										dataAboutUser.playerGame3Board[0][0] == " "
-									) {
-										botRow = 0;
-										botCol = 0;
-										botMoveMade = true;
-									} else if (
-										dataAboutUser.playerGame3Board[0][0] ==
-											dataAboutUser.playerGame3Board[2][2] &&
-										dataAboutUser.playerGame3Board[0][0] != " " &&
-										dataAboutUser.playerGame3Board[1][1] == " "
-									) {
-										botRow = 1;
-										botCol = 1;
-										botMoveMade = true;
-									}
-
-									// Проверка победы в диагональной линии (справа налево)
-									if (
-										dataAboutUser.playerGame3Board[0][2] ==
-											dataAboutUser.playerGame3Board[1][1] &&
-										dataAboutUser.playerGame3Board[0][2] != " " &&
-										dataAboutUser.playerGame3Board[2][0] == " "
-									) {
-										botRow = 2;
-										botCol = 0;
-										botMoveMade = true;
-									} else if (
-										dataAboutUser.playerGame3Board[1][1] ==
-											dataAboutUser.playerGame3Board[2][0] &&
-										dataAboutUser.playerGame3Board[1][1] != " " &&
-										dataAboutUser.playerGame3Board[0][2] == " "
-									) {
-										botRow = 0;
-										botCol = 2;
-										botMoveMade = true;
-									} else if (
-										dataAboutUser.playerGame3Board[0][2] ==
-											dataAboutUser.playerGame3Board[2][0] &&
-										dataAboutUser.playerGame3Board[0][2] != " " &&
-										dataAboutUser.playerGame3Board[1][1] == " "
-									) {
-										botRow = 1;
-										botCol = 1;
-										botMoveMade = true;
-									}
-									if (!botMoveMade) {
 										do {
 											botRow = Math.floor(Math.random() * 3);
 											botCol = Math.floor(Math.random() * 3);
@@ -3793,89 +4090,799 @@ async function StartAll() {
 											] != " "
 										);
 									}
-								}
-								if (!res) {
-									dataAboutUser.playerGame3Board[botRow][botCol] = `${
-										dataAboutUser.game3PlayerSticker == "❌"
-											? "⭕"
-											: "❌"
-									}`;
-									res = game3Result(chatId);
-									if (res != "Ничья!" && res != "❌" && res != "⭕") {
-										setTimeout(() => {
-											bot.editMessageText(
-												`<b><i>❌ Крестики-Нолики ⭕</i>\n\nТвоя очередь ${dataAboutUser.game3PlayerSticker}</b>`,
-												{
-													chat_id: chatId,
-													message_id: dataAboutUser.messageId,
-													parse_mode: "HTML",
-													reply_markup:
-														game3InlineKeyboard(chatId),
+									if (
+										dataAboutUser.game3Difficulty == 1 ||
+										difficultyMiddleCount == 1
+									) {
+										let botMoveMade = false;
+										// Проверка горизонтальных линий для блокировки/победы
+										for (let i = 0; i < 3; i++) {
+											if (
+												dataAboutUser.playerGame3Board[i][0] ==
+													dataAboutUser.playerGame3Board[i][1] &&
+												dataAboutUser.playerGame3Board[i][0] !=
+													" " &&
+												dataAboutUser.playerGame3Board[i][2] == " "
+											) {
+												botRow = i;
+												botCol = 2;
+												botMoveMade = true;
+												break;
+											} else if (
+												dataAboutUser.playerGame3Board[i][1] ==
+													dataAboutUser.playerGame3Board[i][2] &&
+												dataAboutUser.playerGame3Board[i][1] !=
+													" " &&
+												dataAboutUser.playerGame3Board[i][0] == " "
+											) {
+												botRow = i;
+												botCol = 0;
+												botMoveMade = true;
+												break;
+											} else if (
+												dataAboutUser.playerGame3Board[i][0] ==
+													dataAboutUser.playerGame3Board[i][2] &&
+												dataAboutUser.playerGame3Board[i][0] !=
+													" " &&
+												dataAboutUser.playerGame3Board[i][1] == " "
+											) {
+												botRow = i;
+												botCol = 1;
+												botMoveMade = true;
+												break;
+											}
+										}
+										// Проверка вертикальных линий для блокировки/победы
+										for (let i = 0; i < 3; i++) {
+											// Проверка победы в вертикальных линиях
+											if (
+												dataAboutUser.playerGame3Board[0][i] ==
+													dataAboutUser.playerGame3Board[1][i] &&
+												dataAboutUser.playerGame3Board[0][i] !=
+													" " &&
+												dataAboutUser.playerGame3Board[2][i] == " "
+											) {
+												botRow = 2;
+												botCol = i;
+												botMoveMade = true;
+												break;
+											} else if (
+												dataAboutUser.playerGame3Board[1][i] ==
+													dataAboutUser.playerGame3Board[2][i] &&
+												dataAboutUser.playerGame3Board[1][i] !=
+													" " &&
+												dataAboutUser.playerGame3Board[0][i] == " "
+											) {
+												botRow = 0;
+												botCol = i;
+												botMoveMade = true;
+												break;
+											} else if (
+												dataAboutUser.playerGame3Board[0][i] ==
+													dataAboutUser.playerGame3Board[2][i] &&
+												dataAboutUser.playerGame3Board[0][i] !=
+													" " &&
+												dataAboutUser.playerGame3Board[1][i] == " "
+											) {
+												botRow = 1;
+												botCol = i;
+												botMoveMade = true;
+												break;
+											}
+										}
+										// Проверка диагоналей для блокировки/победы
+										// Проверка победы в диагональной линии (слева направо)
+										if (
+											dataAboutUser.playerGame3Board[0][0] ==
+												dataAboutUser.playerGame3Board[1][1] &&
+											dataAboutUser.playerGame3Board[0][0] != " " &&
+											dataAboutUser.playerGame3Board[2][2] == " "
+										) {
+											botRow = 2;
+											botCol = 2;
+											botMoveMade = true;
+										} else if (
+											dataAboutUser.playerGame3Board[1][1] ==
+												dataAboutUser.playerGame3Board[2][2] &&
+											dataAboutUser.playerGame3Board[1][1] != " " &&
+											dataAboutUser.playerGame3Board[0][0] == " "
+										) {
+											botRow = 0;
+											botCol = 0;
+											botMoveMade = true;
+										} else if (
+											dataAboutUser.playerGame3Board[0][0] ==
+												dataAboutUser.playerGame3Board[2][2] &&
+											dataAboutUser.playerGame3Board[0][0] != " " &&
+											dataAboutUser.playerGame3Board[1][1] == " "
+										) {
+											botRow = 1;
+											botCol = 1;
+											botMoveMade = true;
+										}
+
+										// Проверка победы в диагональной линии (справа налево)
+										if (
+											dataAboutUser.playerGame3Board[0][2] ==
+												dataAboutUser.playerGame3Board[1][1] &&
+											dataAboutUser.playerGame3Board[0][2] != " " &&
+											dataAboutUser.playerGame3Board[2][0] == " "
+										) {
+											botRow = 2;
+											botCol = 0;
+											botMoveMade = true;
+										} else if (
+											dataAboutUser.playerGame3Board[1][1] ==
+												dataAboutUser.playerGame3Board[2][0] &&
+											dataAboutUser.playerGame3Board[1][1] != " " &&
+											dataAboutUser.playerGame3Board[0][2] == " "
+										) {
+											botRow = 0;
+											botCol = 2;
+											botMoveMade = true;
+										} else if (
+											dataAboutUser.playerGame3Board[0][2] ==
+												dataAboutUser.playerGame3Board[2][0] &&
+											dataAboutUser.playerGame3Board[0][2] != " " &&
+											dataAboutUser.playerGame3Board[1][1] == " "
+										) {
+											botRow = 1;
+											botCol = 1;
+											botMoveMade = true;
+										}
+										if (!botMoveMade) {
+											do {
+												botRow = Math.floor(Math.random() * 3);
+												botCol = Math.floor(Math.random() * 3);
+												count++;
+												if (count == 40) {
+													res = "Ничья!";
+													break;
 												}
+											} while (
+												dataAboutUser.playerGame3Board[botRow][
+													botCol
+												] != " "
 											);
-										}, 1000);
+										}
+									}
+									if (!res) {
+										dataAboutUser.playerGame3Board[botRow][
+											botCol
+										] = `${
+											dataAboutUser.game3PlayerSticker == "❌"
+												? "⭕"
+												: "❌"
+										}`;
+										res = game3Result(chatId);
+										if (
+											res != "Ничья!" &&
+											res != "❌" &&
+											res != "⭕"
+										) {
+											setTimeout(() => {
+												bot.editMessageText(
+													`<b><i>❌ Крестики-Нолики ⭕</i>\n\nТвоя очередь ${dataAboutUser.game3PlayerSticker}</b>`,
+													{
+														chat_id: chatId,
+														message_id: dataAboutUser.messageId,
+														parse_mode: "HTML",
+														reply_markup:
+															game3InlineKeyboard(chatId),
+													}
+												);
+											}, 1000);
+										}
 									}
 								}
 							}
-						}
-						setTimeout(() => {
-							if (
-								(res == "Ничья!" || res == "❌" || res == "⭕") &&
-								dataAboutUser.userAction != 0
-							) {
-								dataAboutUser.userAction = 0;
-								let boardString = "";
-								for (
-									let i = 0;
-									i < dataAboutUser.playerGame3Board.length;
-									i++
+							setTimeout(() => {
+								if (
+									(res == "Ничья!" || res == "❌" || res == "⭕") &&
+									dataAboutUser.userAction != 0
 								) {
+									dataAboutUser.userAction = "menuHome";
+									let boardString = "";
 									for (
-										let j = 0;
-										j < dataAboutUser.playerGame3Board[i].length;
-										j++
+										let i = 0;
+										i < dataAboutUser.playerGame3Board.length;
+										i++
 									) {
-										const cell = dataAboutUser.playerGame3Board[i][j];
-										boardString += cell !== " " ? ` ${cell} ` : "⠀⠀⠀";
-										if (
-											j <
-											dataAboutUser.playerGame3Board[i].length - 1
+										for (
+											let j = 0;
+											j < dataAboutUser.playerGame3Board[i].length;
+											j++
 										) {
-											boardString += "|";
+											const cell =
+												dataAboutUser.playerGame3Board[i][j];
+											boardString +=
+												cell !== " " ? ` ${cell} ` : "⠀⠀⠀";
+											if (
+												j <
+												dataAboutUser.playerGame3Board[i].length - 1
+											) {
+												boardString += "|";
+											}
+										}
+										if (
+											i <
+											dataAboutUser.playerGame3Board.length - 1
+										) {
+											boardString += "\n— — — — — —\n";
 										}
 									}
-									if (i < dataAboutUser.playerGame3Board.length - 1) {
-										boardString += "\n— — — — — —\n";
-									}
+									bot.editMessageText(
+										`<b><i>❌ Крестики-Нолики ⭕</i>\n\n${
+											res != dataAboutUser.game3PlayerSticker
+												? `${
+														res == "Ничья!"
+															? `🤷‍♂️ Ничья! 🤷`
+															: `🥈 Поражение! 😔`
+												  }`
+												: `🥇 Выигрыш! 🥳`
+										}\n\nРезультат:\n${boardString}\n\nСложность: ${
+											dataAboutUser.game3Difficulty == 0
+												? "Легко"
+												: `${
+														dataAboutUser.game3Difficulty == 2
+															? "Средняя"
+															: `${
+																	dataAboutUser.game3Difficulty ==
+																	1
+																		? "Тяжело"
+																		: "Не выбрано"
+															  }`
+												  }`
+										}\n<a href="https://t.me/${BotName}/?start=options">Статистика</a>\n\nЕще партейку? 🤔</b>`,
+										{
+											parse_mode: "html",
+											chat_id: chatId,
+											message_id: dataAboutUser.messageId,
+											disable_web_page_preview: true,
+											reply_markup: {
+												inline_keyboard: [
+													[
+														{
+															text: "⬅️Назад",
+															callback_data: "games",
+														},
+														{
+															text: "Давай👌",
+															callback_data: `game3_2`,
+														},
+													],
+												],
+											},
+										}
+									);
+									// Статистика
+
+									if (res && res != dataAboutUser.game3PlayerSticker) {
+										if (res == "Ничья!")
+											dataAboutUser.game3DrawResults += 1;
+										else dataAboutUser.game3BadResults += 1;
+									} else dataAboutUser.game3NiceResults += 1;
 								}
+							}, 500);
+						}
+					}
+
+					if (data.includes("deletereminder")) {
+						let remId = data.match(/^deletereminder(\d+)$/);
+						remId = parseInt(remId[1]);
+
+						try {
+							bot.deleteMessage(
+								chatId,
+								usersData.find((obj) => obj.chatId == chatId).messageId
+							);
+
+							let index = remindersData.findIndex(
+								(obj) => obj.reminderId == remId
+							);
+							remindersData.splice(index, 1); // удаление напоминания которое уже объявилось
+						} catch (error) {
+							console.log(error);
+						}
+					}
+
+					if (data.includes("updatetimeforreminder")) {
+						let remId = data.match(/^updatetimeforreminder(\d+)$/);
+						remId = parseInt(remId[1]);
+						let index = remindersData.findIndex(
+							(obj) => obj.reminderId == remId
+						);
+
+						bot.editMessageText(
+							`<b><i>🔔 Перенос напоминания 🔄️</i>\n\nНапоминание:</b>\n"${remindersData[index].text}"\n\n<b>На какое время перенести? 😉</b>`,
+							{
+								parse_mode: "html",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId == chatId
+								).messageId,
+								reply_markup: {
+									inline_keyboard: [
+										[
+											{
+												text: "На завтра",
+												callback_data: `reschedulereminder${remId}on${0}`,
+											},
+										],
+										[
+											{
+												text: "1м",
+												callback_data: `reschedulereminder${remId}on${1}`,
+											},
+											{
+												text: "3м",
+												callback_data: `reschedulereminder${remId}on${3}`,
+											},
+											{
+												text: "5м",
+												callback_data: `reschedulereminder${remId}on${5}`,
+											},
+											{
+												text: "10м",
+												callback_data: `reschedulereminder${remId}on${10}`,
+											},
+										],
+										[
+											{
+												text: "15м",
+												callback_data: `reschedulereminder${remId}on${15}`,
+											},
+											{
+												text: "30м",
+												callback_data: `reschedulereminder${remId}on${30}`,
+											},
+											{
+												text: "1ч",
+												callback_data: `reschedulereminder${remId}on${12}`,
+											},
+											{
+												text: "2ч",
+												callback_data: `reschedulereminder${remId}on${22}`,
+											},
+										],
+										[
+											{
+												text: "Удалить ❌",
+												callback_data: `deletereminder${remId}`,
+											},
+										],
+									],
+								},
+							}
+						);
+					}
+
+					if (data.includes("reschedulereminder")) {
+						let remId = data.match(/^reschedulereminder(\d+)on(\d+)$/);
+						let countTime = parseInt(remId[2]);
+						remId = parseInt(remId[1]);
+
+						let index = remindersData.findIndex(
+							(obj) => obj.reminderId == remId
+						);
+
+						let [hours, minutes] = remindersData[index].time
+							.split(":")
+							.map(Number);
+
+						switch (countTime) {
+							case 0:
+								break;
+							case 1:
+								minutes += 1;
+								if (minutes >= 60) {
+									hours += 1;
+									minutes -= 60;
+								}
+								if (hours >= 24) hours -= 24;
+								break;
+							case 3:
+								minutes += 3;
+								if (minutes >= 60) {
+									hours += 1;
+									minutes -= 60;
+								}
+								if (hours >= 24) hours -= 24;
+								break;
+							case 5:
+								minutes += 5;
+								if (minutes >= 60) {
+									hours += 1;
+									minutes -= 60;
+								}
+								if (hours >= 24) hours -= 24;
+								break;
+							case 10:
+								minutes += 10;
+								if (minutes >= 60) {
+									hours += 1;
+									minutes -= 60;
+								}
+								if (hours >= 24) hours -= 24;
+								break;
+							case 15:
+								minutes += 15;
+								if (minutes >= 60) {
+									hours += 1;
+									minutes -= 60;
+								}
+								if (hours >= 24) hours -= 24;
+								break;
+							case 30:
+								minutes += 30;
+								if (minutes >= 60) {
+									hours += 1;
+									minutes -= 60;
+								}
+								if (hours >= 24) hours -= 24;
+								break;
+							case 12:
+								hours += 1;
+								if (hours >= 24) hours -= 24;
+
+								break;
+							case 22:
+								hours += 2;
+								if (hours >= 24) hours -= 24;
+								break;
+							default:
+								console.log(0);
+								break;
+						}
+
+						let newTime = `${String(hours).padStart(2, "0")}:${String(
+							minutes
+						).padStart(2, "0")}`;
+						remindersData[index].time = newTime;
+
+						bot.editMessageText(
+							`<i><b>🔄️ Перенёс напоминание 😉🔔\n\nНовое:</b>\n"${
+								remindersData[index].text
+							}" - <b>${
+								hours == new Date().getHours() &&
+								minutes == new Date().getMinutes()
+									? "завтра в "
+									: ""
+							}${remindersData[index].time}</b></i>`,
+							{
+								parse_mode: "html",
+								chat_id: chatId,
+								message_id: usersData.find(
+									(obj) => obj.chatId == chatId
+								).messageId,
+								reply_markup: {
+									inline_keyboard: [
+										[
+											{
+												text: "Спасибо👍",
+												callback_data: `deleteexcess`,
+											},
+										],
+									],
+								},
+							}
+						);
+					}
+
+					//? КЛАССЫ/РАСПИСАНИЕ
+					if (
+						data == "10a" ||
+						data == "10b" ||
+						data == "10g" ||
+						data == "11d" ||
+						data == "11g" ||
+						data == "11a" ||
+						data == "11v"
+					) {
+						switch (data) {
+							case "10a":
+								dataAboutUser.className = "10А";
+								dataAboutUser.schoolName = "27c1";
+								break;
+							case "10b":
+								dataAboutUser.className = "10Б";
+								dataAboutUser.schoolName = "27c1";
+								break;
+							case "10g":
+								dataAboutUser.className = "10Г";
+								dataAboutUser.schoolName = "27c2";
+								break;
+							case "11d":
+								dataAboutUser.className = "11Д";
+								dataAboutUser.schoolName = "27c1";
+								break;
+							case "11g":
+								dataAboutUser.className = "11Г";
+								dataAboutUser.schoolName = "27c1";
+								break;
+							case "11a":
+								dataAboutUser.className = "11А";
+								dataAboutUser.schoolName = "27c1";
+								break;
+							case "11v":
+								dataAboutUser.className = "11В";
+								dataAboutUser.schoolName = "27c1";
+								break;
+						}
+						if (dataAboutUser.userAction == "Calls") Calls(chatId);
+						if (dataAboutUser.userAction == "RaspisanieText")
+							RaspisanieText(chatId);
+						else menuHome(chatId);
+					}
+
+					//? ДЕНЬ НЕДЕЛИ
+
+					switch (data) {
+						case "mon":
+							dataAboutUser.weekday = 1;
+							RaspisanieText(chatId);
+							break;
+						case "tue":
+							dataAboutUser.weekday = 2;
+							RaspisanieText(chatId);
+							break;
+						case "wen":
+							dataAboutUser.weekday = 3;
+							RaspisanieText(chatId);
+							break;
+						case "thu":
+							dataAboutUser.weekday = 4;
+							RaspisanieText(chatId);
+							break;
+						case "fri":
+							dataAboutUser.weekday = 5;
+							RaspisanieText(chatId);
+							break;
+						case "today":
+							RaspisanieText(chatId, dayW);
+							break;
+						case "nextweekday":
+							if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
+							else if (dataAboutUser.weekday < 6)
+								dataAboutUser.weekday += 1;
+							RaspisanieText(chatId);
+							break;
+						case "previousweekday":
+							if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
+							else if (dataAboutUser.weekday > 0)
+								dataAboutUser.weekday -= 1;
+							RaspisanieText(chatId);
+							break;
+
+						//? ДЕЙСТВИЯ КНОПОК
+
+						// НАЧАЛЬНЫЕ
+						case "start":
+							deleteAllMessages(chatId);
+							start(chatId, dataAboutUser.login);
+							break;
+						case "exit":
+							if (
+								dataAboutUser &&
+								dataAboutUser.userAction == "registryUsersData"
+							) {
+								registryUsersData(chatId, 1);
+							} else {
+								dataAboutUser.weekday = dayW;
+								dataAboutUser.userAction = "menuHome";
+								try {
+									menuHome(chatId);
+								} catch (error) {
+									menuHome(chatId, false);
+								}
+							}
+
+							break;
+						case "rules1":
+							rulesBot(chatId);
+							break;
+						case "rules2":
+							rulesBot(chatId, false);
+							break;
+						case "miniDetails":
+							miniDetails(chatId, 666);
+							break;
+						case "detailsrules":
+							detailsRules(chatId);
+							break;
+						case "chooseclass1":
+							ChoosingClass(chatId, 1);
+							break;
+						case "chooseclass2":
+							ChoosingClass(chatId, 2);
+							break;
+
+						// RASPISANIE
+
+						case "raspisanie":
+							Raspisanie(chatId);
+							break;
+						case "netclassa":
+							netClassaText(chatId);
+							break;
+						case "netclassa1":
+							netClassaText(chatId, false);
+							break;
+
+						// CALLS
+
+						case "calls":
+							Calls(chatId);
+							break;
+						case "todaycalls":
+							dataAboutUser.weekday = dayW;
+							Calls(chatId);
+							break;
+						case "nextweekdaycalls":
+							if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
+							else if (dataAboutUser.weekday < 6)
+								dataAboutUser.weekday += 1;
+							Calls(chatId);
+							break;
+						case "previousweekdaycalls":
+							if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
+							else if (dataAboutUser.weekday > 0)
+								dataAboutUser.weekday -= 1;
+							Calls(chatId);
+							break;
+						case "callsnotificationsmenu":
+							NotificationsMenuCalls(chatId);
+							break;
+						case "toggleСallOnLesson":
+							NotificationsMenuCalls(
+								chatId,
+								!dataAboutUser.callOnLesson,
+								dataAboutUser.callOnBreak,
+								dataAboutUser.callOnLessonIn5minutes,
+								dataAboutUser.callOnBreakIn5minutes,
+								dataAboutUser.callOnLessonIn10minutes,
+								dataAboutUser.callOnBreakIn10minutes
+							);
+							break;
+						case "toggleСallOnBreak":
+							NotificationsMenuCalls(
+								chatId,
+								dataAboutUser.callOnLesson,
+								!dataAboutUser.callOnBreak,
+								dataAboutUser.callOnLessonIn5minutes,
+								dataAboutUser.callOnBreakIn5minutes,
+								dataAboutUser.callOnLessonIn10minutes,
+								dataAboutUser.callOnBreakIn10minutes
+							);
+							break;
+						case "toggleСallOnLessonIn5minutes":
+							NotificationsMenuCalls(
+								chatId,
+								dataAboutUser.callOnLesson,
+								dataAboutUser.callOnBreak,
+								!dataAboutUser.callOnLessonIn5minutes,
+								dataAboutUser.callOnBreakIn5minutes,
+								dataAboutUser.callOnLessonIn10minutes,
+								dataAboutUser.callOnBreakIn10minutes
+							);
+
+							break;
+						case "toggleСallOnBreakIn5minutes":
+							NotificationsMenuCalls(
+								chatId,
+								dataAboutUser.callOnLesson,
+								dataAboutUser.callOnBreak,
+								dataAboutUser.callOnLessonIn5minutes,
+								!dataAboutUser.callOnBreakIn5minutes,
+								dataAboutUser.callOnLessonIn10minutes,
+								dataAboutUser.callOnBreakIn10minutes
+							);
+
+							break;
+						case "toggleСallOnLessonIn10minutes":
+							NotificationsMenuCalls(
+								chatId,
+								dataAboutUser.callOnLesson,
+								dataAboutUser.callOnBreak,
+								dataAboutUser.callOnLessonIn5minutes,
+								dataAboutUser.callOnBreakIn5minutes,
+								!dataAboutUser.callOnLessonIn10minutes,
+								dataAboutUser.callOnBreakIn10minutes
+							);
+
+							break;
+						case "toggleСallOnBreakIn10minutes":
+							NotificationsMenuCalls(
+								chatId,
+								dataAboutUser.callOnLesson,
+								dataAboutUser.callOnBreak,
+								dataAboutUser.callOnLessonIn5minutes,
+								dataAboutUser.callOnBreakIn5minutes,
+								dataAboutUser.callOnLessonIn10minutes,
+								!dataAboutUser.callOnBreakIn10minutes
+							);
+							break;
+						case "resetallcalls":
+							NotificationsMenuCalls(
+								chatId,
+								false,
+								false,
+								false,
+								false,
+								false,
+								false
+							);
+							break;
+
+						// FOODMENU
+
+						case "foodmenu":
+							break;
+						case "foodmenutoday":
+							foodMenu(chatId);
+							break;
+
+						// GAMES
+
+						case "games":
+							Games(chatId);
+							break;
+						// game1
+						case "game1":
+							game1(chatId);
+							break;
+						case "game1_1":
+							game1(chatId, false);
+							break;
+						case "hint":
+							try {
 								bot.editMessageText(
-									`<b><i>❌ Крестики-Нолики ⭕</i>\n\n${
-										res != dataAboutUser.game3PlayerSticker
-											? `${
-													res == "Ничья!"
-														? `🤷‍♂️ Ничья! 🤷`
-														: `🥈 Поражение! 😔`
-											  }`
-											: `🥇 Выигрыш! 🥳`
-									}\n\nРезультат:\n${boardString}\n\nСложность: ${
-										dataAboutUser.game3Difficulty == 0
-											? "Легко"
+									`*_❓ Угадай\\-ка ❓_\n\n${
+										rndNum <= 5
+											? `Число _меньше_ или равно 5\\! [📉](https://t.me/${BotName}/?start=minidetail4)😉`
 											: `${
-													dataAboutUser.game3Difficulty == 2
-														? "Средняя"
-														: `${
-																dataAboutUser.game3Difficulty ==
-																1
-																	? "Тяжело"
-																	: "Не выбрано"
-														  }`
+													rndNum >= 5
+														? `Число _больше_ или равно 5\\! [📈](https://t.me/${BotName}/?start=minidetail4)😉`
+														: ""
 											  }`
-									}\n<a href="https://t.me/${BotName}/?start=options">Статистика</a>\n\nЕще партейку? 🤔</b>`,
+									}*`,
 									{
-										parse_mode: "html",
+										parse_mode: "MarkdownV2",
 										chat_id: chatId,
-										message_id: dataAboutUser.messageId,
+										message_id: usersData.find(
+											(obj) => obj.chatId == chatId
+										).messageId,
 										disable_web_page_preview: true,
+										reply_markup: {
+											inline_keyboard: [
+												[
+													{
+														text: "⬅️Назад",
+														callback_data: "game1_1",
+													},
+													{
+														text: "Ответ⁉️",
+														callback_data: "game1res",
+													},
+												],
+											],
+										},
+									}
+								);
+							} catch (error) {
+								console.log(error);
+							}
+							break;
+						case "game1res":
+							try {
+								bot.editMessageText(
+									`*_❓ Угадай\\-ка ❓_\n\nНу так не интересно\\! 😒\nОтвет: ${rndNum}\\!\n\nЕще партейку\\? 🤔*`,
+									{
+										parse_mode: "MarkdownV2",
+										chat_id: chatId,
+										message_id: usersData.find(
+											(obj) => obj.chatId == chatId
+										).messageId,
 										reply_markup: {
 											inline_keyboard: [
 												[
@@ -3885,885 +4892,446 @@ async function StartAll() {
 													},
 													{
 														text: "Давай👌",
-														callback_data: `game3_2`,
+														callback_data: "game1",
 													},
 												],
 											],
 										},
 									}
 								);
-								// Статистика
-
-								if (res && res != dataAboutUser.game3PlayerSticker) {
-									if (res == "Ничья!")
-										dataAboutUser.game3DrawResults += 1;
-									else dataAboutUser.game3BadResults += 1;
-								} else dataAboutUser.game3NiceResults += 1;
+							} catch (error) {
+								console.log(error);
 							}
-						}, 500);
-					}
-				}
-
-				if (data.includes("deletereminder")) {
-					let remId = data.match(/^deletereminder(\d+)$/);
-					remId = parseInt(remId[1]);
-
-					try {
-						bot.deleteMessage(
-							chatId,
-							usersData.find((obj) => obj.chatId === chatId).messageId
-						);
-
-						let index = remindersData.findIndex(
-							(obj) => obj.reminderId == remId
-						);
-						remindersData.splice(index, 1); // удаление напоминания которое уже объявилось
-					} catch (error) {
-						console.log(error);
-					}
-				}
-
-				if (data.includes("updatetimeforreminder")) {
-					let remId = data.match(/^updatetimeforreminder(\d+)$/);
-					remId = parseInt(remId[1]);
-					let index = remindersData.findIndex(
-						(obj) => obj.reminderId == remId
-					);
-
-					bot.editMessageText(
-						`<b><i>🔔 Перенос напоминания 🔄️</i>\n\nНапоминание:</b>\n"${remindersData[index].text}"\n\n<b>На какое время перенести? 😉</b>`,
-						{
-							parse_mode: "html",
-							chat_id: chatId,
-							message_id: usersData.find((obj) => obj.chatId == chatId)
-								.messageId,
-							reply_markup: {
-								inline_keyboard: [
-									[
-										{
-											text: "На завтра",
-											callback_data: `reschedulereminder${remId}on${0}`,
-										},
-									],
-									[
-										{
-											text: "1м",
-											callback_data: `reschedulereminder${remId}on${1}`,
-										},
-										{
-											text: "3м",
-											callback_data: `reschedulereminder${remId}on${3}`,
-										},
-										{
-											text: "5м",
-											callback_data: `reschedulereminder${remId}on${5}`,
-										},
-										{
-											text: "10м",
-											callback_data: `reschedulereminder${remId}on${10}`,
-										},
-									],
-									[
-										{
-											text: "15м",
-											callback_data: `reschedulereminder${remId}on${15}`,
-										},
-										{
-											text: "30м",
-											callback_data: `reschedulereminder${remId}on${30}`,
-										},
-										{
-											text: "1ч",
-											callback_data: `reschedulereminder${remId}on${12}`,
-										},
-										{
-											text: "2ч",
-											callback_data: `reschedulereminder${remId}on${22}`,
-										},
-									],
-									[
-										{
-											text: "Удалить ❌",
-											callback_data: `deletereminder${remId}`,
-										},
-									],
-								],
-							},
-						}
-					);
-				}
-
-				if (data.includes("reschedulereminder")) {
-					let remId = data.match(/^reschedulereminder(\d+)on(\d+)$/);
-					let countTime = parseInt(remId[2]);
-					remId = parseInt(remId[1]);
-
-					let index = remindersData.findIndex(
-						(obj) => obj.reminderId == remId
-					);
-
-					let [hours, minutes] = remindersData[index].time
-						.split(":")
-						.map(Number);
-
-					switch (countTime) {
-						case 0:
 							break;
-						case 1:
-							minutes += 1;
-							if (minutes >= 60) {
-								hours += 1;
-								minutes -= 60;
+
+						// game2
+						case "game2":
+							game2(chatId);
+							break;
+						case "stoneGame2":
+							game2_2(chatId, 1);
+							break;
+						case "scissorsGame2":
+							game2_2(chatId, 2);
+							break;
+						case "paperGame2":
+							game2_2(chatId, 3);
+							break;
+						// game3
+						case "game3":
+							game3(chatId);
+							break;
+						case "game3_2":
+							game3_2(chatId);
+							break;
+						case "XGame3":
+							dataAboutUser.game3PlayerSticker = "❌";
+							game3(chatId);
+							break;
+						case "OGame3":
+							dataAboutUser.game3PlayerSticker = "⭕";
+							game3(chatId);
+							break;
+						case "Dificulty0Game3":
+							dataAboutUser.game3Difficulty = 0;
+							game3(chatId);
+							break;
+						case "Dificulty1Game3":
+							dataAboutUser.game3Difficulty = 1;
+							game3(chatId);
+							break;
+						case "Dificulty2Game3":
+							dataAboutUser.game3Difficulty = 2;
+							game3(chatId);
+							break;
+
+						// NEWS
+
+						case "news":
+							News(chatId, 1, "Новости 📖");
+							break;
+						case "botnews":
+							News(chatId, 2, "О боте 🤖");
+							break;
+						case "schoolnews":
+							News(chatId, 3, "О школе 🏫");
+							break;
+
+						// OPTIONS
+
+						case "options":
+							if (dataAboutUser.userAction == "Calls") Calls(chatId);
+							if (dataAboutUser.userAction == "RaspisanieText")
+								RaspisanieText(chatId);
+
+							if (dataAboutUser.userAction == "inBlackList") {
+							} else {
+								dataAboutUser.userAction = "menuHome";
+								Options(chatId);
 							}
-							if (hours >= 24) hours -= 24;
-							break;
-						case 3:
-							minutes += 3;
-							if (minutes >= 60) {
-								hours += 1;
-								minutes -= 60;
-							}
-							if (hours >= 24) hours -= 24;
-							break;
-						case 5:
-							minutes += 5;
-							if (minutes >= 60) {
-								hours += 1;
-								minutes -= 60;
-							}
-							if (hours >= 24) hours -= 24;
-							break;
-						case 10:
-							minutes += 10;
-							if (minutes >= 60) {
-								hours += 1;
-								minutes -= 60;
-							}
-							if (hours >= 24) hours -= 24;
-							break;
-						case 15:
-							minutes += 15;
-							if (minutes >= 60) {
-								hours += 1;
-								minutes -= 60;
-							}
-							if (hours >= 24) hours -= 24;
-							break;
-						case 30:
-							minutes += 30;
-							if (minutes >= 60) {
-								hours += 1;
-								minutes -= 60;
-							}
-							if (hours >= 24) hours -= 24;
-							break;
-						case 12:
-							hours += 1;
-							if (hours >= 24) hours -= 24;
 
 							break;
-						case 22:
-							hours += 2;
-							if (hours >= 24) hours -= 24;
+						case "optionsother":
+							Options_2(chatId);
 							break;
-						default:
-							console.log(0);
+						case "resetfirstname":
+							dataAboutUser.login = dataAboutUser.telegramFirstName;
+							editFistName(chatId, dataAboutUser.telegramFirstName);
 							break;
-					}
-
-					let newTime = `${String(hours).padStart(2, "0")}:${String(
-						minutes
-					).padStart(2, "0")}`;
-					remindersData[index].time = newTime;
-
-					bot.editMessageText(
-						`<i><b>🔄️ Перенёс напоминание 😉🔔\n\nНовое:</b>\n"${
-							remindersData[index].text
-						}" - <b>${
-							hours == new Date().getHours() &&
-							minutes == new Date().getMinutes()
-								? "завтра в "
-								: ""
-						}${remindersData[index].time}</b></i>`,
-						{
-							parse_mode: "html",
-							chat_id: chatId,
-							message_id: usersData.find((obj) => obj.chatId == chatId)
-								.messageId,
-							reply_markup: {
-								inline_keyboard: [
-									[
-										{
-											text: "Спасибо👍",
-											callback_data: `deleteexcess`,
-										},
-									],
-								],
-							},
-						}
-					);
-				}
-
-				//? КЛАССЫ/РАСПИСАНИЕ
-
-				switch (data) {
-					case "10а":
-						dataAboutUser.className = "10A";
-						menuHome(chatId);
-						break;
-					case "10b":
-						dataAboutUser.className = "10Б";
-						menuHome(chatId);
-						break;
-					case "10g":
-						dataAboutUser.className = "10Г";
-						menuHome(chatId);
-						break;
-					case "11d":
-						dataAboutUser.className = "11Д";
-						menuHome(chatId);
-						break;
-					case "11g":
-						dataAboutUser.className = "11Г";
-						menuHome(chatId);
-						break;
-					case "11a":
-						dataAboutUser.className = "11А";
-						menuHome(chatId);
-						break;
-					case "11v":
-						dataAboutUser.className = "11В";
-						menuHome(chatId);
-						break;
-
-					//? ДЕНЬ НЕДЕЛИ
-
-					case "mon":
-						dataAboutUser.weekday = 1;
-						RaspisanieText(chatId);
-						break;
-					case "tue":
-						dataAboutUser.weekday = 2;
-						RaspisanieText(chatId);
-						break;
-					case "wen":
-						dataAboutUser.weekday = 3;
-						RaspisanieText(chatId);
-						break;
-					case "thu":
-						dataAboutUser.weekday = 4;
-						RaspisanieText(chatId);
-						break;
-					case "fri":
-						dataAboutUser.weekday = 5;
-						RaspisanieText(chatId);
-						break;
-					case "today":
-						RaspisanieText(chatId, dayW);
-						break;
-					case "tomorrow":
-						RaspisanieText(chatId, dayW + 1);
-						break;
-					case "nextweekday":
-						if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
-						else if (dataAboutUser.weekday < 6)
-							dataAboutUser.weekday += 1;
-						RaspisanieText(chatId);
-						break;
-					case "previousweekday":
-						if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
-						else if (dataAboutUser.weekday > 0)
-							dataAboutUser.weekday -= 1;
-						RaspisanieText(chatId);
-						break;
-
-					//? ДЕЙСТВИЯ КНОПОК
-
-					// НАЧАЛЬНЫЕ
-					case "start":
-						deleteAllMessages(chatId);
-						start(chatId, dataAboutUser.login);
-						break;
-					case "exit":
-						if (dataAboutUser) {
-							dataAboutUser.weekday = dayW;
-							dataAboutUser.userAction = 0;
-						}
-						try {
-							menuHome(chatId);
-						} catch (error) {
-							menuHome(chatId, false);
-						}
-						break;
-					case "miniDetails":
-						miniDetails(chatId, 666);
-						break;
-					case "detailsrules":
-						detailsRules(chatId);
-						break;
-					case "chooseclass1":
-						ChoosingClass(chatId, 1);
-						break;
-					case "chooseclass2":
-						ChoosingClass(chatId, 2);
-						break;
-
-					// RASPISANIE
-
-					case "raspisanie":
-						Raspisanie(chatId);
-						break;
-					case "netclassa":
-						netClassaText(chatId);
-						break;
-					case "netclassa2":
-						netClassaText(chatId, false);
-						break;
-
-					// CALLS
-
-					case "calls":
-						Calls(chatId);
-						break;
-					case "todaycalls":
-						dataAboutUser.weekday = dayW;
-						Calls(chatId);
-						break;
-					case "nextweekdaycalls":
-						if (dataAboutUser.weekday == 6) dataAboutUser.weekday = 0;
-						else if (dataAboutUser.weekday < 6)
-							dataAboutUser.weekday += 1;
-						Calls(chatId);
-						break;
-					case "previousweekdaycalls":
-						if (dataAboutUser.weekday == 0) dataAboutUser.weekday = 6;
-						else if (dataAboutUser.weekday > 0)
-							dataAboutUser.weekday -= 1;
-						Calls(chatId);
-						break;
-					case "callsnotificationsmenu":
-						NotificationsMenuCalls(chatId);
-						break;
-					case "toggleСallOnLesson":
-						NotificationsMenuCalls(
-							chatId,
-							!dataAboutUser.callOnLesson,
-							dataAboutUser.callOnBreak,
-							dataAboutUser.callOnLessonIn5minutes,
-							dataAboutUser.callOnBreakIn5minutes,
-							dataAboutUser.callOnLessonIn10minutes,
-							dataAboutUser.callOnBreakIn10minutes
-						);
-						break;
-					case "toggleСallOnBreak":
-						NotificationsMenuCalls(
-							chatId,
-							dataAboutUser.callOnLesson,
-							!dataAboutUser.callOnBreak,
-							dataAboutUser.callOnLessonIn5minutes,
-							dataAboutUser.callOnBreakIn5minutes,
-							dataAboutUser.callOnLessonIn10minutes,
-							dataAboutUser.callOnBreakIn10minutes
-						);
-						break;
-					case "toggleСallOnLessonIn5minutes":
-						NotificationsMenuCalls(
-							chatId,
-							dataAboutUser.callOnLesson,
-							dataAboutUser.callOnBreak,
-							!dataAboutUser.callOnLessonIn5minutes,
-							dataAboutUser.callOnBreakIn5minutes,
-							dataAboutUser.callOnLessonIn10minutes,
-							dataAboutUser.callOnBreakIn10minutes
-						);
-
-						break;
-					case "toggleСallOnBreakIn5minutes":
-						NotificationsMenuCalls(
-							chatId,
-							dataAboutUser.callOnLesson,
-							dataAboutUser.callOnBreak,
-							dataAboutUser.callOnLessonIn5minutes,
-							!dataAboutUser.callOnBreakIn5minutes,
-							dataAboutUser.callOnLessonIn10minutes,
-							dataAboutUser.callOnBreakIn10minutes
-						);
-
-						break;
-					case "toggleСallOnLessonIn10minutes":
-						NotificationsMenuCalls(
-							chatId,
-							dataAboutUser.callOnLesson,
-							dataAboutUser.callOnBreak,
-							dataAboutUser.callOnLessonIn5minutes,
-							dataAboutUser.callOnBreakIn5minutes,
-							!dataAboutUser.callOnLessonIn10minutes,
-							dataAboutUser.callOnBreakIn10minutes
-						);
-
-						break;
-					case "toggleСallOnBreakIn10minutes":
-						NotificationsMenuCalls(
-							chatId,
-							dataAboutUser.callOnLesson,
-							dataAboutUser.callOnBreak,
-							dataAboutUser.callOnLessonIn5minutes,
-							dataAboutUser.callOnBreakIn5minutes,
-							dataAboutUser.callOnLessonIn10minutes,
-							!dataAboutUser.callOnBreakIn10minutes
-						);
-						break;
-					case "resetallcalls":
-						NotificationsMenuCalls(
-							chatId,
-							false,
-							false,
-							false,
-							false,
-							false,
-							false
-						);
-						break;
-
-					// GAMES
-
-					case "games":
-						Games(chatId);
-						break;
-					// game1
-					case "game1":
-						game1(chatId);
-						break;
-					case "game1_1":
-						game1(chatId, false);
-						break;
-					case "hint":
-						try {
-							bot.editMessageText(
-								`*_❓ Угадайка ❓_\n\n${
-									rndNum <= 5
-										? `Число _меньше_ или равно 5\\! [📉](https://t.me/${BotName}/?start=minidetail4)😉`
-										: `${
-												rndNum >= 5
-													? `Число _больше_ или равно 5\\! [📈](https://t.me/${BotName}/?start=minidetail4)😉`
-													: ""
-										  }`
-								}*`,
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-									disable_web_page_preview: true,
-									reply_markup: {
-										inline_keyboard: [
-											[
-												{
-													text: "⬅️Назад",
-													callback_data: "game1_1",
-												},
-												{
-													text: "Ответ⁉️",
-													callback_data: "game1res",
-												},
-											],
-										],
-									},
-								}
-							);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-					case "game1res":
-						try {
-							bot.editMessageText(
-								`*_❓ Угадайка ❓_\n\nНу так не интересно\\! 😒\nОтвет: ${rndNum}\\!\n\nЕще партейку\\? 🤔*`,
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-									reply_markup: {
-										inline_keyboard: [
-											[
-												{
-													text: "⬅️Назад",
-													callback_data: "games",
-												},
-												{
-													text: "Давай👌",
-													callback_data: "game1",
-												},
-											],
-										],
-									},
-								}
-							);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-
-					// game2
-					case "game2":
-						game2(chatId);
-						break;
-					case "stoneGame2":
-						game2_2(chatId, 1);
-						break;
-					case "scissorsGame2":
-						game2_2(chatId, 2);
-						break;
-					case "paperGame2":
-						game2_2(chatId, 3);
-						break;
-					// game3
-					case "game3":
-						game3(chatId);
-						break;
-					case "game3_2":
-						game3_2(chatId);
-						break;
-					case "XGame3":
-						dataAboutUser.game3PlayerSticker = "❌";
-						game3(chatId);
-						break;
-					case "OGame3":
-						dataAboutUser.game3PlayerSticker = "⭕";
-						game3(chatId);
-						break;
-					case "Dificulty0Game3":
-						dataAboutUser.game3Difficulty = 0;
-						game3(chatId);
-						break;
-					case "Dificulty1Game3":
-						dataAboutUser.game3Difficulty = 1;
-						game3(chatId);
-						break;
-					case "Dificulty2Game3":
-						dataAboutUser.game3Difficulty = 2;
-						game3(chatId);
-						break;
-
-					// NEWS
-
-					case "news":
-						News(chatId, 1, "Новости 📖");
-						break;
-					case "botnews":
-						News(chatId, 2, "О боте 🤖");
-						break;
-					case "schoolnews":
-						News(chatId, 3, "О школе 🏫");
-						break;
-
-					// OPTIONS
-
-					case "options":
-						dataAboutUser.userAction = 0;
-						Options(chatId);
-						break;
-					case "optionsother":
-						Options_2(chatId);
-						break;
-					case "resetfirstname":
-						dataAboutUser.login = dataAboutUser.telegramFirstName;
-						editFistName(chatId, dataAboutUser.telegramFirstName);
-						break;
-					case "deleteaccount":
-						try {
-							bot.editMessageText(
-								"*_🛠️ Удаление аккаунта ❌\n\n❗ВНИМАНИЕ❗_\n\nДействительно _УДАЛИТЬ_ аккаунт\\?*",
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-									reply_markup: {
-										inline_keyboard: [
-											[
-												{
-													text: "⬅️Назад",
-													callback_data: "optionsother",
-												},
-												{
-													text: "Удалить ✅",
-													callback_data: "deleteaccount2",
-												},
-											],
-										],
-									},
-								}
-							);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-					case "deleteaccount2":
-						try {
-							dataAboutUser.className = "Не определен";
-							// calls
-							dataAboutUser.callOnLesson = false;
-							dataAboutUser.callOnLessonIn5minutes = false;
-							dataAboutUser.callOnLessonIn10minutes = false;
-							dataAboutUser.callOnBreak = false;
-							dataAboutUser.callOnBreakIn5minutes = false;
-							dataAboutUser.callOnBreakIn10minutes = false;
-							// game1
-							dataAboutUser.game1NiceResults = 0;
-							dataAboutUser.game1BadResults = 0;
-							// game2
-							dataAboutUser.game2NiceResults = 0;
-							dataAboutUser.game2BadResults = 0;
-							dataAboutUser.game2DrawResults = 0;
-							// game3
-							dataAboutUser.game3NiceResults = 0;
-							dataAboutUser.game3BadResults = 0;
-							dataAboutUser.game3DrawResults = 0;
-							dataAboutUser.game3Difficulty = 3;
-							dataAboutUser.game3PlayerSticker = "";
-							// mini details
-							dataAboutUser.miniDetail666 = 0;
-							dataAboutUser.miniDetail0 = 0;
-							dataAboutUser.miniDetail1 = 0;
-							dataAboutUser.miniDetail2 = 0;
-							dataAboutUser.miniDetail3 = 0;
-							dataAboutUser.miniDetail4 = 0;
-							dataAboutUser.miniDetail5 = 0;
-							dataAboutUser.miniDetail6 = 0;
-							dataAboutUser.miniDetail7 = 0;
-							dataAboutUser.miniDetail8 = 0;
-							dataAboutUser.miniDetail9 = 0;
-							bot.editMessageText(
-								"*Твой профиль успешно удален\\! ✅\n\nПожалуйста, опиши причину \\- @qu1z3x\n\nЕсли соскучишься \\-  /restart2, /start, 😉*",
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-								}
-							);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-
-					case "chooseclass0":
-						ChoosingClass(chatId, 0);
-						break;
-
-					// ADMINMENU
-
-					case "adminMenu":
-						adminMenu(chatId);
-						break;
-					case "adminMenuSendMessage":
-						adminMenuSendMessage(chatId);
-						break;
-					case "adminMenuSendMessage2":
-						adminMenuSendMessage_2(chatId);
-						break;
-					case "updateraspisaniesheets":
-						buttonUpdateActive = false;
-						updateSheetsData();
-						adminMenuEdit(chatId);
-						break;
-					case "adminMenuEdit":
-						adminMenuEdit(chatId);
-						break;
-					case "allnewsEDIT":
-						AllNewsTextEdit(chatId);
-						break;
-					case "allnewsadd":
-						bot.editMessageText(
-							"*_✏️ Редактирование: Новости 📖_\n\nВы успешно обновили Новости\\! 📖✅*",
-							{
-								parse_mode: "MarkdownV2",
-								chat_id: chatId,
-								message_id: usersData.find(
-									(obj) => obj.chatId === chatId
-								).messageId,
-							}
-						);
-						newsText[1] = newsText[0];
-						setTimeout(() => {
-							adminMenu(chatId);
-						}, 1500);
-						break;
-					case "allnewstextRESETmenu":
-						AllNewsTextReset(chatId);
-						break;
-					case "allnewstextRESET":
-						AllNewsTextEdit(chatId);
-						break;
-					case "allnewstextRESETend":
-						try {
-							newsText[1] = "Новостей нет 😔";
-							bot.editMessageText(
-								`*_✏️ Редактирование: Новости 📖_\n\nРаздел _"Новости📖"_ \\- сброшен\\!✅*`,
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-								}
-							);
-							setTimeout(() => {
-								adminMenu(chatId);
-							}, 1500);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-					case "restart1":
-						ChoosingClass(chatId, 2);
-						break;
-					case "agreerules":
-						try {
-							bot.editMessageText(`*Спасибо тебе ❤️ \\- @qu1z3x*`, {
-								parse_mode: "MarkdownV2",
-								chat_id: chatId,
-								message_id: usersData.find(
-									(obj) => obj.chatId === chatId
-								).messageId,
-							});
-							setTimeout(() => {
-								ChoosingClass(chatId, 1);
-							}, 2000);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-					case "usersdatalist":
-						RegistryUsersData(chatId, 1);
-						break;
-
-					case "p0":
-						numberArr = 0;
-						adminMenuSendMessageOptions(chatId);
-						break;
-					case "p1":
-						numberArr = 1;
-						adminMenuSendMessageOptions(chatId);
-						break;
-					case "p2":
-						numberArr = 2;
-						adminMenuSendMessageOptions(chatId);
-						break;
-					case "p3":
-						numberArr = 3;
-						adminMenuSendMessageOptions(chatId);
-						break;
-
-					// REMINDERS
-
-					case "reminders":
-						if (dataAboutUser) dataAboutUser.userAction = 0;
-						Reminders(chatId);
-						break;
-					case "reminderslist":
-						RemindersList(chatId);
-						break;
-					case "remindersadd":
-						RemindersAdd(chatId);
-						break;
-					case "deleteallreminder":
-						try {
-							bot.editMessageText(
-								`*_🔔 Удаление напоминаний ❌\n\n❗ВНИМАНИЕ❗_*\n\nТвой список из *_${
-									remindersData.filter((obj) => obj.chatId === chatId)
-										.length
-								} ${
-									remindersData.filter((obj) => obj.chatId === chatId)
-										.length == 1
-										? "заметки"
-										: "заметок"
-								}_* будет *удален*\\!\n\nДействительно *_УДАЛИТЬ_* список? 🧐❗`,
-								{
-									parse_mode: "MarkdownV2",
-									chat_id: chatId,
-									message_id: usersData.find(
-										(obj) => obj.chatId === chatId
-									).messageId,
-									reply_markup: {
-										inline_keyboard: [
-											[
-												{
-													text: "⬅️Назад",
-													callback_data: "reminderslist",
-												},
-												{
-													text: "Удалить ✅",
-													callback_data: "deleteallreminder2",
-												},
-											],
-										],
-									},
-								}
-							);
-						} catch (error) {
-							console.log(error);
-						}
-						break;
-					case "deleteallreminder2":
-						try {
-							remindersData = remindersData.filter(
-								(obj) => obj.chatId !== chatId
-							);
-							sendDataAboutAction(
-								query.from.first_name,
-								query.from.username,
-								chatId,
-								`❌ Удалил весь список напоминаний`
-							);
-							if (
-								remindersData.filter((obj) => obj.chatId === chatId)
-									.length == 0
-							) {
+						case "deleteaccount":
+							try {
 								bot.editMessageText(
-									"*_🔔 Удаление напоминаний ❌_\n\nВы успешно удалили все напоминания\\!✅*",
+									"*_🛠️ Удаление аккаунта ❌\n\n❗ВНИМАНИЕ❗_\n\nДействительно _УДАЛИТЬ_ аккаунт\\?*",
 									{
 										parse_mode: "MarkdownV2",
 										chat_id: chatId,
 										message_id: usersData.find(
-											(obj) => obj.chatId === chatId
+											(obj) => obj.chatId == chatId
+										).messageId,
+										reply_markup: {
+											inline_keyboard: [
+												[
+													{
+														text: "⬅️Назад",
+														callback_data: "optionsother",
+													},
+													{
+														text: "Удалить ✅",
+														callback_data: "deleteaccount2",
+													},
+												],
+											],
+										},
+									}
+								);
+							} catch (error) {
+								console.log(error);
+							}
+							break;
+						case "deleteaccount2":
+							try {
+								dataAboutUser.className = "Не определен";
+								// calls
+								dataAboutUser.callOnLesson = false;
+								dataAboutUser.callOnLessonIn5minutes = false;
+								dataAboutUser.callOnLessonIn10minutes = false;
+								dataAboutUser.callOnBreak = false;
+								dataAboutUser.callOnBreakIn5minutes = false;
+								dataAboutUser.callOnBreakIn10minutes = false;
+								// game1
+								dataAboutUser.game1NiceResults = 0;
+								dataAboutUser.game1BadResults = 0;
+								// game2
+								dataAboutUser.game2NiceResults = 0;
+								dataAboutUser.game2BadResults = 0;
+								dataAboutUser.game2DrawResults = 0;
+								// game3
+								dataAboutUser.game3NiceResults = 0;
+								dataAboutUser.game3BadResults = 0;
+								dataAboutUser.game3DrawResults = 0;
+								dataAboutUser.game3Difficulty = 3;
+								dataAboutUser.game3PlayerSticker = "";
+								// mini details
+								dataAboutUser.miniDetail666 = 0;
+								dataAboutUser.miniDetail0 = 0;
+								dataAboutUser.miniDetail1 = 0;
+								dataAboutUser.miniDetail2 = 0;
+								dataAboutUser.miniDetail3 = 0;
+								dataAboutUser.miniDetail4 = 0;
+								dataAboutUser.miniDetail5 = 0;
+								dataAboutUser.miniDetail6 = 0;
+								dataAboutUser.miniDetail7 = 0;
+								dataAboutUser.miniDetail8 = 0;
+								dataAboutUser.miniDetail9 = 0;
+								bot.editMessageText(
+									"Твой профиль <b>успешно</b> удален! ✅\n\nПожалуйста, опиши причину - <b>@qu1z3x</b>\n\nЕсли соскучишься - <b>/restart 😉</b>",
+									{
+										parse_mode: "html",
+										chat_id: chatId,
+										message_id: usersData.find(
+											(obj) => obj.chatId == chatId
+										).messageId,
+									}
+								);
+							} catch (error) {
+								console.log(error);
+							}
+							break;
+
+						case "chooseclass0":
+							ChoosingClass(chatId, 0);
+							break;
+
+						// ADMINMENU
+
+						case "adminMenu":
+							adminMenu(chatId);
+							break;
+						case "adminMenuSendMessage":
+							adminMenuSendMessage(chatId);
+							break;
+						case "usersblacklist":
+							usersBlacklist(chatId);
+							break;
+						case "addinblacklist":
+							addInBlacklist(chatId);
+							break;
+						case "addinblacklistend":
+							addInBlacklistEnd(chatId);
+							break;
+						case "adminMenuSendMessage":
+							adminMenuSendMessage(chatId);
+							break;
+						case "adminMenuSendMessage2":
+							adminMenuSendMessage_2(chatId);
+							break;
+						case "updateraspisaniesheets":
+							buttonUpdateActive = false;
+							updateSheetsData();
+							adminMenuEdit(chatId);
+							break;
+						case "adminMenuEdit":
+							adminMenuEdit(chatId);
+							break;
+						case "allnewsEDIT":
+							allNewsTextEdit(chatId);
+							break;
+						case "allnewsadd":
+							bot.editMessageText(
+								"<b><i>✏️ Редактирование: Новости 📖</i></b>\n\nВы <b>успешно</b> обновили Новости! ✅📖",
+								{
+									parse_mode: "html",
+									chat_id: chatId,
+									message_id: usersData.find(
+										(obj) => obj.chatId == chatId
+									).messageId,
+								}
+							);
+							newsText[1] = newsText[0];
+							setTimeout(() => {
+								adminMenu(chatId);
+							}, 1500);
+							break;
+						case "allnewstextRESETmenu":
+							AllNewsTextReset(chatId);
+							break;
+						case "allnewstextRESET":
+							allNewsTextEdit(chatId);
+							break;
+						case "allnewstextRESETend":
+							try {
+								newsText[1] = "Новостей нет 😔";
+								bot.editMessageText(
+									`*_✏️ Редактирование: Новости 📖_\n\nРаздел _"Новости📖"_ \\- сброшен\\!✅*`,
+									{
+										parse_mode: "MarkdownV2",
+										chat_id: chatId,
+										message_id: usersData.find(
+											(obj) => obj.chatId == chatId
 										).messageId,
 									}
 								);
 								setTimeout(() => {
-									RemindersList(chatId);
+									adminMenu(chatId);
 								}, 1500);
+							} catch (error) {
+								console.log(error);
 							}
-						} catch (error) {
-							console.log(error);
+							break;
+						case "restart1":
+							ChoosingClass(chatId, 2);
+							break;
+						case "agreerules":
+							try {
+								bot.editMessageText(`*Спасибо тебе ❤️ \\- @qu1z3x*`, {
+									parse_mode: "MarkdownV2",
+									chat_id: chatId,
+									message_id: usersData.find(
+										(obj) => obj.chatId == chatId
+									).messageId,
+								});
+								setTimeout(() => {
+									ChoosingClass(chatId, 1);
+								}, 2000);
+							} catch (error) {
+								console.log(error);
+							}
+							break;
+						case "usersdatalist":
+							registryUsersData(chatId, 1);
+							break;
+						case "p0":
+							numberArr = 0;
+							adminMenuSendMessageOptions(chatId);
+							break;
+						case "p1":
+							numberArr = 1;
+							adminMenuSendMessageOptions(chatId);
+							break;
+						case "p2":
+							numberArr = 2;
+							adminMenuSendMessageOptions(chatId);
+							break;
+						case "p3":
+							numberArr = 3;
+							adminMenuSendMessageOptions(chatId);
+							break;
+
+						// REMINDERS
+
+						case "reminders":
+							if (dataAboutUser) dataAboutUser.userAction = "menuHome";
+							Reminders(chatId);
+							break;
+						case "reminderslist":
+							RemindersList(chatId);
+							break;
+						case "remindersadd":
+							remindersAdd(chatId);
+							break;
+						case "deleteallreminder":
+							try {
+								bot.editMessageText(
+									`*_🔔 Удаление напоминаний ❌\n\n❗ВНИМАНИЕ❗_*\n\nТвой список из *_${
+										remindersData.filter(
+											(obj) => obj.chatId == chatId
+										).length
+									} ${
+										remindersData.filter(
+											(obj) => obj.chatId == chatId
+										).length == 1
+											? "заметки"
+											: "заметок"
+									}_* будет *удален*\\!\n\nДействительно *_УДАЛИТЬ_* список?❗`,
+									{
+										parse_mode: "MarkdownV2",
+										chat_id: chatId,
+										message_id: usersData.find(
+											(obj) => obj.chatId == chatId
+										).messageId,
+										reply_markup: {
+											inline_keyboard: [
+												[
+													{
+														text: "⬅️Назад",
+														callback_data: "reminderslist",
+													},
+													{
+														text: "Удалить ✅",
+														callback_data: "deleteallreminder2",
+													},
+												],
+											],
+										},
+									}
+								);
+							} catch (error) {
+								console.log(error);
+							}
+							break;
+						case "deleteallreminder2":
+							try {
+								remindersData = remindersData.filter(
+									(obj) => obj.chatId !== chatId
+								);
+								sendDataAboutAction(
+									query.from.first_name,
+									query.from.username,
+									chatId,
+									`❌ Удалил весь список напоминаний`
+								);
+								if (
+									remindersData.filter((obj) => obj.chatId == chatId)
+										.length == 0
+								) {
+									bot.editMessageText(
+										"<b><i>🔔 Удаление напоминаний ❌</i>\n\n</b>Все напоминания <b>успешно</b> удалены! 😉✅",
+										{
+											parse_mode: "html",
+											chat_id: chatId,
+											message_id: usersData.find(
+												(obj) => obj.chatId == chatId
+											).messageId,
+										}
+									);
+									setTimeout(() => {
+										RemindersList(chatId);
+									}, 1500);
+								}
+							} catch (error) {
+								console.log(error);
+							}
+							break;
+						case "deleteexcess":
+							try {
+								bot.deleteMessage(
+									chatId,
+									usersData.find((obj) => obj.chatId == chatId)
+										.messageId
+								);
+							} catch (error) {}
+							break;
+						default:
+							break;
+					}
+					dataAboutUser.countOfActions += 1;
+					if (data != "deleteexcess") {
+						dataAboutUser.lastActivity = Date.now();
+						dataAboutUser.reminderForReturn1 = false;
+						dataAboutUser.reminderForReturn2 = false;
+						dataAboutUser.reminderForReturn3 = false;
+						dataAboutUser.reminderForReturn4 = false;
+					}
+
+					//* для удобства в терминале
+
+					if (chatId != qu1z3xId && data != "-") {
+						sendDataAboutButton(
+							query.from.first_name,
+							query.from.username,
+							chatId,
+							data
+						);
+					}
+				} else if (dataAboutUser && dataAboutUser.inBlackList) {
+					dataAboutUser.userAction = "inBlackList";
+
+					bot.editMessageText(
+						`<b>Похоже у тебя больше нет возможности общаться со мной! ☹️\n\nЧтобы узнать подробнее причину блокировки, обратись в поддержку! 🗯️😉</b>`,
+						{
+							chat_id: chatId,
+							message_id: usersData.find((obj) => obj.chatId == chatId)
+								.messageId,
+							parse_mode: "html",
+							disable_web_page_preview: true,
+							reply_markup: {
+								inline_keyboard: [
+									[
+										{
+											text: "Написать нам ✍️",
+											url: "https://t.me/qu1z3x",
+										},
+									],
+									[
+										{ text: "Обновить 🔄️", callback_data: "exit" },
+										{
+											text: "Правила 📃",
+											callback_data: `rules2`,
+										},
+									],
+								],
+							},
 						}
-						break;
-					case "deleteexcess":
-						try {
-							bot.deleteMessage(
-								chatId,
-								usersData.find((obj) => obj.chatId === chatId).messageId
-							);
-						} catch (error) {}
-						break;
-					default:
-						break;
-				}
-
-				//* для удобства в терминале
-
-				if (chatId != qu1z3xId && data != "-") {
-					sendDataAboutButton(
-						query.from.first_name,
-						query.from.username,
-						chatId,
-						data
+					);
+				} else if (!dataAboutUser) {
+					bot.editMessageText(
+						`<b>Мы разве знакомы? 🤨\n</b>Мои системы тебя не помнят...<b> \n\n<i>Обычно такое бывает, когда происходят масштабные обновления! ☹️</i>\n\n</b>Раз уж так произошло, давай начнем все с <b>чистого листа!</b> Жми - <b><a href="https://t.me/${BotName}/?start=afterabsencedata">/start</a></b> 😉`,
+						{
+							chat_id: chatId,
+							message_id: query.message.message_id,
+							parse_mode: "html",
+							disable_web_page_preview: true,
+						}
 					);
 				}
 			} catch (error) {
@@ -4772,9 +5340,8 @@ async function StartAll() {
 			}
 		});
 
-		// Запись данных в базу данных
-
 		cron.schedule(`*/30 * * * *`, function () {
+			// Запись данных в базу данных
 			console.log("DB updated");
 
 			if (TOKEN == TOKENs[0]) {
@@ -4785,6 +5352,9 @@ async function StartAll() {
 					remindersData: remindersData,
 				});
 			}
+
+			// Проверка активности пользователей
+			checkUsersActivity();
 		});
 	} catch (error) {
 		console.log(error);

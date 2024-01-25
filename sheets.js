@@ -1,6 +1,9 @@
 import { google } from "googleapis";
 
 let class10a, class10b, class10g, class11a, class11v, class11g, class11d;
+let foodmenu27c1 = [],
+	foodmenu27c2 = [];
+
 const sheetId = "18xSi-VnqkjKbY9se4Q4bYeVPZAVqfHZd97nkVtYTiwY";
 
 function NodeGoogleSheets(file, sheetId, keyMass, fun) {
@@ -128,3 +131,4 @@ updateSheetsData();
 
 export { updateSheetsData };
 export { class10a, class10b, class10g, class11a, class11v, class11g, class11d };
+export { foodmenu27c1, foodmenu27c2 };
