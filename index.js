@@ -2112,7 +2112,7 @@ async function Options(chatId) {
 					: "включить"
 			}</a>\nНапоминания: <b>${
 				countRem > 0 ? "✅🔔" : "❌"
-			}</b>\nСоздано: <b>${countRem}</b> - <a href="https://t.me/${BotName}/?start=remindersList">${
+			}</b>\nСоздано: <b>${countRem}</b> - ${
 				countRem > 0
 					? `<a href="https://t.me/${BotName}/?start=remindersList">список</a>`
 					: `<a href="https://t.me/${BotName}/?start=remindersAdd">создать</a>`
@@ -2236,6 +2236,7 @@ async function Options(chatId) {
 			}
 		);
 	} catch (error) {
+		console.error();
 		sendDataAboutError(chatId, `${String(error)}`);
 	}
 }
@@ -4963,13 +4964,10 @@ async function StartAll() {
 							if (dataAboutUser.userAction == "Calls") Calls(chatId);
 							if (dataAboutUser.userAction == "RaspisanieText")
 								RaspisanieText(chatId);
-
-							if (dataAboutUser.userAction == "inBlackList") {
-							} else {
+							else {
 								dataAboutUser.userAction = "menuHome";
 								Options(chatId);
 							}
-
 							break;
 						case "optionsother":
 							Options_2(chatId);
