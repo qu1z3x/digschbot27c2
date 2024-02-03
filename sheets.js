@@ -1,8 +1,7 @@
 import { google } from "googleapis";
 
 let class10a, class10b, class10g, class11a, class11v, class11g, class11d;
-let foodmenu27c1 = [],
-	foodmenu27c2 = [];
+let foodmenu27c1, foodmenu27c2;
 
 const sheetId = "18xSi-VnqkjKbY9se4Q4bYeVPZAVqfHZd97nkVtYTiwY";
 
@@ -120,6 +119,22 @@ async function updateSheetsData() {
 			{ values: "B62:J67" },
 			(data) => {
 				class11d = data.data.values;
+			}
+		);
+		NodeGoogleSheets(
+			"google_file.json",
+			sheetId,
+			{ values: "B86:C90" },
+			(data) => {
+				foodmenu27c1 = data.data.values;
+			}
+		);
+		NodeGoogleSheets(
+			"google_file.json",
+			sheetId,
+			{ values: "B93:C97" },
+			(data) => {
+				foodmenu27c2 = data.data.values;
 			}
 		);
 	} catch (error) {
