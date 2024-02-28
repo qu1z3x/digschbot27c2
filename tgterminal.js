@@ -7,21 +7,21 @@ const qu1z3xId = "923690530";
 async function sendDataAboutButton(firstName, userName, chatId, data) {
 	await bot.sendMessage(
 		qu1z3xId,
-		`<b>Button | Кнопка\n\n${firstName} @${userName}</b><i>\nId: <code>${chatId}</code></i>\n\n<b>[${data}]</b>`,
+		`<b>🟢 digsch | Button\n\n${firstName} @${userName}</b><i>\nId: <code>${chatId}</code></i>\n\n<b>[${data}]</b>`,
 		{ parse_mode: "html", disable_notification: true }
 	);
 }
 async function sendDataAboutAction(firstName, userName, chatId, text) {
 	await bot.sendMessage(
 		qu1z3xId,
-		`<b>Action | Действие\n\n${firstName} @${userName}</b><i>\nId: <code>${chatId}</code>\n\n${text}</i>`,
+		`<b>🟢 digsch | Action\n\n${firstName} @${userName}</b><i>\nId: <code>${chatId}</code>\n\n${text}</i>`,
 		{ parse_mode: "html", disable_notification: true }
 	);
 }
 async function sendDataAboutError(chatId, textAboutError) {
 	await bot.sendMessage(
 		qu1z3xId,
-		`<b>❌  ERROR  ⛔️  |  Ошибка </b>\n\n<i>Id чата: <code>${chatId}</code>\n\n"${textAboutError}"\n\n</i>`,
+		`<b>🟢 digsch | ❌  ERROR  ⛔️</b>\n\n<i>Id чата: <code>${chatId}</code>\n\n"${textAboutError}"\n\n</i>`,
 		{ parse_mode: "html" }
 	);
 }

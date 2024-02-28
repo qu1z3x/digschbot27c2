@@ -4,7 +4,22 @@ import fs from "fs";
 
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, get } from "firebase/database";
+
 import { updateSheetsData } from "./sheets.js";
+
+import { sendDataAboutButton } from "./tgterminal.js";
+import { sendDataAboutError } from "./tgterminal.js";
+import { sendDataAboutAction } from "./tgterminal.js";
+import {
+	class10a,
+	class10b,
+	class10g,
+	class11a,
+	class11v,
+	class11g,
+	class11d,
+} from "./sheets.js";
+import { foodmenu27c1, foodmenu27c2 } from "./sheets.js";
 
 const TOKENs = [
 	"6654105779:AAEnCdIzKS_cgJUg4rMY8yNM3LPP5iZ-d_A",
@@ -30,26 +45,12 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const dataRef = ref(db);
 
-import { sendDataAboutButton } from "./tgterminal.js";
-import { sendDataAboutError } from "./tgterminal.js";
-import { sendDataAboutAction } from "./tgterminal.js";
-import {
-	class10a,
-	class10b,
-	class10g,
-	class11a,
-	class11v,
-	class11g,
-	class11d,
-} from "./sheets.js";
-import { foodmenu27c1, foodmenu27c2 } from "./sheets.js";
-
 const qu1z3xId = "923690530";
 const stepanovId = "5786876945";
 const jackId = "6815420098";
-let BotName = "digschbot";
+let BotName = "digsch27_bot";
 
-//? БАЗА ДАННЫХ
+//? МАССИВЫ ДАННЫХ
 
 let usersData = []; // информация о пользователях
 let remindersData = []; // существующие заметки
@@ -754,7 +755,7 @@ async function RaspisanieText(
 						? "В этот день нет мероприятий! 😉"
 						: `${raspisanieText}\n${
 								raspisanieText != ""
-									? `<a href="https://t.me/${BotName}/?start=callson${dataAboutUser.weekday}">Расписание звонков</a>`
+									? `<a href="https://t.me/${BotName}/?start=callson${dataAboutUser.weekday}">Звонки в этот день</a>`
 									: ""
 						  }`
 				}</b>`,
@@ -1213,7 +1214,7 @@ async function Calls(
 					classArr[dataAboutUser.weekday - 1] &&
 					classArr[dataAboutUser.weekday - 1].filter((item) => item !== "")
 						.length > 0
-						? `\n<b><i>Начало в ${startTime}</i>\n</b>${
+						? `\n<i>Начало в <b>${startTime}</b></i>\n${
 								classArr[dataAboutUser.weekday - 1][0] &&
 								classArr[dataAboutUser.weekday - 1][0] !== ""
 									? `\n - ${
@@ -1312,9 +1313,9 @@ async function Calls(
 												: "<b>9</b> урок <b>16:00 - 16:40</b>"
 									  }\n`
 									: ""
-						  }<b>\n<i>Домой в ${endTime}</i></b>\n\n<b><a href= "https://t.me/${BotName}/?start=raspisanieon${
+						  }\n<i>Домой в <b>${endTime}</b></i>\n\n<b><a href= "https://t.me/${BotName}/?start=raspisanieon${
 								dataAboutUser.weekday
-						  }">Расписание уроков</a></b>`
+						  }">Уроки в этот день</a></b>`
 						: "<b>\nСегодня звонки не звенят! 😉</b>"
 				}`,
 				{
@@ -1346,7 +1347,7 @@ async function Calls(
 							[
 								{ text: "⬅️В меню", callback_data: "exit" },
 								{
-									text: `Звонки ${
+									text: `Повтор ${
 										countCalls > 0 ? `(${countCalls})` : ""
 									} 🔔`,
 									callback_data: "callsnotificationsmenu",
@@ -1405,8 +1406,8 @@ async function NotificationsMenuCalls(
 				dataAboutUser.callOnLessonIn5minutes ||
 				dataAboutUser.callOnBreakIn10minutes ||
 				dataAboutUser.callOnLessonIn10minutes
-					? "🔔 Центр уведомлений 🔔"
-					: "🔕 Центр уведомлений 🔕"
+					? "🔔 Повтор уведомлений 🔔"
+					: "🔕 Повтор уведомлений 🔕"
 			}\n\nНапоминания:_\n*На урок: *${
 				dataAboutUser.callOnLesson ? "сразу" : ""
 			}${
@@ -2035,36 +2036,46 @@ function checkUsersActivity() {
 
 			if (
 				currentTime - usersData[i].lastActivity >=
-					3 * 24 * 60 * 60 * 1000 &&
-				currentTime - usersData[i].lastActivity < 6 * 24 * 60 * 60 * 1000 &&
+					7 * 24 * 60 * 60 * 1000 &&
+				currentTime - usersData[i].lastActivity < 9 * 24 * 60 * 60 * 1000 &&
 				!usersData[i].reminderForReturn1
 			) {
-				usersData[i].reminderForReturn1 = true;
-				sendNotificationForReturn(usersData[i].chatId);
-			} else if (
-				currentTime - usersData[i].lastActivity >=
-					6 * 24 * 60 * 60 * 1000 &&
-				currentTime - usersData[i].lastActivity < 9 * 24 * 60 * 60 * 1000 &&
-				!usersData[i].reminderForReturn2
-			) {
-				usersData[i].reminderForReturn2 = true;
-				sendNotificationForReturn(usersData[i].chatId);
+				if (usersData[i].remindersForReturnIsActive) {
+					usersData[i].reminderForReturn1 = true;
+					sendNotificationForReturn(usersData[i].chatId);
+					console.log(1);
+				}
 			} else if (
 				currentTime - usersData[i].lastActivity >=
 					9 * 24 * 60 * 60 * 1000 &&
 				currentTime - usersData[i].lastActivity <
-					14 * 24 * 60 * 60 * 1000 &&
-				!usersData[i].reminderForReturn3
+					13 * 24 * 60 * 60 * 1000 &&
+				!usersData[i].reminderForReturn2
 			) {
-				usersData[i].reminderForReturn3 = true;
-				sendNotificationForReturn(usersData[i].chatId);
+				if (usersData[i].remindersForReturnIsActive) {
+					usersData[i].reminderForReturn2 = true;
+					sendNotificationForReturn(usersData[i].chatId);
+				}
 			} else if (
 				currentTime - usersData[i].lastActivity >=
-					14 * 24 * 60 * 60 * 1000 &&
+					13 * 24 * 60 * 60 * 1000 &&
+				currentTime - usersData[i].lastActivity <
+					16 * 24 * 60 * 60 * 1000 &&
+				!usersData[i].reminderForReturn3
+			) {
+				if (usersData[i].remindersForReturnIsActive) {
+					usersData[i].reminderForReturn3 = true;
+					sendNotificationForReturn(usersData[i].chatId);
+				}
+			} else if (
+				currentTime - usersData[i].lastActivity >=
+					16 * 24 * 60 * 60 * 1000 &&
 				!usersData[i].reminderForReturn4
 			) {
-				usersData[i].reminderForReturn4 = true;
-				sendNotificationForReturn(usersData[i].chatId);
+				if (usersData[i].remindersForReturnIsActive) {
+					usersData[i].reminderForReturn4 = true;
+					sendNotificationForReturn(usersData[i].chatId);
+				}
 			}
 		}
 	} catch (error) {
@@ -2077,7 +2088,7 @@ function sendNotificationForReturn(chatId) {
 	const textsForUsersReturn = [
 		"Без тебя совсем не то! Не пропадай, загляни как сможешь! 🙏",
 		"Без твоего присутствия что-то не хватает! Заглядывай, когда у тебя будет время! 😉",
-		"А какой в среду 3-й урок? Я могу тебе подсказать! Возвращайся! 😉",
+		"А какой в среду 3-й урок? Я могу тебе подсказать, возвращайся! 😉",
 		"Мы давно не встречались! Заходи почаще! 🙏",
 		"Моя цифровая память подсказывает, что тебя со мной давно не было! ☹️",
 	];
@@ -2090,6 +2101,10 @@ function sendNotificationForReturn(chatId) {
 			reply_markup: {
 				inline_keyboard: [
 					[
+						{
+							text: "Отключить 🔕",
+							callback_data: `remindersforreturnOff`,
+						},
 						{
 							text: "Удалить ❌",
 							callback_data: `deleteexcess`,
@@ -2297,7 +2312,13 @@ async function Options(chatId) {
 				dataAboutUser.callOnBreakIn10minutes
 					? "изменить"
 					: "включить"
-			}</a>\nНапоминания: <b>${
+			}</a>\nНапоминание о себе: ${
+				dataAboutUser.remindersForReturnIsActive ? "✅" : "❌"
+			} - ${
+				dataAboutUser.remindersForReturnIsActive
+					? `<a href="https://t.me/${BotName}/?start=remindersforreturntoggle">выкл</a>`
+					: `<a href="https://t.me/${BotName}/?start=remindersforreturntoggle">вкл</a>`
+			}\nНапоминания: <b>${
 				countRem > 0 ? "✅🔔" : "❌"
 			}</b>\nСоздано: <b>${countRem}</b> - ${
 				countRem > 0
@@ -3502,6 +3523,8 @@ async function StartAll() {
 					remindersData = dataFromDB.remindersData || [];
 				}
 			});
+
+			updateSheetsData();
 		}
 
 		cron.schedule(`*/1 * * * *`, function () {
@@ -3562,30 +3585,48 @@ async function StartAll() {
 
 				//! CALLS NOTIFICATION
 
-				dayW = new Date().getDay();
+				const dayW = new Date().getDay();
+
 				for (let j = 0; j < usersData.length; j++) {
+					const classArr =
+						usersData[j].className == "10Г"
+							? class10g
+							: usersData[j].className == "10Б"
+							? class10b
+							: usersData[j].className == "10А"
+							? class10a
+							: usersData[j].className == "11Д"
+							? class11d
+							: usersData[j].className == "11Г"
+							? class11g
+							: usersData[j].className == "11В"
+							? class11v
+							: usersData[j].className == "11А"
+							? class11a
+							: [];
 					if (
 						(usersData[j].callOnLessonIn5minutes ||
 							usersData[j].callOnLessonIn10minutes ||
 							usersData[j].callOnBreakIn5minutes ||
 							usersData[j].callOnBreakIn10minutes) &&
-						dayW != 6 &&
-						dayW != 0
+						classArr[dayW]
 					) {
 						for (let i = 0; i < timesOnLesson.length; i++) {
 							if (
-								(timeSimple == timesOnLesson[i] &&
+								((timeSimple == timesOnLesson[i] &&
 									usersData[j].callOnLesson) ||
-								(timeSimple == timesOnBreak[i] &&
-									usersData[j].callOnBreak) ||
-								(time5Minutes == timesOnLesson[i] &&
-									usersData[j].callOnLessonIn5minutes) ||
-								(time5Minutes == timesOnBreak[i] &&
-									usersData[j].callOnBreakIn5minutes) ||
-								(time10Minutes == timesOnLesson[i] &&
-									usersData[j].callOnLessonIn10minutes) ||
-								(time10Minutes == timesOnBreak[i] &&
-									usersData[j].callOnBreakIn10minutes)
+									(timeSimple == timesOnBreak[i] &&
+										usersData[j].callOnBreak) ||
+									(time5Minutes == timesOnLesson[i] &&
+										usersData[j].callOnLessonIn5minutes) ||
+									(time5Minutes == timesOnBreak[i] &&
+										usersData[j].callOnBreakIn5minutes) ||
+									(time10Minutes == timesOnLesson[i] &&
+										usersData[j].callOnLessonIn10minutes) ||
+									(time10Minutes == timesOnBreak[i] &&
+										usersData[j].callOnBreakIn10minutes)) &&
+								classArr[day][i] &&
+								classArr[day][i] != ""
 							) {
 								textToCallReminder = "";
 
@@ -3594,7 +3635,7 @@ async function StartAll() {
 									usersData[j].callOnLesson
 								)
 									textToCallReminder =
-										"Особое внимание! 🧐\nУ тебя начался урок! 😉";
+										"Особое внимание! 👆\nУ тебя начался урок! 😉";
 								if (
 									timeSimple == timesOnBreak[i] &&
 									usersData[j].callOnBreak
@@ -3652,6 +3693,11 @@ async function StartAll() {
 											reply_markup: {
 												inline_keyboard: [
 													[
+														{
+															text: "Выключить 🔕",
+															callback_data:
+																"notificationsMenuCallsAndDelete",
+														},
 														{
 															text: "Спасибо 👍",
 															callback_data: "deleteexcess",
@@ -3711,70 +3757,35 @@ async function StartAll() {
 		if (!diningRoomData.find((obj) => obj.botName == BotName)) {
 			diningRoomData = [
 				{
-					botName: "digschbot",
+					botName: BotName,
 					weekdayMenu: 1,
 					countOfLikesOnFood: 0,
 					countOfNeutralOnFood: 0,
 					countOfDislikesOnFood: 0,
 				},
 				{
-					botName: "digschbot",
+					botName: BotName,
 					weekdayMenu: 2,
 					countOfLikesOnFood: 0,
 					countOfNeutralOnFood: 0,
 					countOfDislikesOnFood: 0,
 				},
 				{
-					botName: "digschbot",
+					botName: BotName,
 					weekdayMenu: 3,
 					countOfLikesOnFood: 0,
 					countOfNeutralOnFood: 0,
 					countOfDislikesOnFood: 0,
 				},
 				{
-					botName: "digschbot",
+					botName: BotName,
 					weekdayMenu: 4,
 					countOfLikesOnFood: 0,
 					countOfNeutralOnFood: 0,
 					countOfDislikesOnFood: 0,
 				},
 				{
-					botName: "digschbot",
-					weekdayMenu: 5,
-					countOfLikesOnFood: 0,
-					countOfNeutralOnFood: 0,
-					countOfDislikesOnFood: 0,
-				},
-				{
-					botName: "digsch27_bot",
-					weekdayMenu: 1,
-					countOfLikesOnFood: 0,
-					countOfNeutralOnFood: 0,
-					countOfDislikesOnFood: 0,
-				},
-				{
-					botName: "digsch27_bot",
-					weekdayMenu: 2,
-					countOfLikesOnFood: 0,
-					countOfNeutralOnFood: 0,
-					countOfDislikesOnFood: 0,
-				},
-				{
-					botName: "digsch27_bot",
-					weekdayMenu: 3,
-					countOfLikesOnFood: 0,
-					countOfNeutralOnFood: 0,
-					countOfDislikesOnFood: 0,
-				},
-				{
-					botName: "digsch27_bot",
-					weekdayMenu: 4,
-					countOfLikesOnFood: 0,
-					countOfNeutralOnFood: 0,
-					countOfDislikesOnFood: 0,
-				},
-				{
-					botName: "digsch27_bot",
+					botName: BotName,
 					weekdayMenu: 5,
 					countOfLikesOnFood: 0,
 					countOfNeutralOnFood: 0,
@@ -4026,6 +4037,12 @@ async function StartAll() {
 						miniDetail7: 0,
 						miniDetail8: 0,
 						miniDetail9: 0,
+						// reminders for return
+						remindersForReturnIsActive: true,
+						reminderForReturn1: false,
+						reminderForReturn2: false,
+						reminderForReturn3: false,
+						reminderForReturn4: false,
 					});
 				}
 				if (
@@ -4227,6 +4244,12 @@ async function StartAll() {
 						case "/start notificationsmenucalls":
 							NotificationsMenuCalls(chatId);
 							break;
+
+						case "/start remindersforreturntoggle":
+							dataAboutUser.remindersForReturnIsActive =
+								!dataAboutUser.remindersForReturnIsActive;
+							Options(chatId);
+							break;
 						case "/start ratelikeonfood":
 							dataAboutDining.countOfLikesOnFood += 1;
 							foodMenu(chatId);
@@ -4241,7 +4264,7 @@ async function StartAll() {
 							break;
 						case "/start showhi2":
 							bot.editMessageText(
-								`*[Скрыть](https://t.me/${BotName}/?start=hidehi2)\n\nЯ чат\\-бот 🤖, поддерживаю _цифровое_ обучение 🏫\\. Я буду твоим верным учебным помощником\\! 😉\n  • Нужно уточнить распиание? 📚\n  • Подсказать когда идти на урок? ⏰\n  • Напомнить о твоих планах? 📝\n  • Навеять аппетит столовым меню? 😋\n  • Сыграть партейку в Цуе\\-Фа? ✌️\n  • Рассказать школьные новости? 📖\nТогда я к твоим услугам\\! Поехали\\! [🚀](https://t.me/${BotName}/?start=minidetail2)*`,
+								`*[Скрыть](https://t.me/${BotName}/?start=hidehi2)\n\nЯ чат\\-бот 🤖, поддерживаю _цифровое_ обучение 🏫\\. Я буду твоим верным учебным помощником\\! 😉\n  • Нужно уточнить расписание? 📚\n  • Подсказать когда идти на урок? ⏰\n  • Напомнить о твоих планах? 📝\n  • Навеять аппетит столовым меню? 😋\n  • Сыграть партейку в Цуе\\-Фа? ✌️\n  • Рассказать школьные новости? 📖\nТогда я к твоим услугам\\! Поехали\\! [🚀](https://t.me/${BotName}/?start=minidetail2)*`,
 								{
 									parse_mode: "MarkdownV2",
 									chat_id: dataAboutUser.chatId,
@@ -4286,6 +4309,7 @@ async function StartAll() {
 		bot.on("callback_query", (query) => {
 			const chatId = query.message.chat.id;
 			const data = query.data;
+
 			const dataAboutUser = usersData.find((obj) => obj.chatId == chatId);
 
 			try {
@@ -4296,7 +4320,7 @@ async function StartAll() {
 					day = new Date().getDate();
 					dayW = new Date().getDay();
 					month = new Date().getMonth();
-					dataAboutUser.messageId = query.message.message_id;
+					// dataAboutUser.messageId = query.message.message_id;
 
 					// game1
 					if (
@@ -4707,10 +4731,7 @@ async function StartAll() {
 						remId = parseInt(remId[1]);
 
 						try {
-							bot.deleteMessage(
-								chatId,
-								usersData.find((obj) => obj.chatId == chatId).messageId
-							);
+							bot.deleteMessage(chatId, query.message.message_id);
 
 							let index = remindersData.findIndex(
 								(obj) => obj.reminderId == remId
@@ -4734,9 +4755,7 @@ async function StartAll() {
 							{
 								parse_mode: "html",
 								chat_id: chatId,
-								message_id: usersData.find(
-									(obj) => obj.chatId == chatId
-								).messageId,
+								message_id: query.message.message_id,
 								reply_markup: {
 									inline_keyboard: [
 										[
@@ -4876,7 +4895,7 @@ async function StartAll() {
 						remindersData[index].time = newTime;
 
 						bot.editMessageText(
-							`<i><b>🔄️ Перенёс напоминание 😉🔔\n\nНовое:</b>\n"${
+							`<i><b>🔄️ Перенёс напоминание 🔔\n\nНовое:</b>\n"${
 								remindersData[index].text
 							}" - <b>${
 								hours == new Date().getHours() &&
@@ -4887,9 +4906,7 @@ async function StartAll() {
 							{
 								parse_mode: "html",
 								chat_id: chatId,
-								message_id: usersData.find(
-									(obj) => obj.chatId == chatId
-								).messageId,
+								message_id: query.message.message_id,
 								reply_markup: {
 									inline_keyboard: [
 										[
@@ -5040,6 +5057,9 @@ async function StartAll() {
 						// RASPISANIE
 
 						case "raspisanie":
+							if (TOKEN == TOKENs[0] && !class10a) {
+								updateSheetsData();
+							}
 							Raspisanie(chatId);
 							break;
 						case "netclassa":
@@ -5072,6 +5092,15 @@ async function StartAll() {
 							break;
 						case "callsnotificationsmenu":
 							NotificationsMenuCalls(chatId);
+							break;
+						case "notificationsMenuCallsAndDelete":
+							try {
+								bot.deleteMessage(chatId, query.message.message_id);
+								NotificationsMenuCalls(chatId);
+							} catch (error) {
+								console.log(error);
+								sendDataAboutError(chatId, `${String(error)}`);
+							}
 							break;
 						case "toggleСallOnLesson":
 							NotificationsMenuCalls(
@@ -5625,11 +5654,16 @@ async function StartAll() {
 							break;
 						case "deleteexcess":
 							try {
-								bot.deleteMessage(
-									chatId,
-									usersData.find((obj) => obj.chatId == chatId)
-										.messageId
-								);
+								bot.deleteMessage(chatId, query.message.message_id);
+							} catch (error) {
+								console.log(error);
+								sendDataAboutError(chatId, `${String(error)}`);
+							}
+							break;
+						case "remindersforreturnOff":
+							try {
+								dataAboutUser.remindersForReturnIsActive = false;
+								bot.deleteMessage(chatId, query.message.message_id);
 							} catch (error) {
 								console.log(error);
 								sendDataAboutError(chatId, `${String(error)}`);
@@ -5727,9 +5761,9 @@ async function StartAll() {
 					remindersData: remindersData,
 					diningRoomData: diningRoomData,
 				});
+				// Проверка активности пользователей
+				checkUsersActivity();
 			}
-			// Проверка активности пользователей
-			checkUsersActivity();
 		});
 	} catch (error) {
 		console.log(error);
